@@ -17,6 +17,86 @@ RESET
 
     lda #$008f
     sta $2100 ; turn the screen off
+
+    lda #$8008     ; A -> B, FIXED SOURCE, WRITE BYTE | WRAM
+    sta $4300
+    lda #<>ZERO ; 64Tass | get low word
+    sta $4302
+    lda #`ZERO  ; 64Tass | get bank
+    sta $4304
+    stz $2181
+    stz $2182      ; START AT 7E:0000
+    stz $4305      ; DO 64K
+    lda #$0001
+    sta $420B      ; FIRE DMA
+    sta $420B      ; FIRE IT AGAIN, FOR NEXT 64k
+
+    rep #$20    ; A16
+    lda #$008F  ; FORCE BLANK, SET OBSEL TO 0
+    sta $2100
+    stz $2105 ;6
+    stz $2107 ;8
+    stz $2109 ;A
+    stz $210B ;C
+    stz $210D ;E
+    stz $210D ;E
+    stz $210F ;10
+    stz $210F ;10
+    stz $2111 ;12
+    stz $2111 ;12
+    stz $2113 ;14
+    stz $2113 ;14
+    stz $2119 ;1A to get Mode7
+    stz $211B ;1C these are write twice
+    stz $211B ;1C regs
+    stz $211D ;1E
+    stz $211D ;1E
+    stz $211F ;20
+    stz $211F ;20
+    stz $2123 ;24
+    stz $2125 ;26
+    stz $2126 ;27 YES IT DOUBLES OH WELL
+    stz $2128 ;29
+    stz $212A ;2B
+    stz $212C ;2D
+    stz $212E ;2F
+    stz $2130 ;31
+    lda #$00E0
+    sta $2132
+
+    ;ONTO THE CPU I/O REGS
+    lda #$FF00
+    sta $4200
+    stz $4202 ;3
+    stz $4204 ;5
+    stz $4206 ;7
+    stz $4208 ;9
+    stz $420A ;B
+    stz $420C ;D
+
+    ; CLEAR VRAM
+    rep #$20        ; A16
+    lda #$1809      ; A -> B, fixed source, write word | vram
+    sta $4300
+    lda #<>ZERO  ; this get the low word, you will need to change if not using 64tass
+    sta $4302
+    lda #`ZERO   ; this gets the bank, you will need to change if not using 64tass
+    sta $4304       ; and the upper byte will be 0
+    stz $4305       ; do 64k
+    lda #$80        ; inc on hi write
+    sta $2115
+    stz $2116       ; start at $$0000
+    lda #$01
+    sta $420B       ; fire dma
+    ; CLEAR CG-RAM
+    lda #$2208      ; a -> b, fixed source, write byte | cg-ram
+    sta $4300
+    lda #$200       ; 512 bytes
+    sta $4305
+    sep #$20        ; A8
+    stz $2121       ; start at 0
+    lda #$01
+    sta $420B       ; fire dma
 INF
     jmp INF
 
