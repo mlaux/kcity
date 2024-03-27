@@ -97,13 +97,103 @@ RESET
     stz $2121       ; start at 0
     lda #$01
     sta $420B       ; fire dma
+
+    ; DMA geneva mac font
+    rep #$30                 ; AXY 16
+    lda #<>GENEVA_CHARS
+    sta $4302
+    sep #$20                 ; A8
+    lda #`GENEVA_CHARS
+    sta $4304
+    ldx #size(GENEVA_CHARS)
+    stx $4305
+    ldx #%00000001 | $1800   ; A->B, Inc, Write WORD, $2118
+    stx $4300
+    ldx #$1000
+    stx $2116
+    lda #$80
+    sta $2115                ; inc VRAM port address
+    lda #1
+    sta $420B
+
+    ; DMA Palette
+    ldx #<>GENEVA_PALETTE
+    stx $4302
+    lda #`GENEVA_PALETTE
+    sta $4304
+    ldx #size(GENEVA_PALETTE)
+    stx $4305
+    ldx #%00000010 | $2200  ; A->B, Inc, Write 2 Bytes, $2122
+    stx $4300
+    stz $2121               ; start of Palette
+    lda #1
+    sta $420B
+
+    ; copy test string
+    ; for only writing low bytes. do this because all the text tiles are <256 and don't want to interpolate a bunch of 0s
+    ; When Address increment mode is 0, the internal VRAM word address increments after writing to VMDATAL or reading from VMDATALREAD.
+    stz VMAIN
+
+    stz VMADDL
+    stz VMADDH
+
+    ldx #DMAMODE_PPULODATA
+    stx DMAMODE
+
+    ldx #<>TEST_CHAR
+    stx DMAADDR
+    lda #`TEST_CHAR
+    sta DMAADDRBANK
+
+    ldx #TEST_CHAR_LENGTH
+    stx DMALEN
+
+    lda #1
+    sta MDMAEN
+
+    ; for only writing high bytes
+    ; lda #$80
+    ; sta VMAIN
+    ; stz VMADDL
+    ; stz VMADDH
+
+    ; ldx #DMAMODE_PPUHIDATA
+    ; stx DMAMODE
+    ; ldx #(<>TEST_CHAR) + 1
+    ; stx DMAADDR
+
+    ; ldx #TEST_CHAR_LENGTH
+    ; stx DMALEN
+
+    ; lda #1
+    ; sta MDMAEN
+
+    ; set up screen addresses
+    stz $2107 ; we want the screen at $$0000 and size 32x32
+    lda #1
+    sta $210b ; we want BG1 tile data to be $$1000 which is the first 4K word step
+    stz $2105 ; 8x8 chars and Mode 0
+    lda #1
+    sta $212c ; BG1 is on the Main Screen
+    lda #$ff
+    sta $210e ; we also need to scroll up 1 pixel ( so do -1 )
+    lda #$03
+    sta $210e ; because the first line is not drawn
+    lda #$0f
+    sta $2100 ; don't blank, so show the screen at full brightness
 INF
-    jmp INF
+    bra INF
 
 NMI_ISR
    ; nothing needed yet
 EMPTY_ISR
-   rti
+    rti
+
+TEST_CHAR .text 'HELLO hello this is a test of the text, now need to render proportionally. what if the string is really long? '
+TEST_CHAR_LENGTH = len(TEST_CHAR)
+
+GENEVA_CHARS .binary "../font/geneva.tiles"
+GENEVA_PALETTE .binary "../font/geneva.palette"
 
 ; ROM header
 * = $ffb0

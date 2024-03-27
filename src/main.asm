@@ -1,7 +1,10 @@
 ; define an ascii encoding
 .enc "ascii"
 ; identity mapping for printable
-.cdef " ~", 32
+.cdef " ~", 0
+
+.include "ppu.asm"
+.include "dma.asm"
 
 ; start at beginning of .sfc
 * = $000000
