@@ -6,8 +6,9 @@ def main():
   for ch in range(32, 128):
     label = chr(ch)
     if ch == ord(' '):
-      label = '.'
-    if ch == ord('\\'):
+      subprocess.run(['convert -size 8x8 xc:white ch032.png'], shell=True)
+      continue
+    elif ch == ord('\\'):
       label = '\\\\'
     subprocess.run([
       "magick",
@@ -20,11 +21,12 @@ def main():
       "white",
       "-border",
       "1",
-      # "-crop", "+0+2", "+repage",
-      # "-crop", "-1+0", "+repage",
-      # "-crop", "+0-1", "+repage",
-      "-trim", "+repage",
-      "-gravity", "northwest", "-extent", "8x8",
+      "-crop", "+0+4", "+repage",
+      "-crop", "+1+0", "+repage",
+      #"-crop", "+0-1", "+repage",
+      #"-trim", "+repage",
+      #"-gravity", "northwest", 
+      "-extent", "8x8",
       f"ch{ch:03d}.png"
     ])
 

@@ -182,6 +182,7 @@ TM = $212C
 ;    | +---- Enable BG4 on subscreen
 ;    +------ Enable OBJ on subscreen
 TS = $212D
+
 TMW = $212E
 TSW = $212F
 CGWSEL = $2130
