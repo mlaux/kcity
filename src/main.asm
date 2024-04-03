@@ -13,8 +13,9 @@
 * = $100
 ; source pointer for VWF routine
 vwf_src .word ?
-vwf_tile .fill $8
+vwf_tile .fill $10
 
+vwf_row .byte ?
 vwf_ch .byte ?
 ; the horizontal pixel offset into the current tile
 vwf_offs .byte ?

@@ -1,6 +1,8 @@
+.as
+.xl
 .autsiz
-.databank $00     ; databank is 00
-.dpage $0000      ; direct page is 0000
+.databank $00
+.dpage $0000
 
 ; input: x = address of string
 ;        y = word address of destination in vram
@@ -14,6 +16,8 @@ draw_string_vwf
     sta VMAIN
 
 _each_char
+    rep #$20
+
     ldx vwf_src
     lda 0, x
     and #$ff
@@ -22,8 +26,10 @@ _each_char
     sta vwf_ch
 
     ; look up tile in font
+    ; y = GENEVA_CHARS + 16 * vwf_ch
     ; sec
     ; sbc #' '
+    asl
     asl
     asl
     asl
@@ -31,14 +37,18 @@ _each_char
     adc #GENEVA_CHARS
     tay
 
-    ldx #8
+    ldx #15
+_each_byte
+    sep #$20
 
-_each_row
-    ; for each row (byte) in the tile
+    ; for each byte in the tile
+    lda vwf_tile, x
+    sta vwf_row
+
+    ; loads byte from font
     lda 0, y
-    and #$ff
 
-    ; copy this row to vwf_tile, shifted right by vwf_offs
+    ; copy this byte to vwf_tile + x, shifted right by vwf_offs
     ; lsr
     ; lsr
     ; lsr
@@ -46,13 +56,14 @@ _each_row
     ; lsr
     ; lsr
     ; lsr
-
-    inc vwf_tile
+    ora vwf_row
+    sta vwf_tile, x
 
     iny
     dex
-    bne _each_row
+    bpl _each_byte
 
+    ; vwf_offs += CHAR_WIDTHS[vwf_ch]
     ldx vwf_ch
     lda CHAR_WIDTHS, x
     clc
@@ -62,7 +73,8 @@ _each_row
     sta vwf_offs
     bpl _send_tile
 
-    ; 
+    ; successfully completed this char without overflowing the tile
+    ; onto the next char
     inc vwf_src
     bra _each_char
 _send_tile
@@ -73,11 +85,16 @@ _send_tile
     stx DMAADDR
     lda #`vwf_tile
     sta DMAADDRBANK
-    ldx #8
+    ldx #$10
     stx DMALEN
 
     lda #1
     sta MDMAEN
+
+    lda vwf_offs
+    sec
+    sbc #8
+    sta vwf_offs
 
     ; this char could still have some columns left over
     bra _each_char
@@ -295,7 +312,7 @@ NMI_ISR
 EMPTY_ISR
     rti
 
-TEST_CHAR .text 'short string', 255
+TEST_CHAR .text 'xyz', 255
 TEST_CHAR_LENGTH = len(TEST_CHAR)
 
 GENEVA_CHARS .binary "../font/geneva.tiles"
