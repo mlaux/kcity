@@ -13,7 +13,7 @@ vwf_dst .word ?
 vwf_next .word ?
 
 * = $100
-vwf_tiles .fill $200
+vwf_tiles .fill $400
 ; source pointer for VWF routine
 vwf_src .word ?
 

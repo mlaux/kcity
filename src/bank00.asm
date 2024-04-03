@@ -48,6 +48,9 @@ _each_byte
     lda (vwf_dst), y
     sta vwf_row
 
+    lda #0
+    sta vwf_temp
+
     ; loads equivalent byte from font for this char
     lda 0, x
     phx
@@ -80,7 +83,6 @@ _done_shifting
     ldx vwf_ch
     lda CHAR_WIDTHS, x
     clc
-    adc #1
     adc vwf_offs
     sta vwf_offs
     cmp #8
@@ -315,7 +317,7 @@ NMI_ISR
 EMPTY_ISR
     rti
 
-TEST_CHAR .text "ABCDEFG", 255
+TEST_CHAR .text "'Numbers in Science' ... isn't there something a little less practical I can read?", 255
 TEST_CHAR_LENGTH = len(TEST_CHAR)
 
 GENEVA_CHARS .binary "../font/geneva.tiles"
