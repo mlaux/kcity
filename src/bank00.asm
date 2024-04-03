@@ -95,7 +95,7 @@ RESET
 .as
     sep #$20
 
-    ; clear WRAM. why is 1ff00-1ffff not cleared?
+    ; clear WRAM
     ldx #DMAMODE_RAMFILL
     stx DMAMODE
 
@@ -108,6 +108,7 @@ RESET
     stz WMADDM
     stz WMADDH
     stz DMALEN ; 0 length = 64k
+    stz DMALENHI
 
     ; 2x 64k
     lda #1
@@ -119,6 +120,7 @@ RESET
     stx DMAMODE
 
     stz DMALEN
+    stz DMALENHI
 
     lda #$80
     sta VMAIN
