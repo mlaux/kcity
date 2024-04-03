@@ -11,7 +11,13 @@
 * = $0
 
 * = $100
-temp_word .word ?
+; source pointer for VWF routine
+vwf_src .word ?
+vwf_tile .fill $8
+
+vwf_ch .byte ?
+; the horizontal pixel offset into the current tile
+vwf_offs .byte ?
 rendered_text .fill $100
 
 ; place first 32k

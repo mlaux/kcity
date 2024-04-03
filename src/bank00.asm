@@ -1,28 +1,86 @@
-.as               ; Assume A8
-.xs               ; Assume X8
-.autsiz           ; Auto size detect
+.autsiz
 .databank $00     ; databank is 00
 .dpage $0000      ; direct page is 0000
 
-; x = address of string
-render_text
-.as
+; input: x = address of string
+;        y = word address of destination in vram
+; assumes: AXY 16
+draw_string_vwf
+.al
 .xl
-    ; a is 8 bits, xy is 16
-    sep #$20
-    rep #$10
-    stx temp_word
-    ldy #0
-_next_char
-    lda temp_word, y
+    stx vwf_src
+    sty VMADD
+    lda #$80
+    sta VMAIN
+
+_each_char
+    ldx vwf_src
+    lda 0, x
+    and #$ff
     cmp #$ff
     beq _exit
-    ;ldx 
+    sta vwf_ch
 
-_next_column
+    ; look up tile in font
+    ; sec
+    ; sbc #' '
+    asl
+    asl
+    asl
+    clc
+    adc #GENEVA_CHARS
+    tay
+
+    ldx #8
+
+_each_row
+    ; for each row (byte) in the tile
+    lda 0, y
+    and #$ff
+
+    ; copy this row to vwf_tile, shifted right by vwf_offs
+    ; lsr
+    ; lsr
+    ; lsr
+    ; lsr
+    ; lsr
+    ; lsr
+    ; lsr
+
+    inc vwf_tile
 
     iny
-    bra _next_char
+    dex
+    bne _each_row
+
+    ldx vwf_ch
+    lda CHAR_WIDTHS, x
+    clc
+    adc vwf_offs
+    sec
+    sbc #8
+    sta vwf_offs
+    bpl _send_tile
+
+    ; 
+    inc vwf_src
+    bra _each_char
+_send_tile
+    ldx #DMAMODE_PPUDATA
+    stx DMAMODE
+
+    ldx #<>vwf_tile
+    stx DMAADDR
+    lda #`vwf_tile
+    sta DMAADDRBANK
+    ldx #8
+    stx DMALEN
+
+    lda #1
+    sta MDMAEN
+
+    ; this char could still have some columns left over
+    bra _each_char
 _exit
     rts
 
@@ -92,7 +150,7 @@ RESET
     stz VTIMEH ; MDMAEN
     stz HDMAEN ; MEMSEL
 
-.as
+    ; a8
     sep #$20
 
     ; clear WRAM
@@ -152,6 +210,7 @@ RESET
     ldx #size(GENEVA_CHARS)
     stx DMALEN
 
+    ; word address, not byte. 0-7fff
     ldx #$1000
     stx VMADD
     lda #$80
@@ -200,25 +259,13 @@ RESET
     lda #1
     sta MDMAEN
 
-    ; for only writing high bytes
-    ; lda #$80
-    ; sta VMAIN
-    ; stz VMADDL
-    ; stz VMADDH
-
-    ; ldx #DMAMODE_PPUHIDATA
-    ; stx DMAMODE
-    ; ldx #(<>TEST_CHAR) + 1
-    ; stx DMAADDR
-
-    ; ldx #TEST_CHAR_LENGTH
-    ; stx DMALEN
-
-    ; lda #1
-    ; sta MDMAEN
+    rep #$30
 
     ldx #TEST_CHAR
-    jsr render_text
+    ldy #$1800
+    jsr draw_string_vwf
+
+    sep #$20
 
     ; set up screen addresses
     stz BG1SC ; we want the screen at $$0000 and size 32x32
@@ -248,7 +295,7 @@ NMI_ISR
 EMPTY_ISR
     rti
 
-TEST_CHAR .text 'HELLO hello this is a test of the text, now need to render proportionally. what if the string is really long? ', 255
+TEST_CHAR .text 'short string', 255
 TEST_CHAR_LENGTH = len(TEST_CHAR)
 
 GENEVA_CHARS .binary "../font/geneva.tiles"
