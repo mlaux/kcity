@@ -10,6 +10,7 @@
 ; start at beginning of .sfc
 * = $0
 vwf_dst .word ?
+vwf_next .word ?
 
 * = $100
 vwf_tiles .fill $200
@@ -20,6 +21,7 @@ vwf_row .word ?
 vwf_ch .word ?
 ; the horizontal pixel offset into the current tile
 vwf_offs .word ?
+vwf_temp .word ?
 
 ; place first 32k
 .logical $008000

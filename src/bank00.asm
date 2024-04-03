@@ -10,8 +10,11 @@ draw_string_vwf
 .al
 .xl
     stx vwf_src
-    ldx #vwf_tiles
-    stx vwf_dst
+    lda #vwf_tiles
+    sta vwf_dst
+    clc
+    adc #$10
+    sta vwf_next
 
     ; vwf_src points to the currently processed char.
     ; vwf_dst points to the first byte of the current tile.
@@ -25,7 +28,7 @@ _each_char
     beq _exit
     sta vwf_ch
 
-    ; look up tile in font
+    ; look up tile in font (go to last byte because it iterates backwards)
     ; y = GENEVA_CHARS + (16 * vwf_ch) + 15
     ; sec
     ; sbc #' '
@@ -54,6 +57,7 @@ _each_byte
     ldy vwf_offs
 -   beq _done_shifting
     lsr
+    ror vwf_temp
     dey
     bra -
 
@@ -65,6 +69,9 @@ _done_shifting
     ora vwf_row
     sta (vwf_dst), y
 
+    lda vwf_temp
+    sta (vwf_next), y
+
     dex
     dey
     bpl _each_byte
@@ -72,8 +79,8 @@ _done_shifting
     ; vwf_offs = (vwf_offs + CHAR_WIDTHS[vwf_ch]) % 8;
     ldx vwf_ch
     lda CHAR_WIDTHS, x
-    ;and #$ff
     clc
+    adc #1
     adc vwf_offs
     sta vwf_offs
     cmp #8
@@ -83,10 +90,11 @@ _done_shifting
     sta vwf_offs
 
     rep #$20
-    lda vwf_dst
+    lda vwf_next
+    sta vwf_dst
     clc
     adc #$10
-    sta vwf_dst
+    sta vwf_next
 
 _no_tile_increment
     ; successfully completed this char without overflowing the tile
@@ -307,7 +315,7 @@ NMI_ISR
 EMPTY_ISR
     rti
 
-TEST_CHAR .text 'test of a longer string', 255
+TEST_CHAR .text "ABCDEFG", 255
 TEST_CHAR_LENGTH = len(TEST_CHAR)
 
 GENEVA_CHARS .binary "../font/geneva.tiles"
