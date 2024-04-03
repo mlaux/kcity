@@ -5,6 +5,9 @@
 .dpage $0000
 
 ; input: x = address of string
+;        a = count of characters to draw (0 for everything)
+; returns: x = base address of rendered text to send to VRAM
+;          a = number of tiles to send to VRAM
 ; assumes: AXY 16
 draw_string_vwf
 .al
@@ -41,15 +44,17 @@ _each_char
     adc #$f
     tax
 
+    ; for each byte in the current destination tile
     ldy #15
 _each_byte
     sep #$20
-    ; for each byte in the current destination tile
+
+    ; save existing tile byte
     lda (vwf_dst), y
     sta vwf_row
 
     lda #0
-    sta vwf_temp
+    sta vwf_remainder
 
     ; loads equivalent byte from font for this char
     lda 0, x
@@ -59,8 +64,10 @@ _each_byte
 
     ldy vwf_offs
 -   beq _done_shifting
+    ; remove the rightmost "vwf_offs" pixels
     lsr
-    ror vwf_temp
+    ; and store them in the remainder to be placed in the next tile
+    ror vwf_remainder
     dey
     bra -
 
@@ -69,10 +76,12 @@ _done_shifting
     ply
     plx
 
+    ; combine new partial character with existing tile
     ora vwf_row
     sta (vwf_dst), y
 
-    lda vwf_temp
+    ; leftover pixels need to go in the next tile
+    lda vwf_remainder
     sta (vwf_next), y
 
     dex
@@ -101,9 +110,13 @@ _done_shifting
 _no_tile_increment
     ; successfully completed this char without overflowing the tile
     ; onto the next char
+    rep #$20
     inc vwf_src
     bra _each_char
 _exit
+    ; TODO
+    ldx #$100
+    lda #$400
     rts
 
 RESET
@@ -317,7 +330,7 @@ NMI_ISR
 EMPTY_ISR
     rti
 
-TEST_CHAR .text "'Numbers in Science' ... isn't there something a little less practical I can read?", 255
+TEST_CHAR .text "'Numbers in Science' ... isn't there ANYTHING a little less practical I can read?", 255
 TEST_CHAR_LENGTH = len(TEST_CHAR)
 
 GENEVA_CHARS .binary "../font/geneva.tiles"
