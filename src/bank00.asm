@@ -5,16 +5,16 @@
 .dpage $0000
 
 ; input: x = address of string
-;        y = word address of destination in vram
 ; assumes: AXY 16
 draw_string_vwf
 .al
 .xl
     stx vwf_src
-    sty VMADD
-    lda #$80
-    sta VMAIN
+    ldx #vwf_tiles
+    stx vwf_dst
 
+    ; vwf_src points to the currently processed char.
+    ; vwf_dst points to the first byte of the current tile.
 _each_char
     rep #$20
 
@@ -26,7 +26,7 @@ _each_char
     sta vwf_ch
 
     ; look up tile in font
-    ; y = GENEVA_CHARS + 16 * vwf_ch
+    ; y = GENEVA_CHARS + (16 * vwf_ch) + 15
     ; sec
     ; sbc #' '
     asl
@@ -35,68 +35,63 @@ _each_char
     asl
     clc
     adc #GENEVA_CHARS
-    tay
+    adc #$f
+    tax
 
-    ldx #15
+    ldy #15
 _each_byte
     sep #$20
-
-    ; for each byte in the tile
-    lda vwf_tile, x
+    ; for each byte in the current destination tile
+    lda (vwf_dst), y
     sta vwf_row
 
-    ; loads byte from font
-    lda 0, y
+    ; loads equivalent byte from font for this char
+    lda 0, x
+    phx
+    phy
+    sep #$10
 
-    ; copy this byte to vwf_tile + x, shifted right by vwf_offs
-    ; lsr
-    ; lsr
-    ; lsr
-    ; lsr
-    ; lsr
-    ; lsr
-    ; lsr
+    ldy vwf_offs
+-   beq _done_shifting
+    lsr
+    dey
+    bra -
+
+_done_shifting
+    rep #$10
+    ply
+    plx
+
     ora vwf_row
-    sta vwf_tile, x
+    sta (vwf_dst), y
 
-    iny
     dex
+    dey
     bpl _each_byte
 
-    ; vwf_offs += CHAR_WIDTHS[vwf_ch]
+    ; vwf_offs = (vwf_offs + CHAR_WIDTHS[vwf_ch]) % 8;
     ldx vwf_ch
     lda CHAR_WIDTHS, x
+    ;and #$ff
     clc
     adc vwf_offs
+    sta vwf_offs
+    cmp #8
+    bmi _no_tile_increment
     sec
     sbc #8
     sta vwf_offs
-    bpl _send_tile
 
+    rep #$20
+    lda vwf_dst
+    clc
+    adc #$10
+    sta vwf_dst
+
+_no_tile_increment
     ; successfully completed this char without overflowing the tile
     ; onto the next char
     inc vwf_src
-    bra _each_char
-_send_tile
-    ldx #DMAMODE_PPUDATA
-    stx DMAMODE
-
-    ldx #<>vwf_tile
-    stx DMAADDR
-    lda #`vwf_tile
-    sta DMAADDRBANK
-    ldx #$10
-    stx DMALEN
-
-    lda #1
-    sta MDMAEN
-
-    lda vwf_offs
-    sec
-    sbc #8
-    sta vwf_offs
-
-    ; this char could still have some columns left over
     bra _each_char
 _exit
     rts
@@ -312,7 +307,7 @@ NMI_ISR
 EMPTY_ISR
     rti
 
-TEST_CHAR .text 'xyz', 255
+TEST_CHAR .text 'test of a longer string', 255
 TEST_CHAR_LENGTH = len(TEST_CHAR)
 
 GENEVA_CHARS .binary "../font/geneva.tiles"

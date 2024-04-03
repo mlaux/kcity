@@ -9,17 +9,17 @@
 
 ; start at beginning of .sfc
 * = $0
+vwf_dst .word ?
 
 * = $100
+vwf_tiles .fill $200
 ; source pointer for VWF routine
 vwf_src .word ?
-vwf_tile .fill $10
 
-vwf_row .byte ?
-vwf_ch .byte ?
+vwf_row .word ?
+vwf_ch .word ?
 ; the horizontal pixel offset into the current tile
-vwf_offs .byte ?
-rendered_text .fill $100
+vwf_offs .word ?
 
 ; place first 32k
 .logical $008000
