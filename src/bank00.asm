@@ -4,10 +4,12 @@
 .databank $00
 .dpage $0000
 
+; Renders text in variable-width font to tiles and returns the rendered text
+; for copying to VRAM during the next blanking interval.
 ; input: x = address of string
 ;        a = count of characters to draw (0 for everything)
-; returns: x = base address of rendered text to send to VRAM
-;          a = number of tiles to send to VRAM
+; returns: vwf_dmaout = base address of rendered text to send to VRAM
+;          vwf_dmalen = number of tiles to send to VRAM
 ; assumes: AXY 16
 draw_string_vwf
 .al
@@ -22,6 +24,7 @@ draw_string_vwf
     ; vwf_src points to the currently processed char.
     ; vwf_dst points to the first byte of the current tile.
 _each_char
+    ; I think it might be good practice to rep/sep appropriately at the beginning of each "basic block"?
     rep #$20
 
     ldx vwf_src
@@ -114,9 +117,12 @@ _no_tile_increment
     inc vwf_src
     bra _each_char
 _exit
-    ; TODO
-    ldx #$100
+    ; TODO return the actual values
+    lda #$100
+    sta vwf_dmaout
+    stz vwf_dmaoutbank
     lda #$400
+    sta vwf_dmalen
     rts
 
 RESET
@@ -294,14 +300,6 @@ RESET
     lda #1
     sta MDMAEN
 
-    rep #$30
-
-    ldx #TEST_CHAR
-    ldy #$1800
-    jsr draw_string_vwf
-
-    sep #$20
-
     ; set up screen addresses
     stz BG1SC ; we want the screen at $$0000 and size 32x32
     lda #1
@@ -322,11 +320,98 @@ RESET
     ; disable force blank, full brightness
     lda #$0f
     sta INIDISP
-INF
-    bra INF
+
+    rep #$30
+
+    ldx #TEST_CHAR
+    ldy #$1800
+    jsr draw_string_vwf
+
+    sep #$20
+    lda #$81
+    sta NMITIMEN
+
+main
+    ; todo main loop
+    lda #1
+    sta should_vblank
+-   wai
+    lda should_vblank
+    bne -
+    jmp main
 
 NMI_ISR
-   ; nothing needed yet
+    rep #$30
+    pha
+    phx
+    phy
+    phb
+    phd
+    phk
+    plb
+    lda #0
+    tcd
+
+    ; long index, short a
+    sep #$20
+
+    ; if main loop is still running, this is a lag frame, leave immediately
+    lda should_vblank
+    beq _skip_vblank
+
+
+    ; DMA generated text tiles
+    ; ldx #DMAMODE_PPUDATA
+    ; stx DMAMODE
+
+    ; ldx vwf_dmaout
+    ; stx DMAADDR
+    ; lda vwf_dmaoutbank
+    ; sta DMAADDRBANK
+    ; ldx vwf_dmalen
+    ; stx DMALEN
+
+    ; ldx #$1800
+    ; stx VMADD
+    ; lda #$80
+    ; sta VMAIN
+
+    ; lda #1
+    ; sta MDMAEN
+
+    ; ; and update tilemap
+    ; lda #$80
+    ; sta VMAIN
+
+    ; ldx #$0080
+    ; stx VMADD
+
+    ; ldx #DMAMODE_PPUDATA
+    ; stx DMAMODE
+
+    ; w/e need to set up properly
+    ; ldx #<>ZERO
+    ; stx DMAADDR
+    ; lda #`ZERO
+    ; sta DMAADDRBANK
+
+    ; ldx #TEST_CHAR_LENGTH
+    ; stx DMALEN
+
+    ; lda #1
+    ; sta MDMAEN
+
+    ; reset flag so main loop can continue
+    stz should_vblank
+
+_skip_vblank
+    pld
+    plb
+    ply
+    plx
+    pla
+    lda NMIRD
+
 EMPTY_ISR
     rti
 

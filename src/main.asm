@@ -28,6 +28,11 @@ vwf_ch .word ?
 vwf_offs .word ?
 vwf_remainder .word ?
 
+vwf_dmaout .word ?
+vwf_dmaoutbank .word ?
+vwf_dmalen .word ?
+should_vblank .word ?
+
 ; place first 32k
 .logical $008000
 .include "bank00.asm"
