@@ -31,9 +31,11 @@ vwf_offs .word ?
 vwf_remainder .word ?
 
 ; return values for text rendering
-vwf_dmaout .word ?
-vwf_dmaoutbank .word ?
+vwf_dmasrc .word ?
+vwf_dmasrcbank .word ?
+vwf_dmadst .word ?
 vwf_dmalen .word ?
+vwf_done .word ?
 
 main_loop_done .word ?
 

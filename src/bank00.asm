@@ -8,6 +8,8 @@
 ; assumes: A16
 reset_vwf
 .al
+    lda #$1800
+    sta vwf_dmadst
     lda #vwf_tiles
     sta vwf_dst
     clc
@@ -19,16 +21,21 @@ reset_vwf
 ; for copying to VRAM during the next blanking interval.
 ; input: vwf_src = address of string
 ;        vwf_count = count of characters to draw (-1 for everything)
-; returns: vwf_dmaout = base address of rendered text to send to VRAM
+; returns: vwf_dmasrc = base address of rendered text to send to VRAM
+;          vwf_dmadst = destination address for VRAM DMA
 ;          vwf_dmalen = number of tiles to send to VRAM
 ; assumes: XY 16
 draw_string_vwf
 .al
 .xl
+    lda vwf_done
+    beq +
+    rts
+
     ; before doing anything set the return value
-    lda vwf_dst
-    sta vwf_dmaout
-    stz vwf_dmaoutbank
++   lda vwf_dst
+    sta vwf_dmasrc
+    stz vwf_dmasrcbank
 
     ; vwf_src points to the currently processed char.
     ; vwf_dst points to the first byte of the current tile.
@@ -46,7 +53,7 @@ _want_entire_string
     lda 0, x
     and #$ff
     cmp #$ff
-    beq _exit
+    beq _exit_end_of_string
     sta vwf_ch
 
     ; look up tile in font (go to last byte because it iterates backwards)
@@ -131,15 +138,17 @@ _no_tile_increment
     rep #$20
     inc vwf_src
     brl _each_char
+
+_exit_end_of_string
+    inc vwf_done
+    ; ; take into account any unfinished tiles
+    ; lda vwf_next
+    ; bra +
 _exit
-    ; calculate length
+    ; calculate length used (in bytes)
     lda vwf_dst
-    sec
-    sbc vwf_dmaout
-    asl
-    asl
-    asl
-    asl
++   sec
+    sbc vwf_dmasrc
     sta vwf_dmalen
     rts
 
@@ -382,25 +391,33 @@ NMI_ISR
     beq _skip_vblank
 
     ; DMA generated text tiles
-    ldx vwf_dmalen
+    ldy vwf_dmalen
     beq _no_font_dma
-    stx DMALEN
+    sty DMALEN
 
     ldx #DMAMODE_PPUDATA
     stx DMAMODE
 
-    ldx vwf_dmaout
+    ldx vwf_dmasrc
     stx DMAADDR
-    lda vwf_dmaoutbank
+    lda vwf_dmasrcbank
     sta DMAADDRBANK
 
-    ldx #$1800
+    ldx vwf_dmadst
     stx VMADD
     lda #$80
     sta VMAIN
 
     lda #1
     sta MDMAEN
+
+    ; advance vram pointer by however many words were written
+    rep #$20
+    lda vwf_dmalen
+    lsr
+    clc
+    adc vwf_dmadst
+    sta vwf_dmadst
 
 _no_font_dma
 
