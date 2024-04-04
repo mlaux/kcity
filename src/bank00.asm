@@ -24,12 +24,13 @@ reset_vwf
 ; returns: vwf_dmasrc = base address of rendered text to send to VRAM
 ;          vwf_dmadst = destination address for VRAM DMA
 ;          vwf_dmalen = number of tiles to send to VRAM
-; assumes: XY 16
+; assumes: AXY 16
 draw_string_vwf
 .al
 .xl
     lda vwf_done
     beq +
+    stz vwf_dmalen
     rts
 
     ; before doing anything set the return value
@@ -40,26 +41,20 @@ draw_string_vwf
     ; vwf_src points to the currently processed char.
     ; vwf_dst points to the first byte of the current tile.
 _each_char
-    ; I think it might be good practice to rep/sep appropriately at the beginning of each "basic block"?
-    rep #$20
-
     lda vwf_count
     bmi _want_entire_string
     dec vwf_count
     bmi _exit
 
 _want_entire_string
-    ldx vwf_src
-    lda 0, x
+    lda (vwf_src)
     and #$ff
     cmp #$ff
     beq _exit_end_of_string
     sta vwf_ch
 
     ; look up tile in font (go to last byte because it iterates backwards)
-    ; y = GENEVA_CHARS + (16 * vwf_ch) + 15
-    ; sec
-    ; sbc #' '
+    ; vwf_font_ptr = GENEVA_CHARS + (16 * vwf_ch) + 15
     asl
     asl
     asl
@@ -67,9 +62,11 @@ _want_entire_string
     clc
     adc #GENEVA_CHARS
     adc #$f
-    tax
+    sta vwf_font_ptr
 
     ; for each byte in the current destination tile
+    nop
+    nop
     ldy #15
 _each_byte
     sep #$20
@@ -82,24 +79,18 @@ _each_byte
     sta vwf_remainder
 
     ; loads equivalent byte from font for this char
-    lda 0, x
-    phx
-    phy
-    sep #$10
+    lda (vwf_font_ptr)
 
-    ldy vwf_offs
+    ldx vwf_offs
 -   beq _done_shifting
     ; remove the rightmost "vwf_offs" pixels
     lsr
     ; and store them in the remainder to be placed in the next tile
     ror vwf_remainder
-    dey
+    dex
     bra -
 
 _done_shifting
-    rep #$10
-    ply
-    plx
 
     ; combine new partial character with existing tile
     ora vwf_row
@@ -109,7 +100,7 @@ _done_shifting
     lda vwf_remainder
     sta (vwf_next), y
 
-    dex
+    dec vwf_font_ptr
     dey
     bpl _each_byte
 
@@ -140,10 +131,11 @@ _no_tile_increment
     brl _each_char
 
 _exit_end_of_string
+    ; next time called, return immediately
     inc vwf_done
-    ; ; take into account any unfinished tiles
-    ; lda vwf_next
-    ; bra +
+    ; take into account any unfinished tiles this time
+    lda vwf_next
+    bra +
 _exit
     ; calculate length used (in bytes)
     lda vwf_dst
@@ -390,7 +382,7 @@ NMI_ISR
     lda main_loop_done
     beq _skip_vblank
 
-    ; DMA generated text tiles
+    ; DMA generated text tiles if needed
     ldy vwf_dmalen
     beq _no_font_dma
     sty DMALEN
@@ -419,8 +411,6 @@ NMI_ISR
     adc vwf_dmadst
     sta vwf_dmadst
 
-_no_font_dma
-
     ; ; and update tilemap
     ; lda #$80
     ; sta VMAIN
@@ -443,6 +433,7 @@ _no_font_dma
     ; lda #1
     ; sta MDMAEN
 
+_no_font_dma
     ; reset flag so main loop can continue
     stz main_loop_done
 

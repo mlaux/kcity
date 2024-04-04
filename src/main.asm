@@ -9,18 +9,19 @@
 
 ; start at beginning of .sfc
 * = $0
+; source pointer for VWF routine
+vwf_src .word ?
 ; base address of current tile
 vwf_dst .word ?
 ; base address of next tile
 vwf_next .word ?
+vwf_font_ptr .word ?
 
 * = $100
 
 ; 32 tiles * 16 bytes/tile * 4 lines = 1024 bytes
 vwf_tiles .fill $400
 
-; source pointer for VWF routine
-vwf_src .word ?
 ; how many chars to draw
 vwf_count .word ?
 
