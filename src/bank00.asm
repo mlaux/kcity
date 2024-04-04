@@ -361,23 +361,23 @@ NMI_ISR
     beq _skip_vblank
 
     ; DMA generated text tiles
-    ; ldx #DMAMODE_PPUDATA
-    ; stx DMAMODE
+    ldx #DMAMODE_PPUDATA
+    stx DMAMODE
 
-    ; ldx vwf_dmaout
-    ; stx DMAADDR
-    ; lda vwf_dmaoutbank
-    ; sta DMAADDRBANK
-    ; ldx vwf_dmalen
-    ; stx DMALEN
+    ldx vwf_dmaout
+    stx DMAADDR
+    lda vwf_dmaoutbank
+    sta DMAADDRBANK
+    ldx vwf_dmalen
+    stx DMALEN
 
-    ; ldx #$1800
-    ; stx VMADD
-    ; lda #$80
-    ; sta VMAIN
+    ldx #$1800
+    stx VMADD
+    lda #$80
+    sta VMAIN
 
-    ; lda #1
-    ; sta MDMAEN
+    lda #1
+    sta MDMAEN
 
     ; ; and update tilemap
     ; lda #$80
