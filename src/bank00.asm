@@ -25,6 +25,11 @@ reset_vwf
 draw_string_vwf
 .al
 .xl
+    ; before doing anything set the return value
+    lda vwf_dst
+    sta vwf_dmaout
+    stz vwf_dmaoutbank
+
     ; vwf_src points to the currently processed char.
     ; vwf_dst points to the first byte of the current tile.
 _each_char
@@ -127,11 +132,14 @@ _no_tile_increment
     inc vwf_src
     brl _each_char
 _exit
-    ; TODO return the actual values
-    lda #$100
-    sta vwf_dmaout
-    stz vwf_dmaoutbank
-    lda #$400
+    ; calculate length
+    lda vwf_dst
+    sec
+    sbc vwf_dmaout
+    asl
+    asl
+    asl
+    asl
     sta vwf_dmalen
     rts
 
@@ -374,6 +382,10 @@ NMI_ISR
     beq _skip_vblank
 
     ; DMA generated text tiles
+    ldx vwf_dmalen
+    beq _no_font_dma
+    stx DMALEN
+
     ldx #DMAMODE_PPUDATA
     stx DMAMODE
 
@@ -381,8 +393,6 @@ NMI_ISR
     stx DMAADDR
     lda vwf_dmaoutbank
     sta DMAADDRBANK
-    ldx vwf_dmalen
-    stx DMALEN
 
     ldx #$1800
     stx VMADD
@@ -391,6 +401,8 @@ NMI_ISR
 
     lda #1
     sta MDMAEN
+
+_no_font_dma
 
     ; ; and update tilemap
     ; lda #$80
