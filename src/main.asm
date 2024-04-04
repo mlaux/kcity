@@ -21,6 +21,8 @@ vwf_tiles .fill $400
 
 ; source pointer for VWF routine
 vwf_src .word ?
+; how many chars to draw
+vwf_count .word ?
 
 vwf_row .word ?
 vwf_ch .word ?
@@ -28,9 +30,11 @@ vwf_ch .word ?
 vwf_offs .word ?
 vwf_remainder .word ?
 
+; return values for text rendering
 vwf_dmaout .word ?
 vwf_dmaoutbank .word ?
 vwf_dmalen .word ?
+
 main_loop_done .word ?
 
 ; place first 32k

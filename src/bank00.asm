@@ -4,29 +4,39 @@
 .databank $00
 .dpage $0000
 
-; Renders text in variable-width font to tiles and returns the rendered text
-; for copying to VRAM during the next blanking interval.
-; input: x = address of string
-;        a = count of characters to draw (0 for everything)
-; returns: vwf_dmaout = base address of rendered text to send to VRAM
-;          vwf_dmalen = number of tiles to send to VRAM
-; assumes: AXY 16
-draw_string_vwf
+; reset destination text pointer to beginning of WRAM output buffer
+; assumes: A16
+reset_vwf
 .al
-.xl
-    stx vwf_src
     lda #vwf_tiles
     sta vwf_dst
     clc
     adc #$10
     sta vwf_next
+    rts
 
+; Renders text in variable-width font to tiles and returns the rendered text
+; for copying to VRAM during the next blanking interval.
+; input: vwf_src = address of string
+;        vwf_count = count of characters to draw (-1 for everything)
+; returns: vwf_dmaout = base address of rendered text to send to VRAM
+;          vwf_dmalen = number of tiles to send to VRAM
+; assumes: XY 16
+draw_string_vwf
+.al
+.xl
     ; vwf_src points to the currently processed char.
     ; vwf_dst points to the first byte of the current tile.
 _each_char
     ; I think it might be good practice to rep/sep appropriately at the beginning of each "basic block"?
     rep #$20
 
+    lda vwf_count
+    bmi _want_entire_string
+    dec vwf_count
+    bmi _exit
+
+_want_entire_string
     ldx vwf_src
     lda 0, x
     and #$ff
@@ -115,7 +125,7 @@ _no_tile_increment
     ; onto the next char
     rep #$20
     inc vwf_src
-    bra _each_char
+    brl _each_char
 _exit
     ; TODO return the actual values
     lda #$100
@@ -323,8 +333,12 @@ RESET
 
     rep #$30
 
-    ldx #TEST_CHAR
-    ldy #$1800
+    jsr reset_vwf
+
+    lda #TEST_CHAR
+    sta vwf_src
+    lda #-1
+    sta vwf_count
     jsr draw_string_vwf
 
     sep #$20
