@@ -31,7 +31,7 @@ vwf_remainder .word ?
 vwf_dmaout .word ?
 vwf_dmaoutbank .word ?
 vwf_dmalen .word ?
-should_vblank .word ?
+main_loop_done .word ?
 
 ; place first 32k
 .logical $008000

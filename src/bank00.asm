@@ -143,7 +143,7 @@ RESET
     plb
 
     ; direct page = zero page
-    lda #0000
+    lda #0
     tcd
 
     ; turn the screen off
@@ -334,9 +334,9 @@ RESET
 main
     ; todo main loop
     lda #1
-    sta should_vblank
+    sta main_loop_done
 -   wai
-    lda should_vblank
+    lda main_loop_done
     bne -
     jmp main
 
@@ -354,11 +354,11 @@ NMI_ISR
 
     ; long index, short a
     sep #$20
+    bit NMIRD
 
     ; if main loop is still running, this is a lag frame, leave immediately
-    lda should_vblank
+    lda main_loop_done
     beq _skip_vblank
-
 
     ; DMA generated text tiles
     ; ldx #DMAMODE_PPUDATA
@@ -402,15 +402,15 @@ NMI_ISR
     ; sta MDMAEN
 
     ; reset flag so main loop can continue
-    stz should_vblank
+    stz main_loop_done
 
 _skip_vblank
+    rep #$30
     pld
     plb
     ply
     plx
     pla
-    lda NMIRD
 
 EMPTY_ISR
     rti
