@@ -332,21 +332,20 @@ RESET
     sta INIDISP
 
     rep #$30
-
     jsr reset_vwf
-
     lda #TEST_CHAR
     sta vwf_src
-    lda #-1
-    sta vwf_count
-    jsr draw_string_vwf
 
     sep #$20
     lda #$81
     sta NMITIMEN
 
 main
-    ; todo main loop
+    rep #$20
+    lda #2
+    sta vwf_count
+    jsr draw_string_vwf
+
     lda #1
     sta main_loop_done
 -   wai
