@@ -26,6 +26,8 @@ vwf_reset
 
 ; Renders text in variable-width font to tiles and returns the rendered text
 ; for copying to VRAM during the next blanking interval.
+; vwf_src points to the currently processed char.
+; vwf_dst points to the first byte of the current tile.
 ; input: vwf_src = address of string
 ;        vwf_count = count of characters to draw (-1 for everything)
 ; returns: vwf_dmasrc = base address of rendered text to send to VRAM
@@ -45,30 +47,29 @@ vwf_draw_string
     sta vwf_dmasrc
     stz vwf_dmasrcbank
 
-    ; vwf_src points to the currently processed char.
-    ; vwf_dst points to the first byte of the current tile.
-_each_char
-    lda vwf_count
-    bmi _want_whole_string
-    dec vwf_count
-    bmi _exit
-
 ; this is kind of crazy branching???
 ; surely i can optimize how this works
-_want_whole_string
+_check_count
+    lda vwf_count
+    ; if length parameter was negative, want whole string
+    bmi _load_char
+    dec vwf_count
+    bmi _exit_length_parameter_reached
+
+_load_char
     lda (vwf_src)
     and #$ff
     cmp #$ff
     sta vwf_ch
     bne _process_char
 
-_exit_end_of_string
-    ; next time called, return immediately
+    ; end of string. next time called, return immediately
     inc vwf_done
     ; take into account any unfinished tiles this time
     lda vwf_next
     bra +
-_exit
+
+_exit_length_parameter_reached
     ; calculate length used (in bytes)
     lda vwf_dst
 +   sec
@@ -154,9 +155,9 @@ _no_tile_increment
     inc vwf_src
 
     ; all the crazy branching above is because there's no conditional relative branch
-    brl _each_char
+    brl _check_count
 
-; sends the tilemap (increasing numbers from 0)
+; sends the tilemap (increasing tile id from 0)
 vwf_transfer_map
 .as
 .xl
@@ -179,7 +180,7 @@ vwf_transfer_map
     dec a
     bne -
 
-    ; last char of the line?
+    ; last tile of the line?
     lda vwf_mapcount
     and #$f
     cmp #$f
