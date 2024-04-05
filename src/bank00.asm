@@ -4,7 +4,8 @@
 .databank $00
 .dpage $0000
 
-.include "vwf.asm"
+.include "text.asm"
+.include "palette.asm"
 
 RESET
     ; enter 65816 mode
@@ -12,7 +13,6 @@ RESET
     clc
     xce
 
-    ; AXY 16
 .al
 .xl
     rep #$30
@@ -27,55 +27,12 @@ RESET
     lda #0
     tcd
 
-    ; turn the screen off
-    lda #$008f
-    sta INIDISP
+    ; clear all SNES-specific CPU and PPU registers
+    jsr clear_registers
 
-    stz OAMADDL
-    stz BGMODE ; MOSAIC
-    stz BG1SC ; BG2SC
-    stz BG3SC ; BG4SC
-    stz BG12NBA
-
-    stz BG1HOFS
-    stz BG1HOFS
-
-    stz BG2HOFS
-    stz BG2HOFS
-
-    stz BG3HOFS
-    stz BG3HOFS
-
-    stz BG4HOFS
-    stz BG4HOFS
-
-    stz W12SEL
-    stz WOBJSEL
-    stz WH0
-    stz WH2
-    stz WBGLOG ;2B
-    stz TM ;2D
-    stz TMW ;2F
-    stz CGWSEL
-
-    lda #$00e0
-    sta COLDATA
-
-    ; NMITIMEN = 0, WRIO = $ff
-    lda #$ff00
-    sta NMITIMEN
-
-    stz WRMPYA ; WRMPYB
-    stz WRDIVL ; WRDIVH
-    stz WRDIVB ; HTIMEL
-    stz HTIMEH ; VTIMEL
-    stz VTIMEH ; MDMAEN
-    stz HDMAEN ; MEMSEL
-
-    ; a8
     sep #$20
 
-    ; clear WRAM
+    ; clear WRAM, can't be a procedure because it's gonna erase the stack lol
     ldx #DMAMODE_RAMFILL
     stx DMAMODE
 
@@ -87,75 +44,21 @@ RESET
     stz WMADDL
     stz WMADDM
     stz WMADDH
-    stz DMALEN ; 0 length = 64k
-    stz DMALENHI
 
-    ; 2x 64k
-    lda #1
-    sta MDMAEN
-    sta MDMAEN
-
-    ; clear VRAM
-    ldx #DMAMODE_PPUFILL
-    stx DMAMODE
-
+    ; 0 length actually means 64k
     stz DMALEN
     stz DMALENHI
 
-    lda #$80
-    sta VMAIN
-
-    stz VMADDL
-    stz VMADDH
-
+    ; channel 0, 2x 64k
     lda #1
     sta MDMAEN
-
-    ; clear CGRAM
-    ldx #DMAMODE_CGFILL
-    stx DMAMODE
-    ldx #$200
-    stx DMALEN
-    stz CGADD       ; start at 0
-
-    lda #1
-    sta MDMAEN       ; fire dma
-
-    ; DMA geneva mac font
-    ldx #DMAMODE_PPUDATA
-    stx DMAMODE
-
-    ldx #<>GENEVA_CHARS
-    stx DMAADDR
-    lda #`GENEVA_CHARS
-    sta DMAADDRBANK
-    ldx #size(GENEVA_CHARS)
-    stx DMALEN
-
-    ; word address, not byte. 0-7fff
-    ldx #$1000
-    stx VMADD
-    lda #$80
-    sta VMAIN
-
-    lda #1
     sta MDMAEN
 
-    ; DMA Palette
-    ldx #DMAMODE_CGDATA
-    stx DMAMODE
-    ldx #<>GENEVA_PALETTE
-    stx DMAADDR
-    lda #`GENEVA_PALETTE
-    sta DMAADDRBANK
-    ldx #size(GENEVA_PALETTE)
-    stx DMALEN
+    jsr clear_ppu_ram
 
-    ; palette ram dest address
-    stz $2121
-
-    lda #1
-    sta MDMAEN
+    ; DMA geneva mac font and palette
+    jsr font_init
+    jsr palette_init
 
     ; copy test string
     ; for only writing low bytes. do this because all the text tiles are <256 and don't want to interpolate a bunch of
@@ -191,8 +94,7 @@ RESET
     lda #1
     sta TM
 
-    ; $3ff = -1 vertical scroll
-    ; first line is not drawn
+    ; $3ff = -1 vertical scroll, since first line is not drawn
     lda #$ff
     sta BG1VOFS
     lda #$03
@@ -207,9 +109,11 @@ RESET
     lda #TEST_CHAR
     sta vwf_src
 
+    ; initialization done, enable interrupts and auto joypad reading
     sep #$20
     lda #$81
     sta NMITIMEN
+    ; fall through to main loop
 
 main
     rep #$20
@@ -288,6 +192,85 @@ _skip_vblank
 
 EMPTY_ISR
     rti
+
+clear_registers
+.al
+.xl
+    ; turn the screen off
+    lda #$008f
+    sta INIDISP
+
+    stz OAMADDL
+    stz BGMODE ; MOSAIC
+    stz BG1SC ; BG2SC
+    stz BG3SC ; BG4SC
+    stz BG12NBA
+
+    stz BG1HOFS
+    stz BG1HOFS
+
+    stz BG2HOFS
+    stz BG2HOFS
+
+    stz BG3HOFS
+    stz BG3HOFS
+
+    stz BG4HOFS
+    stz BG4HOFS
+
+    stz W12SEL
+    stz WOBJSEL
+    stz WH0
+    stz WH2
+    stz WBGLOG ;2B
+    stz TM ;2D
+    stz TMW ;2F
+    stz CGWSEL
+
+    lda #$00e0
+    sta COLDATA
+
+    ; NMITIMEN = 0, WRIO = $ff
+    lda #$ff00
+    sta NMITIMEN
+
+    stz WRMPYA ; WRMPYB
+    stz WRDIVL ; WRDIVH
+    stz WRDIVB ; HTIMEL
+    stz HTIMEH ; VTIMEL
+    stz VTIMEH ; MDMAEN
+    stz HDMAEN ; MEMSEL
+    rts
+
+clear_ppu_ram
+.as
+.xl
+    ; clear VRAM
+    ldx #DMAMODE_PPUFILL
+    stx DMAMODE
+
+    stz DMALEN
+    stz DMALENHI
+
+    lda #$80
+    sta VMAIN
+
+    stz VMADDL
+    stz VMADDH
+
+    lda #1
+    sta MDMAEN
+
+    ; clear CGRAM
+    ldx #DMAMODE_CGFILL
+    stx DMAMODE
+    ldx #$200
+    stx DMALEN
+    stz CGADD       ; start at 0
+
+    lda #1
+    sta MDMAEN       ; fire dma
+    rts
 
 TEST_CHAR .text "'Numbers in Science' ... isn't there ANYTHING a little less practical I can read?", 255
 TEST_CHAR_LENGTH = len(TEST_CHAR)

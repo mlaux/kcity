@@ -1,5 +1,31 @@
 ; contains routines for rendering text in a variable-width font to WRAM,
-; and copying those tiles to VRAM
+; copying those tiles to VRAM, and copying raw font tiles to VRAM
+
+; transfers 8x8 font tiles to VRAM for use with fixed-width text
+; assumes: A8, XY16
+font_init
+.as
+.xl
+    ; font tiles (2bpp)
+    ldx #DMAMODE_PPUDATA
+    stx DMAMODE
+
+    ldx #<>GENEVA_CHARS
+    stx DMAADDR
+    lda #`GENEVA_CHARS
+    sta DMAADDRBANK
+    ldx #size(GENEVA_CHARS)
+    stx DMALEN
+
+    ; word address, not byte. 0-7fff
+    ldx #$1000
+    stx VMADD
+    lda #$80
+    sta VMAIN
+
+    lda #1
+    sta MDMAEN
+    rts
 
 ; - resets destination text tile pointer to beginning of WRAM output buffer
 ; - resets next tile pointer to the tile after that

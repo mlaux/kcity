@@ -9,12 +9,13 @@
 
 ; start at beginning of .sfc
 * = $0
-; source pointer for VWF routine
+; text source pointer for VWF routine
 vwf_src .word ?
 ; base address of current tile
 vwf_dst .word ?
 ; base address of next tile
 vwf_next .word ?
+; font byte currently being shifted/copied
 vwf_font_ptr .word ?
 
 * = $100
@@ -38,6 +39,7 @@ vwf_dmadst .word ?
 vwf_dmalen .word ?
 vwf_done .word ?
 
+; main vs. nmi flag, nmi is skipped if this is 0
 main_loop_done .word ?
 
 ; place first 32k
