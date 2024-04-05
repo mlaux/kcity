@@ -140,8 +140,10 @@ VMADDH = $2117
 
 ; On $2118 write: If address increment mode == 0: increment VMADD
 ; On $2119 write: If address increment mode == 1: increment VMADD
+VMDATA = $2118
 VMDATAL = $2118
 VMDATAH = $2119
+
 M7SEL = $211A
 M7A = $211B
 M7B = $211C

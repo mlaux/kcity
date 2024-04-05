@@ -6,8 +6,13 @@
 ; assumes: A16
 vwf_reset
 .al
-    lda #$2300
+    lda #$3000
     sta vwf_dmadst
+    lda #$800
+    sta vwf_mapdst
+    ; incrementing tile counter
+    lda #$2000
+    sta vwf_mapcount
     lda #vwf_tiles
     sta vwf_dst
     clc
@@ -140,6 +145,37 @@ _exit
     sta vwf_dmalen
     rts
 
+; sends the tilemap (increasing numbers from 0)
+vwf_transfer_map
+.as
+.xl
+    ldx vwf_mapdst
+    stx VMADD
+    lda #$80
+    sta VMAIN
+
+    lda vwf_dmalen ; in BYTES
+    lsr
+    lsr
+    lsr
+    lsr
+
+-   ldy vwf_mapcount
+    sty VMDATA
+    inc vwf_mapcount
+    dec a
+    bne -
+
+    rep #$20
+    lda vwf_mapcount
+    and #$ff
+    clc
+    adc #$800
+    sta vwf_mapdst
+    sep #$20
+
+    rts
+
 ; input: y = number of bytes to transfer
 vwf_dma_tiles
 .as
@@ -168,4 +204,5 @@ vwf_dma_tiles
     clc
     adc vwf_dmadst
     sta vwf_dmadst
+    sep #$20
     rts

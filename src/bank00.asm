@@ -64,13 +64,17 @@ RESET
 
     ; set up screen addresses
     stz BG1SC ; we want the screen at $0000 and size 32x32
+    lda #%00001000 ; layer 3 at $0800.w and size 32x32
+    sta BG3SC
     lda #1
     sta BG12NBA ; we want BG1 tile data to be $1000 which is the first 4K word step
-    lda #1
-    sta BGMODE ; 8x8 chars and mode 1
+    lda #3
+    sta BG34NBA ; BG3 tile data at $3000
+    lda #$9
+    sta BGMODE ; 8x8 chars mode 1, BG3 priority
 
-    ; enable bg1 on main screen
-    lda #1
+    ; enable bg1 and bg3 on main screen
+    lda #$5
     sta TM
 
     ; $3ff = -1 vertical scroll, since first line is not drawn
@@ -134,28 +138,7 @@ NMI_ISR
     beq _no_font_dma
 
     jsr vwf_dma_tiles
-
-    ; ; and update tilemap
-    ; lda #$80
-    ; sta VMAIN
-
-    ; ldx #$0080
-    ; stx VMADD
-
-    ; ldx #DMAMODE_PPUDATA
-    ; stx DMAMODE
-
-    ; w/e need to set up properly
-    ; ldx #<>ZERO
-    ; stx DMAADDR
-    ; lda #`ZERO
-    ; sta DMAADDRBANK
-
-    ; ldx #TEST_CHAR_LENGTH
-    ; stx DMALEN
-
-    ; lda #1
-    ; sta MDMAEN
+    jsr vwf_transfer_map
 
 _no_font_dma
 

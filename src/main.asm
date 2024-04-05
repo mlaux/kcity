@@ -39,6 +39,9 @@ vwf_dmadst .word ?
 vwf_dmalen .word ?
 vwf_done .word ?
 
+vwf_mapdst .word ?
+vwf_mapcount .word ?
+
 ; main vs. nmi flag, nmi is skipped if this is 0
 main_loop_done .word ?
 
@@ -59,7 +62,10 @@ scroll .word ?
 
 ; VRAM MAP
 ; 0000 - 07FF (0000 - 03FF): BG1 tilemap
-; 0800 - 1FFF (0400 - 0FFF): free
+; 0800 - 0FFF (0400 - 07FF): BG2 tilemap
+; 1000 - 17FF (0800 - 0BFF): BG3 tilemap
+; 1800 - 1FFF (0C00 - 0FFF): free
 ; 2000 - 3FFF (1000 - 1FFF): BG1 tiles
-; 4000 - 45FF (2000 - 22FF): fixed font tiles
-; 4600 - 49FF (2300 - 24FF): variable text tiles
+; 4000 - 5FFF (2000 - 2FFF): BG2 tiles (currently free)
+; 6000 - 63FF (3000 - 31FF): BG3 tiles (variable width text tiles)
+; 6400 - 7FFF (3200 - 3FFF): BG3 tiles (other)
