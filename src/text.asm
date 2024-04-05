@@ -1,14 +1,18 @@
 ; contains routines for rendering text in a variable-width font to WRAM,
 ; and copying those tiles to VRAM
 
+DIALOG_BOX_BASE = $ac2
+LINE_START_TABLE .word DIALOG_BOX_BASE, DIALOG_BOX_BASE + $11, DIALOG_BOX_BASE + $21, DIALOG_BOX_BASE + $31
+
 ; - resets destination text tile pointer to beginning of WRAM output buffer
 ; - resets next tile pointer to the tile after that
 ; assumes: A16
 vwf_reset
 .al
+    stz vwf_tiles_written
     lda #$3000
     sta vwf_dmadst
-    lda #$800
+    lda #DIALOG_BOX_BASE
     sta vwf_mapdst
     ; incrementing tile counter
     lda #$2000
@@ -124,6 +128,7 @@ _done_shifting
     clc
     adc #$10
     sta vwf_next
+    inc vwf_tiles_written
 
 _no_tile_increment
     ; successfully completed this char without overflowing the tile
@@ -143,6 +148,7 @@ _exit
 +   sec
     sbc vwf_dmasrc
     sta vwf_dmalen
+
     rts
 
 ; sends the tilemap (increasing numbers from 0)
@@ -154,24 +160,43 @@ vwf_transfer_map
     lda #$80
     sta VMAIN
 
-    lda vwf_dmalen ; in BYTES
+    ; in BYTES, divide by 16 to get num tiles
+    lda vwf_dmalen
     lsr
     lsr
     lsr
     lsr
 
--   ldy vwf_mapcount
-    sty VMDATA
+    ; write tile ids
+-   ldx vwf_mapcount
+    stx VMDATA
     inc vwf_mapcount
     dec a
     bne -
 
-    rep #$20
+    ; last char of the line?
+    lda vwf_mapcount
+    and #$f
+    cmp #$f
+    bne +
+    inc text_box_line
+
++   rep #$20
+
+    ; loop up destination address in tilemap (line base - (16 * line) - 1)
+    lda text_box_line
+    asl
+    tax
+    lda LINE_START_TABLE, x
+    sta text_box_line_start
+
+    ; add to number of tiles written
     lda vwf_mapcount
     and #$ff
     clc
-    adc #$800
+    adc text_box_line_start
     sta vwf_mapdst
+
     sep #$20
 
     rts

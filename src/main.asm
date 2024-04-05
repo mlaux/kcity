@@ -31,6 +31,7 @@ vwf_ch .word ?
 ; the horizontal pixel offset into the current tile
 vwf_offs .word ?
 vwf_remainder .word ?
+vwf_tiles_written .word ?
 
 ; return values for text rendering
 vwf_dmasrc .word ?
@@ -41,6 +42,8 @@ vwf_done .word ?
 
 vwf_mapdst .word ?
 vwf_mapcount .word ?
+text_box_line .word ?
+text_box_line_start .word ?
 
 ; main vs. nmi flag, nmi is skipped if this is 0
 main_loop_done .word ?

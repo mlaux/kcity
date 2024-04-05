@@ -100,7 +100,7 @@ RESET
 
 main
     rep #$20
-    lda #2
+    lda #1
     sta vwf_count
     jsr vwf_draw_string
 
@@ -244,7 +244,7 @@ clear_ppu_ram
     sta MDMAEN       ; fire dma
     rts
 
-TEST_CHAR .text "'Numbers in Science' ... isn't there ANYTHING a little less practical I can read?", 255
+TEST_CHAR .text "test string with more than one line, maybe three? here we go for the third", 255
 TEST_CHAR_LENGTH = len(TEST_CHAR)
 
 GENEVA_CHARS .binary "../font/geneva.tiles"
