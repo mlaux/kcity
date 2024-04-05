@@ -65,8 +65,6 @@ _want_entire_string
     sta vwf_font_ptr
 
     ; for each byte in the current destination tile
-    nop
-    nop
     ldy #15
 _each_byte
     sep #$20
@@ -91,7 +89,6 @@ _each_byte
     bra -
 
 _done_shifting
-
     ; combine new partial character with existing tile
     ora vwf_row
     sta (vwf_dst), y
@@ -100,6 +97,8 @@ _done_shifting
     lda vwf_remainder
     sta (vwf_next), y
 
+    rep #$20
+
     dec vwf_font_ptr
     dey
     bpl _each_byte
@@ -107,6 +106,7 @@ _done_shifting
     ; vwf_offs = (vwf_offs + CHAR_WIDTHS[vwf_ch]) % 8;
     ldx vwf_ch
     lda CHAR_WIDTHS, x
+    and #$ff
     clc
     adc vwf_offs
     sta vwf_offs
@@ -116,7 +116,6 @@ _done_shifting
     sbc #8
     sta vwf_offs
 
-    rep #$20
     lda vwf_next
     sta vwf_dst
     clc
@@ -126,7 +125,6 @@ _done_shifting
 _no_tile_increment
     ; successfully completed this char without overflowing the tile
     ; onto the next char
-    rep #$20
     inc vwf_src
     brl _each_char
 
