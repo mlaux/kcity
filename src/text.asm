@@ -49,17 +49,35 @@ vwf_draw_string
     ; vwf_dst points to the first byte of the current tile.
 _each_char
     lda vwf_count
-    bmi _want_entire_string
+    bmi _want_whole_string
     dec vwf_count
     bmi _exit
 
-_want_entire_string
+; this is kind of crazy branching???
+; surely i can optimize how this works
+_want_whole_string
     lda (vwf_src)
     and #$ff
     cmp #$ff
-    beq _exit_end_of_string
     sta vwf_ch
+    bne _process_char
 
+_exit_end_of_string
+    ; next time called, return immediately
+    inc vwf_done
+    ; take into account any unfinished tiles this time
+    lda vwf_next
+    bra +
+_exit
+    ; calculate length used (in bytes)
+    lda vwf_dst
++   sec
+    sbc vwf_dmasrc
+    sta vwf_dmalen
+
+    rts
+
+_process_char
     ; look up tile in font (go to last byte because it iterates backwards)
     ; vwf_font_ptr = GENEVA_CHARS + (16 * vwf_ch) + 15
     asl
@@ -134,22 +152,9 @@ _no_tile_increment
     ; successfully completed this char without overflowing the tile
     ; onto the next char
     inc vwf_src
+
+    ; all the crazy branching above is because there's no conditional relative branch
     brl _each_char
-
-_exit_end_of_string
-    ; next time called, return immediately
-    inc vwf_done
-    ; take into account any unfinished tiles this time
-    lda vwf_next
-    bra +
-_exit
-    ; calculate length used (in bytes)
-    lda vwf_dst
-+   sec
-    sbc vwf_dmasrc
-    sta vwf_dmalen
-
-    rts
 
 ; sends the tilemap (increasing numbers from 0)
 vwf_transfer_map
