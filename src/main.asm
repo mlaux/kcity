@@ -42,6 +42,8 @@ vwf_done .word ?
 ; main vs. nmi flag, nmi is skipped if this is 0
 main_loop_done .word ?
 
+scroll .word ?
+
 ; place first 32k
 .logical $008000
 .include "bank00.asm"

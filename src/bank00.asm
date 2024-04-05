@@ -5,6 +5,7 @@
 .dpage $0000
 
 .include "text.asm"
+.include "tileset.asm"
 .include "palette.asm"
 
 RESET
@@ -59,36 +60,14 @@ RESET
     ; DMA geneva mac font and palette
     jsr font_init
     jsr palette_init
-
-    ; copy test string
-    ; for only writing low bytes. do this because all the text tiles are <256 and don't want to interpolate a bunch of
-    ; 0s. 
-    ; "when Address increment mode is 0, the internal VRAM word address increments after writing to VMDATAL or reading
-    ; from VMDATALREAD."
-    stz VMAIN
-
-    stz VMADDL
-    stz VMADDH
-
-    ldx #DMAMODE_PPULODATA
-    stx DMAMODE
-
-    ldx #<>TEST_CHAR
-    stx DMAADDR
-    lda #`TEST_CHAR
-    sta DMAADDRBANK
-
-    ldx #TEST_CHAR_LENGTH
-    stx DMALEN
-
-    lda #1
-    sta MDMAEN
+    jsr test_map_init
 
     ; set up screen addresses
     stz BG1SC ; we want the screen at $$0000 and size 32x32
     lda #1
     sta BG12NBA ; we want BG1 tile data to be $$1000 which is the first 4K word step
-    stz BGMODE ; 8x8 chars and Mode 0
+    lda #$01
+    sta BGMODE ; 8x8 chars and mode 1
 
     ; enable bg1 on main screen
     lda #1
@@ -117,9 +96,9 @@ RESET
 
 main
     rep #$20
-    lda #2
-    sta vwf_count
-    jsr vwf_draw_string
+    ;lda #2
+    ;sta vwf_count
+    ;jsr vwf_draw_string
 
     lda #1
     sta main_loop_done
@@ -179,6 +158,16 @@ NMI_ISR
     ; sta MDMAEN
 
 _no_font_dma
+
+    inc scroll
+    sep #$20
+    lda scroll
+    sta BG1HOFS
+    stz BG1HOFS
+    sta BG1VOFS
+    stz BG1VOFS
+
+
     ; reset flag so main loop can continue
     stz main_loop_done
 
@@ -276,9 +265,12 @@ TEST_CHAR .text "'Numbers in Science' ... isn't there ANYTHING a little less pra
 TEST_CHAR_LENGTH = len(TEST_CHAR)
 
 GENEVA_CHARS .binary "../font/geneva.tiles"
-GENEVA_1BPP .binary "../font/geneva1.tiles"
 GENEVA_PALETTE .binary "../font/geneva.palette"
 CHAR_WIDTHS .binary "../font/charwidths.bin"
+
+TEST_PALETTE .binary "../experimental_gfx/maptest.palette"
+TEST_TILESET .binary "../experimental_gfx/maptest.tiles"
+TEST_TILEMAP .binary "../experimental_gfx/maptest.map"
 
 ; ROM header
 * = $ffb0
