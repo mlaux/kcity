@@ -6,7 +6,7 @@
 
 ; reset destination text pointer to beginning of WRAM output buffer
 ; assumes: A16
-reset_vwf
+vwf_reset
 .al
     lda #$1800
     sta vwf_dmadst
@@ -25,7 +25,7 @@ reset_vwf
 ;          vwf_dmadst = destination address for VRAM DMA
 ;          vwf_dmalen = number of tiles to send to VRAM
 ; assumes: AXY 16
-draw_string_vwf
+vwf_draw_string
 .al
 .xl
     lda vwf_done
@@ -140,6 +140,36 @@ _exit
 +   sec
     sbc vwf_dmasrc
     sta vwf_dmalen
+    rts
+
+; input: y = number of bytes to transfer
+vwf_dma_tiles
+.as
+.xl
+    sty DMALEN
+    ldx #DMAMODE_PPUDATA
+    stx DMAMODE
+
+    ldx vwf_dmasrc
+    stx DMAADDR
+    lda vwf_dmasrcbank
+    sta DMAADDRBANK
+
+    ldx vwf_dmadst
+    stx VMADD
+    lda #$80
+    sta VMAIN
+
+    lda #1
+    sta MDMAEN
+
+    ; advance vram pointer by however many words were written
+    rep #$20
+    lda vwf_dmalen
+    lsr
+    clc
+    adc vwf_dmadst
+    sta vwf_dmadst
     rts
 
 RESET
@@ -339,7 +369,7 @@ RESET
     sta INIDISP
 
     rep #$30
-    jsr reset_vwf
+    jsr vwf_reset
     lda #TEST_CHAR
     sta vwf_src
 
@@ -351,7 +381,7 @@ main
     rep #$20
     lda #2
     sta vwf_count
-    jsr draw_string_vwf
+    jsr vwf_draw_string
 
     lda #1
     sta main_loop_done
@@ -374,7 +404,7 @@ NMI_ISR
 
     ; long index, short a
     sep #$20
-    bit NMIRD
+    bit RDNMI
 
     ; if main loop is still running, this is a lag frame, leave immediately
     lda main_loop_done
@@ -383,31 +413,8 @@ NMI_ISR
     ; DMA generated text tiles if needed
     ldy vwf_dmalen
     beq _no_font_dma
-    sty DMALEN
 
-    ldx #DMAMODE_PPUDATA
-    stx DMAMODE
-
-    ldx vwf_dmasrc
-    stx DMAADDR
-    lda vwf_dmasrcbank
-    sta DMAADDRBANK
-
-    ldx vwf_dmadst
-    stx VMADD
-    lda #$80
-    sta VMAIN
-
-    lda #1
-    sta MDMAEN
-
-    ; advance vram pointer by however many words were written
-    rep #$20
-    lda vwf_dmalen
-    lsr
-    clc
-    adc vwf_dmadst
-    sta vwf_dmadst
+    jsr vwf_dma_tiles
 
     ; ; and update tilemap
     ; lda #$80
