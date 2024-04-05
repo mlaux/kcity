@@ -56,3 +56,10 @@ scroll .word ?
 ; 128k minus one byte
 * = $01ffff
 .byte 0
+
+; VRAM MAP
+; 0000 - 07FF (0000 - 03FF): BG1 tilemap
+; 0800 - 1FFF (0400 - 0FFF): free
+; 2000 - 3FFF (1000 - 1FFF): BG1 tiles
+; 4000 - 45FF (2000 - 22FF): fixed font tiles
+; 4600 - 49FF (2300 - 24FF): variable text tiles

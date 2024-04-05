@@ -6,7 +6,7 @@
 ; assumes: A16
 vwf_reset
 .al
-    lda #$800
+    lda #$2300
     sta vwf_dmadst
     lda #vwf_tiles
     sta vwf_dst

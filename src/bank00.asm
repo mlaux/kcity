@@ -63,10 +63,10 @@ RESET
     jsr test_map_init
 
     ; set up screen addresses
-    stz BG1SC ; we want the screen at $$0000 and size 32x32
+    stz BG1SC ; we want the screen at $0000 and size 32x32
     lda #1
-    sta BG12NBA ; we want BG1 tile data to be $$1000 which is the first 4K word step
-    lda #$01
+    sta BG12NBA ; we want BG1 tile data to be $1000 which is the first 4K word step
+    lda #1
     sta BGMODE ; 8x8 chars and mode 1
 
     ; enable bg1 on main screen
@@ -96,9 +96,9 @@ RESET
 
 main
     rep #$20
-    ;lda #2
-    ;sta vwf_count
-    ;jsr vwf_draw_string
+    lda #2
+    sta vwf_count
+    jsr vwf_draw_string
 
     lda #1
     sta main_loop_done

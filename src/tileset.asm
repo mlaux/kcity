@@ -54,7 +54,7 @@ font_init
     ldx #size(GENEVA_CHARS)
     stx DMALEN
 
-    ldx #$400
+    ldx #$2000
     stx VMADD
     lda #$80
     sta VMAIN

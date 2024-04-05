@@ -11,4 +11,4 @@
   --tile-width 8 \
   --tile-height 8 \
   --palette-base-offset 1 \
-  --no-remap
+  --color-zero 000000
