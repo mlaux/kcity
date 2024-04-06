@@ -7,6 +7,7 @@
 .include "text.asm"
 .include "tileset.asm"
 .include "palette.asm"
+.include "effect.asm"
 
 RESET
     ; enter 65816 mode
@@ -83,14 +84,19 @@ RESET
     lda #$03
     sta BG1VOFS
 
-    ; disable force blank, full brightness
-    lda #$0f
+    ; disable force blank, brightness still 0
+    lda #$0
     sta INIDISP
 
     rep #$30
     jsr vwf_reset
     lda #TEST_CHAR
     sta vwf_src
+
+    lda #EFFECT_FADE_IN
+    sta effect_id
+    lda #$f
+    sta effect_speed
 
     ; initialization done, enable interrupts and auto joypad reading
     sep #$20
@@ -125,7 +131,6 @@ NMI_ISR
     lda #0
     tcd
 
-    ; long index, short a
     sep #$20
     bit RDNMI
 
@@ -142,14 +147,8 @@ NMI_ISR
 
 _no_font_dma
 
-    inc scroll
-    sep #$20
-    lda scroll
-    sta BG1HOFS
-    stz BG1HOFS
-    sta BG1VOFS
-    stz BG1VOFS
-
+    jsr run_effect
+    inc frame_counter
 
     ; reset flag so main loop can continue
     stz main_loop_done

@@ -1,0 +1,127 @@
+; Bass
+	"Acid Bass Pluck.brr"		$FF $E0 $B8 $04 $84
+	"Acoustic Bass.brr"		$FF $F0 $B8 $03 $40
+	"Electric Bass.brr"		$FF $EC $B8 $03 $16
+	"Fretless Bass.brr"		$FF $EC $B8 $03 $00
+	"Synth Bass (Pre-release).brr"	$FF $EF $B8 $03 $E1
+
+; Brass
+	"French Horn.brr"	$FF $E0 $B8 $04 $02
+	"Trumpet.brr"		$FF $E0 $B8 $04 $02
+; Reed
+	"Alto Saxophone.brr"	$FE $E0 $B8 $07 $82
+	"Soprano Saxophone.brr"	$FF $E0 $B8 $04 $02
+; Pipe
+	"Flute.brr"		$FF $E0 $B8 $04 $89
+	"High Flute.brr"	$FF $E0 $B8 $06 $02
+	"Pan Flute.brr"		$FF $E0 $B8 $04 $3C
+
+; Orchestral 1
+	"Accordion.brr"		$FF $E0 $B8 $02 $D9
+	"Choir Aahs.brr"	$FF $E6 $B8 $05 $A3
+	"Distortion Guitar.brr"	$FF $E0 $B8 $02 $D5
+	"Orchestral Harp.brr"	$FF $ED $B8 $03 $01
+	"Pizzicato Strings.brr"	$FF $E0 $B8 $04 $8E
+	"String Ensemble.brr"	$FA $E4 $B8 $04 $28
+	"Vibraphone.brr"	$FF $ED $B8 $06 $02
+	"Xylophone.brr"		$FF $E0 $B8 $02 $DF
+
+; Orchestral 2
+	"Celesta.brr"		$FF $E0 $B8 $04 $02
+	"Crystal.brr"		$FE $F4 $B8 $05 $2C
+	"Glass Pad.brr"		$F8 $E0 $B8 $06 $0B
+	"Leene's Bell.brr"	$FF $EE $B8 $03 $B6
+	"Music Box.brr"		$FF $EF $B8 $03 $D5
+	"Sitar.brr"		$FF $EE $B8 $04 $82
+
+; Piano
+	"Acoustic Grand Piano.brr"	$FF $EE $B8 $03 $57
+	"Church Organ.brr"		$FF $E0 $B8 $06 $03
+	"Harpsichord.brr"		$FF $EA $B8 $06 $02
+	"Piano.brr"			$FF $EE $B8 $03 $01
+	"Percussive Organ.brr"		$FF $E0 $B8 $03 $01
+
+; Global Waves (Synth, SFX)
+	"Electric Piano 1.brr"		$FF $E0 $B8 $02 $01 ; Default.
+	"Electric Piano 1.brr"		$F2 $E0 $B8 $02 $01 ; Fall of Zeal.
+	"Electric Piano 1.brr"		$F6 $FB $B8 $02 $01 ; Ozzie's laugh.
+	"Electric Piano 1.brr"		$FA $E0 $B8 $02 $01 ; Seagulls' voice. Heavy use of vibrato and pitchslides are made in order to produce the voices.
+	"Electric Piano 1.brr"		$FC $E0 $B8 $02 $01 ; Lavos' scream. It's Pitch Modulated by "Noise 3.brr" in order to produce said effect.
+
+	"Electric Piano 2.brr"		$FF $E0 $B8 $04 $02 ; Default.
+	"Electric Piano 2.brr"		$F4 $E0 $B8 $04 $02 ; Wind algorithm's carrier. It's Pitch Modulated by "Noise 1.brr" and "Noise 4.brr" in order to produce said effect.
+	"Electric Piano 2.brr"		$F8 $E0 $B8 $04 $02 ; Used as the howling sound on "Secret of Forest"
+	"Electric Piano 2.brr"		$FF $FA $B8 $04 $02 ; Lavos' heartbeat.
+
+	"Noise 1.brr"			$FF $E0 $B8 $02 $00 ; Default.
+	"Noise 1.brr"			$F3 $E0 $B8 $02 $00 ; Lavos' voice sample.
+	"Noise 1.brr"			$F5 $E0 $B8 $02 $00 ; Lavos' breath.
+	"Noise 1.brr"			$F7 $E0 $B8 $02 $00 ; Fall of Zeal.
+	"Noise 1.brr"			$F8 $E0 $B8 $02 $00 ; Wind algorithm 1.
+
+	"Noise 2.brr"			$FF $E0 $B8 $05 $00 ; Default. Also used as Lavos' voice sample.
+	"Noise 2.brr"			$F8 $E0 $B8 $05 $00 ; Lavos' breath.
+
+	"Noise 3.brr"			$FF $E0 $B8 $07 $00 ; Default.
+	"Noise 3.brr"			$F2 $EF $B8 $07 $00 ; Ocean SFX 1. It's Pitch Modulated by the DSP Noise algorithm.
+	"Noise 3.brr"			$F4 $E0 $B8 $07 $00 ; Rain SFX.
+	"Noise 3.brr"			$F6 $E0 $B8 $07 $00 ; Lavos' scream.
+
+	"Noise 4.brr"			$FF $E0 $B8 $06 $00 ; Wind algorithm 2.
+	"Noise 4.brr"			$F7 $E0 $B8 $06 $00 ; Used as the flapping wings sound on "Truce Canyon"
+
+	"Sharp Saw-like Wave.brr"	$FF $E0 $B8 $04 $02 ; Default.
+	"Sharp Saw-like Wave.brr"	$F4 $F0 $B8 $04 $02 ; DSP Noise is used instead of the actual sample. Used as the ocean SFX on "Quiet Beach"
+	"Sharp Saw-like Wave.brr"	$FA $E0 $B8 $04 $02 ; Sounded like a Harmonica on "Burn! Bobonga!"
+	"Sharp Saw-like Wave.brr"	$FC $E0 $B8 $04 $02 ; Used on "Tyran Castle"
+
+	"Square Wave.brr"		$FF $E0 $B8 $07 $02 ; Default.
+	"Square Wave.brr"		$FF $20 $B8 $07 $02 ; Mystic chanting.
+	"Square Wave.brr"		$F4 $E0 $B8 $07 $02 ; Ozzie's Laugh.
+	"Square Wave.brr"		$FC $E0 $B8 $07 $02 ; Used on "Tyran Castle"
+
+	"Pulse-Width Modulation.brr"			$FF $E0 $B8 $04 $02
+	"Pulse-Width Modulation (Last Battle).brr"	$FF $E0 $B8 $04 $02
+
+; Notes about PWMs: They're actually just 45 bytes long. Looping it could simply result in a Pulse wave.
+; However, their offsets where they're located updates each in-game frame. (This is probably made to save ARAM space)
+; There are basically 63 updates in total, one for each duty.
+; If you manage to pause the SPC player while sustain the notes (aka, open the DSP editor on SPC Tool and pause it), or even slow it enough, you can hear its individual duties.
+
+; SFX, Ambient and Voices
+	"Applause (Pre-release).brr"	$FF $E0 $B8 $03 $80 ; o3 c
+	"Balloon Explosion.brr"		$FF $E0 $B8 $03 $D6 ; o2 a+
+	"Clank Sounds.brr"		$FF $E0 $B8 $03 $39 ; o2 g+
+	"Magus Laugh.brr"		$F8 $E0 $B8 $02 $BC ; o2 d
+	"Mute Cuica (Unused).brr"	$FF $E0 $B8 $03 $D4 ; o4 c
+	"Mystic Chanting.brr"		$FE $E0 $B8 $02 $90 ; o2 b
+	"Mystic Chanting 2.brr"		$FE $E0 $B8 $03 $46 ; o2 a
+	"Shout.brr"			$FF $E0 $B8 $06 $D2 ; o4 f+
+	"Water Ambience.brr"		$FF $E0 $B8 $03 $2C ; o3 g+
+	"Water Drip.brr"		$FF $E0 $B8 $03 $69 ; o3 b
+
+; Percussions
+	"Acoustic Snare.brr"		$FF $E0 $B8 $06 $C1 ; o4 g
+	"Bodhran Drum.brr"		$FF $E0 $B8 $03 $71 ; o5 c
+	"Bongo.brr"			$FF $E0 $B8 $04 $10 ; o3 b
+	"Clap.brr"			$FF $E0 $B8 $05 $BA ; o5 c
+	"Clave.brr"			$FF $E0 $B8 $05 $9A ; o4 g
+	"Closed Hi-hat.brr"		$FF $E0 $B8 $04 $D1 ; o5 d+
+	"Conga.brr"			$FF $E0 $B8 $03 $31 ; o4 c
+	"Crash Cymbal.brr"		$FF $EE $B8 $06 $39 ; o4 c
+	"Guiro.brr"			$FF $E0 $B8 $04 $D3 ; o4 c
+	"Kick.brr"			$FF $E0 $B8 $07 $37 ; o4 e
+	"Kick (Pre-release).brr"	$FF $E0 $B8 $07 $37 ; o4 e
+	"Open Hi-hat.brr"		$FF $E0 $B8 $07 $A7 ; o4 f+
+	"Padded Drum.brr"		$FF $E0 $B8 $08 $10 ; o4 g+
+	"Pendulum.brr"			$FF $E7 $B8 $05 $BC ; o4 c
+	"Power Snare.brr"		$FF $E0 $B8 $05 $1C ; o4 g
+	"Ride Cymbal.brr"		$FF $F3 $B8 $04 $0D ; o5 d
+	"Shaker.brr"			$FF $E0 $B8 $08 $74 ; o4 c
+	"Side Stick.brr"		$FF $E0 $B8 $05 $70 ; o4 a
+	"Synth-ish Snare.brr"		$FF $F4 $B8 $09 $92 ; o4 c
+	"Tabla Drum.brr"		$FF $E0 $B8 $05 $BB ; o5 c
+	"Tambourine.brr"		$FF $E0 $B8 $06 $4D ; o4 a
+	"Timpani.brr"			$FF $E0 $B8 $02 $DF ; o3 c
+	"Tom Drum.brr"			$FF $E0 $B8 $06 $6F ; o4 f+
+	"Udu Drum.brr"			$FF $E0 $B8 $05 $1C ; o4 f+

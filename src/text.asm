@@ -9,7 +9,6 @@ LINE_START_TABLE .word DIALOG_BOX_BASE, DIALOG_BOX_BASE + $11, DIALOG_BOX_BASE +
 ; assumes: A16
 vwf_reset
 .al
-    stz vwf_tiles_written
     lda #$3000
     sta vwf_dmadst
     lda #DIALOG_BOX_BASE
@@ -147,7 +146,6 @@ _done_shifting
     clc
     adc #$10
     sta vwf_next
-    inc vwf_tiles_written
 
 _no_tile_increment
     ; successfully completed this char without overflowing the tile

@@ -31,7 +31,6 @@ vwf_ch .word ?
 ; the horizontal pixel offset into the current tile
 vwf_offs .word ?
 vwf_remainder .word ?
-vwf_tiles_written .word ?
 
 ; return values for text rendering
 vwf_dmasrc .word ?
@@ -47,8 +46,17 @@ text_box_line_start .word ?
 
 ; main vs. nmi flag, nmi is skipped if this is 0
 main_loop_done .word ?
+frame_counter .word ?
 
-scroll .word ?
+; fadein/fadeout/mosaic
+effect_id .word ?
+; only need to set this if the effect isn't the opposite of the previous one
+effect_level .word ?
+; 1, 3, 7, 15, ...
+effect_speed .word ?
+
+script_id .word ?
+script_step .word ?
 
 ; place first 32k
 .logical $008000

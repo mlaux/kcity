@@ -1,0 +1,83 @@
+; Menu and Global Waves
+	"Electric Piano 1.brr"				$FF $E0 $B8 $02 $01 $A4 $40 $40
+	"Electric Piano 2.brr"				$FF $E0 $B8 $04 $02 $A4 $40 $40
+	"Noise 1.brr"					$FF $E0 $B8 $02 $00 $A4 $20 $20
+	"Noise 2.brr"					$FF $E0 $B8 $05 $00 $A4 $20 $20
+	"Noise 3.brr"					$FF $E0 $B8 $07 $00 $A4 $20 $20
+	"Noise 4.brr"					$FF $E0 $B8 $06 $00 $A4 $20 $20
+	"Sharp Saw-like Wave.brr"			$FF $E0 $B8 $04 $02 $A4 $20 $20
+	"Square Wave.brr"				$FF $E0 $B8 $07 $02 $A4 $20 $20
+	"Weak Sawtooth Wave.brr"			$FF $E0 $B8 $02 $01 $A4 $40 $40
+
+; Instruments
+	"Accordion.brr"					$FF $E0 $B8 $02 $D9 $A4 $40 $40
+	"Acid Bass Pluck.brr"				$FF $E0 $B8 $04 $84 $A4 $40 $40
+	"Acoustic Bass.brr"				$FF $F0 $B8 $03 $40 $A4 $40 $40
+	"Acoustic Grand Piano.brr"			$FF $EE $B8 $03 $57 $A4 $40 $40
+	"Alto Saxophone.brr"				$FE $E0 $B8 $07 $82 $A4 $40 $40
+	"Celesta.brr"					$FF $E0 $B8 $04 $02 $A4 $40 $40
+	"Choir Aahs.brr"				$FF $E6 $B8 $05 $A3 $A4 $40 $40
+	"Church Organ.brr"				$FF $E0 $B8 $06 $03 $A4 $40 $40
+	"Crystal.brr"					$FE $F4 $B8 $05 $2C $A4 $40 $40
+	"Distortion Guitar.brr"				$FF $E0 $B8 $02 $D5 $A4 $40 $40
+	"Electric Bass.brr"				$FF $EC $B8 $03 $16 $A4 $40 $40
+	"Flute.brr"					$FF $E0 $B8 $04 $89 $A4 $40 $40
+	"French Horn.brr"				$FF $E0 $B8 $04 $02 $A4 $40 $40
+	"Fretless Bass.brr"				$FF $EC $B8 $03 $00 $A4 $40 $40
+	"Glass Pad.brr"					$F8 $E0 $B8 $06 $0B $A4 $40 $40
+	"Harpsichord.brr"				$FF $EA $B8 $06 $02 $A4 $40 $40
+	"High Flute.brr"				$FF $E0 $B8 $06 $02 $A4 $40 $40
+	"Leene's Bell.brr"				$FF $EE $B8 $03 $B6 $A4 $40 $40
+	"Music Box.brr"					$FF $EF $B8 $03 $D5 $A4 $40 $40
+	"Orchestral Harp.brr"				$FF $ED $B8 $03 $01 $A4 $40 $40
+	"Pan Flute.brr"					$FF $E0 $B8 $04 $3C $A4 $40 $40
+	"Percussive Organ.brr"				$FF $E0 $B8 $03 $01 $A4 $40 $40
+	"Piano.brr"					$FF $EE $B8 $03 $01 $A4 $40 $40
+	"Pizzicato Strings.brr"				$FF $E0 $B8 $04 $8E $A4 $40 $40
+	"Pulse-Width Modulation.brr"			$FF $E0 $B8 $04 $02 $A4 $40 $40
+	"Pulse-Width Modulation (Last Battle).brr"	$FF $E0 $B8 $04 $02 $A4 $40 $40
+	"Sitar.brr"					$FF $EE $B8 $04 $82 $A4 $40 $40
+	"Soprano Saxophone.brr"				$FF $E0 $B8 $04 $02 $A4 $40 $40
+	"String Ensemble.brr"				$FA $E4 $B8 $04 $28 $A4 $40 $40
+	"Synth Bass (Pre-release).brr"			$FF $EF $B8 $03 $E1 $A4 $40 $40
+	"Trumpet.brr"					$FF $E0 $B8 $04 $02 $A4 $40 $40
+	"Vibraphone.brr"				$FF $ED $B8 $06 $02 $A4 $40 $40
+	"Xylophone.brr"					$FF $E0 $B8 $02 $DF $A4 $40 $40
+
+; Percussions
+	"Acoustic Snare.brr"				$FF $E0 $B8 $06 $C1 $AB $40 $40
+	"Bodhran Drum.brr"				$FF $E0 $B8 $03 $71 $B0 $40 $40
+	"Bongo.brr"					$FF $E0 $B8 $04 $10 $A3 $40 $40
+	"Clap.brr"					$FF $E0 $B8 $05 $BA $B0 $40 $40
+	"Clave.brr"					$FF $E0 $B8 $05 $9A $AB $40 $40
+	"Closed Hi-hat.brr"				$FF $E0 $B8 $04 $D1 $B3 $40 $40
+	"Conga.brr"					$FF $E0 $B8 $03 $31 $A4 $40 $40
+	"Crash Cymbal.brr"				$FF $EE $B8 $06 $39 $A4 $40 $40
+	"Guiro.brr"					$FF $E0 $B8 $04 $D3 $A4 $40 $40
+	"Kick.brr"					$FF $E0 $B8 $07 $37 $A8 $40 $40
+	"Kick (Pre-release).brr"			$FF $E0 $B8 $07 $37 $A8 $40 $40
+	"Open Hi-hat.brr"				$FF $E0 $B8 $07 $A7 $AA $40 $40
+	"Padded Drum.brr"				$FF $E0 $B8 $08 $10 $AC $40 $40
+	"Pendulum.brr"					$FF $E7 $B8 $05 $BC $A4 $40 $40
+	"Power Snare.brr"				$FF $E0 $B8 $05 $1C $AB $40 $40
+	"Ride Cymbal.brr"				$FF $F3 $B8 $04 $0D $B2 $40 $40
+	"Shaker.brr"					$FF $E0 $B8 $08 $74 $A4 $40 $40
+	"Side Stick.brr"				$FF $E0 $B8 $05 $70 $AD $40 $40
+	"Synth-ish Snare.brr"				$FF $F4 $B8 $09 $92 $A4 $40 $40
+	"Tabla Drum.brr"				$FF $E0 $B8 $05 $BB $B0 $40 $40
+	"Tambourine.brr"				$FF $E0 $B8 $06 $4D $AD $40 $40
+	"Timpani.brr"					$FF $E0 $B8 $02 $E3 $98 $40 $40
+	"Tom Drum.brr"					$FF $E0 $B8 $06 $6F $AA $40 $40
+	"Udu Drum.brr"					$FF $E0 $B8 $05 $1C $AA $40 $40
+
+; SFX, Ambient and Voices
+	"Applause (Pre-release).brr"			$FF $E0 $B8 $03 $80 $98 $40 $40
+	"Balloon Explosion.brr"				$FF $E0 $B8 $03 $D6 $96 $40 $40
+	"Clank Sounds.brr"				$FF $E0 $B8 $03 $39 $94 $40 $40
+	"Magus Laugh.brr"				$F8 $E0 $B8 $02 $BC $8E $40 $40
+	"Mute Cuica (Unused).brr"			$FF $E0 $B8 $03 $D4 $A4 $40 $40
+	"Mystic Chanting.brr"				$FE $E0 $B8 $02 $90 $97 $40 $40
+	"Mystic Chanting 2.brr"				$FE $E0 $B8 $03 $46 $95 $40 $40
+	"Shout.brr"					$FF $E0 $B8 $06 $D2 $AA $40 $40
+	"Water Ambience.brr"				$FF $E0 $B8 $03 $2C $A0 $40 $40
+	"Water Drip.brr"				$FF $E0 $B8 $03 $69 $A3 $40 $40

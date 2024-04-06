@@ -1,0 +1,41 @@
+#amk 2
+#path "chrono-trigger"
+#samples
+{
+	"Applause (Pre-release).brr"
+	"Balloon Explosion.brr"
+	"Clank Sounds.brr"
+	"Magus Laugh.brr"
+	"Mute Cuica (Unused).brr"
+	"Mystic Chanting.brr"
+	"Mystic Chanting 2.brr"
+	"Shout.brr"
+	"Water Ambience.brr"
+	"Water Drip.brr"
+}
+#instruments
+{
+	"Applause (Pre-release).brr"	$FF $E0 $B8 $03 $80
+	"Balloon Explosion.brr"		$FF $E0 $B8 $03 $D6
+	"Clank Sounds.brr"		$FF $E0 $B8 $03 $39
+	"Magus Laugh.brr"		$F8 $E0 $B8 $02 $BC
+	"Mute Cuica (Unused).brr"	$FF $E0 $B8 $03 $D4
+	"Mystic Chanting.brr"		$FE $E0 $B8 $02 $90
+	"Mystic Chanting 2.brr"		$FE $E0 $B8 $03 $46
+	"Shout.brr"			$FF $E0 $B8 $06 $D2
+	"Water Ambience.brr"		$FF $E0 $B8 $03 $2C
+	"Water Drip.brr"		$FF $E0 $B8 $03 $69
+}
+#0
+w144 t24
+@30 o3 c2.
+@31 o2 a+2
+@32 o2 g+1
+@33 o2 d2.
+@34 o4 c3
+@35 o2 b3
+@36 o2 a3
+@37 o4 f+3
+@38 o3 g+2
+@39 o3 b3
+r3
