@@ -4,8 +4,8 @@
 DIALOG_BOX_BASE = $ac2
 LINE_START_TABLE .word DIALOG_BOX_BASE, DIALOG_BOX_BASE + $11, DIALOG_BOX_BASE + $21, DIALOG_BOX_BASE + $31
 
-TILE_DESTINATION_START = $3008
-TILE_ID_START = $2001
+TILE_DESTINATION_START = $3010
+TILE_ID_START = $2002
 BYTES_PER_TILE = $10
 
 ; - resets destination text tile pointer to beginning of WRAM output buffer
@@ -145,6 +145,9 @@ _each_byte
 
 _done_shifting
     ; combine new partial character with existing tile
+    ; so since this is an or, white needs to be in the palette twice
+    ; 0 - transparent, 1 - individual letter, 2 - background, 3 - two letters ORed
+    ; i might need to figure out a way to avoid this
     ora vwf_row
     sta (vwf_dst), y
 
@@ -243,4 +246,23 @@ vwf_dma_tiles
     adc vwf_dmadst
     sta vwf_dmadst
     sep #$20
+    rts
+
+; input: X address in tilemap
+;        A length of line
+; assumes: A8, XY16, length > 0
+transparent_horiz_line
+.as
+.xl
+    stx VMADD
+    pha
+    lda #$80
+    sta VMAIN
+    pla
+
+    ldx #$2001
+-   stx VMDATA
+    dec a
+    bne -
+
     rts

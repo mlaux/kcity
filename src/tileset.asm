@@ -62,3 +62,23 @@ font_init
     lda #1
     sta MDMAEN
     rts
+
+blank_tile_init
+.as
+.xl
+    ldx #$3008
+    stx VMADD
+    lda #$80
+    sta VMAIN
+
+    ldx #$ff00
+    stx VMDATA
+    stx VMDATA
+    stx VMDATA
+    stx VMDATA
+    stx VMDATA
+    stx VMDATA
+    stx VMDATA
+    stx VMDATA
+
+    rts

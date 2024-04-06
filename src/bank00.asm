@@ -8,7 +8,7 @@
 .include "tileset.asm"
 .include "palette.asm"
 .include "effect.asm"
-TEXT_COUNT = 2
+TEXT_COUNT = 1
 
 RESET
     ; enter 65816 mode
@@ -61,6 +61,7 @@ RESET
 
     ; DMA geneva mac font and palette
     jsr font_init
+    jsr blank_tile_init
     jsr palette_init
     jsr test_map_init
 
@@ -75,15 +76,41 @@ RESET
     lda #$9
     sta BGMODE ; 8x8 chars mode 1, BG3 priority
 
-    ; enable bg1 and bg3 on main screen
-    lda #$5
+    ; enable bg1 on main screen, bg3 on subscreen
+    lda #$1
     sta TM
+    lda #$4
+    sta TS
+    lda #$2
+    sta CGWSEL
 
     ; $3ff = -1 vertical scroll, since first line is not drawn
     lda #$ff
     sta BG1VOFS
     lda #$03
     sta BG1VOFS
+
+    lda #$45
+    sta CGADSUB
+
+    ldx #$aa1
+    lda #$1e
+    jsr transparent_horiz_line
+    ldx #$ac1
+    lda #$1e
+    jsr transparent_horiz_line
+    ldx #$ae1
+    lda #$1e
+    jsr transparent_horiz_line
+    ldx #$b01
+    lda #$1e
+    jsr transparent_horiz_line
+    ldx #$b21
+    lda #$1e
+    jsr transparent_horiz_line
+    ldx #$b41
+    lda #$1e
+    jsr transparent_horiz_line
 
     ; disable force blank, brightness still 0
     lda #$0
@@ -281,9 +308,9 @@ _draw_next_string
     jsr vwf_init_string
     bra _yes
 
-TEST_CHAR .text "line one of text", 255
-TEST_CHAR2 .text "line two - testing longer line than line one", 255
-TEXT_LINES .word TEST_CHAR, TEST_CHAR2
+TEST_CHAR .text "here's a line of text - bdijgpqy", 255
+TEST_CHAR2 .text "line two", 255
+TEXT_LINES .word TEST_CHAR
 
 GENEVA_CHARS .binary "../font/geneva.tiles"
 GENEVA_PALETTE .binary "../font/geneva.palette"
