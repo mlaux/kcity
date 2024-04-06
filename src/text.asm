@@ -180,12 +180,12 @@ vwf_transfer_map
     dec a
     bne -
 
-    ; last tile of the line?
-    lda vwf_mapcount
-    and #$f
-    cmp #$f
-    bne +
-    inc text_box_line
+    ; bad word wrap, last tile of the line?
+    ; lda vwf_mapcount
+    ; and #$f
+    ; cmp #$f
+    ; bne +
+    ; inc text_box_line
 
 +   rep #$20
 

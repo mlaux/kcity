@@ -244,7 +244,7 @@ clear_ppu_ram
     sta MDMAEN       ; fire dma
     rts
 
-TEST_CHAR .text "test string with more than one line, maybe three? here we go for the third", 255
+TEST_CHAR .text "hello world - Geneva 9 font... IiMm!", 255
 TEST_CHAR_LENGTH = len(TEST_CHAR)
 
 GENEVA_CHARS .binary "../font/geneva.tiles"
