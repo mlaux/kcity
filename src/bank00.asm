@@ -308,7 +308,7 @@ _draw_next_string
     jsr vwf_init_string
     bra _yes
 
-TEST_CHAR .text "here's a line of text - bdijgpqy", 255
+TEST_CHAR .text "Upper Lowercase - bdijgpqy.  [symbols] although,", 255
 TEST_CHAR2 .text "line two", 255
 TEXT_LINES .word TEST_CHAR
 
