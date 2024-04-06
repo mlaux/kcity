@@ -37,12 +37,15 @@ vwf_dmasrc .word ?
 vwf_dmasrcbank .word ?
 vwf_dmadst .word ?
 vwf_dmalen .word ?
-vwf_done .word ?
+vwf_end_of_string .word ?
 
+; start pointer into tilemap for currently rendered string
+vwf_mapstart .word ?
+; current tile pointer for currently rendered string
 vwf_mapdst .word ?
+; current tile id
+; ($20 << 8) | (how many tiles have been written to the tilemap so far)
 vwf_mapcount .word ?
-text_box_line .word ?
-text_box_line_start .word ?
 
 ; main vs. nmi flag, nmi is skipped if this is 0
 main_loop_done .word ?
@@ -55,8 +58,10 @@ effect_level .word ?
 ; 1, 3, 7, 15, ...
 effect_speed .word ?
 
+current_text .word ?
 script_id .word ?
 script_step .word ?
+text_index .word ?
 
 ; place first 32k
 .logical $008000

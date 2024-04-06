@@ -8,6 +8,7 @@
 .include "tileset.asm"
 .include "palette.asm"
 .include "effect.asm"
+TEXT_COUNT = 2
 
 RESET
     ; enter 65816 mode
@@ -88,10 +89,9 @@ RESET
     lda #$0
     sta INIDISP
 
-    rep #$30
-    jsr vwf_reset
-    lda #TEST_CHAR
-    sta vwf_src
+    rep #$20
+
+    jsr vwf_reset_tiles
 
     lda #EFFECT_FADE_IN
     sta effect_id
@@ -106,9 +106,21 @@ RESET
 
 main
     rep #$20
-    lda #1
-    sta vwf_count
-    jsr vwf_draw_string
+
+    lda current_text
+    bne +
+
+    lda text_index
+    cmp #TEXT_COUNT
+    beq +
+
+    asl
+    tax
+    lda TEXT_LINES, x
+    sta current_text
+    inc text_index
+
++   jsr update_text
 
     lda #1
     sta main_loop_done
@@ -144,6 +156,7 @@ NMI_ISR
 
     jsr vwf_dma_tiles
     jsr vwf_transfer_map
+    stz vwf_dmalen
 
 _no_font_dma
 
@@ -243,8 +256,34 @@ clear_ppu_ram
     sta MDMAEN       ; fire dma
     rts
 
-TEST_CHAR .text "hello world - Geneva 9 font... IiMm!", 255
-TEST_CHAR_LENGTH = len(TEST_CHAR)
+update_text
+.al
+.xl
+    ; string currently being drawn?
+    lda vwf_end_of_string
+    bne _no
+
+    ; yes, keep going with current string
+_yes
+    lda #1
+    sta vwf_count
+    jmp vwf_draw_string
+
+    ; no, anything to draw?
+_no
+    ldx current_text
+    bne _draw_next_string
+    rts
+
+    ; yes, start it
+_draw_next_string
+    ldy #DIALOG_BOX_BASE
+    jsr vwf_init_string
+    bra _yes
+
+TEST_CHAR .text "line one of text", 255
+TEST_CHAR2 .text "line two - testing longer line than line one", 255
+TEXT_LINES .word TEST_CHAR, TEST_CHAR2
 
 GENEVA_CHARS .binary "../font/geneva.tiles"
 GENEVA_PALETTE .binary "../font/geneva.palette"
