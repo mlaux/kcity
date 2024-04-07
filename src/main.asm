@@ -72,10 +72,13 @@ current_text .word ?
 script_id .word ?
 script_step .word ?
 
+; for OAM
 player_x .word ?
 player_y .word ?
-player_direction .word ?
 player_sprite_id .word ?
+
+; for calculating animation
+player_direction .word ?
 player_animation_index .word ?
 
 ; place first 32k

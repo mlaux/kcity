@@ -83,25 +83,6 @@ RESET
     lda #$0
     sta OAMDATA
 
-    ldx #$aa1
-    lda #$1e
-    jsr transparent_horiz_line
-    ldx #$ac1
-    lda #$1e
-    jsr transparent_horiz_line
-    ldx #$ae1
-    lda #$1e
-    jsr transparent_horiz_line
-    ldx #$b01
-    lda #$1e
-    jsr transparent_horiz_line
-    ldx #$b21
-    lda #$1e
-    jsr transparent_horiz_line
-    ldx #$b41
-    lda #$1e
-    jsr transparent_horiz_line
-
     ; disable force blank, brightness still 0
     lda #$0
     sta INIDISP
@@ -200,6 +181,17 @@ _no_font_dma
     lda #$30
     sta OAMDATA
 
+    ; HDMA
+    lda #$0
+    sta $4300
+    lda #$31
+    sta $4301
+    ldx #TEXT_HDMA_TABLE
+    stx $4302
+    stz $4304
+    lda #$1
+    sta HDMAEN
+
  +  jsr run_effect
     inc frame_counter
 
@@ -251,7 +243,7 @@ clear_registers
     stz TMW ;2F
     stz CGWSEL
 
-    lda #$00e0
+    lda #$e0
     sta COLDATA
 
     ; NMITIMEN = 0, WRIO = $ff
@@ -342,18 +334,27 @@ background_init
     lda #$03
     sta BG1VOFS
 
-    ; enable bg1+obj on main screen, bg3 on subscreen
-    lda #$11
+    ; enable bg1+bg3+obj on main screen
+    lda #$15
     sta TM
-    lda #$4
-    sta TS
-    ; enable blending between layers, not constant color
-    lda #$2
-    sta CGWSEL
+
+    ; ; enable blending between layers, not constant color
+    ; lda #$0
+    ; sta CGWSEL
 
     ; output = (subscreen + main screen) / 2
-    lda #$45
-    sta CGADSUB
+    ; lda #$41
+    ; sta CGADSUB
+
+    lda #$8
+    sta WH0
+    lda #$f8
+    sta WH1
+    lda #$20
+    sta WOBJSEL
+    lda #$10
+    sta CGWSEL
+
     rts
 
 update_text
@@ -394,7 +395,9 @@ _draw_next_string
     jsr vwf_init_string
     bra _yes
 
-TEST_CHAR .text "Testing character movement with random art", 255
+TEXT_HDMA_TABLE .byte 1, $40, $7e, $40, 40, $40, 48, $41, 1, $40, 0
+
+TEST_CHAR .text "Testing text box with Geneva 9 point font...", 255
 TEST_CHAR2 .text "line two", 255
 TEXT_LINES .word TEST_CHAR
 

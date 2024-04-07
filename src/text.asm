@@ -113,7 +113,7 @@ _process_char
     asl
     clc
     adc #GENEVA_CHARS
-    adc #$e
+    adc #$f
     sta vwf_font_ptr
 
     ; for each byte in the current destination tile
@@ -122,12 +122,12 @@ _each_byte
     sep #$20
 
     ; odd byte - ff (goes to transparent palette entry)
-    lda #$ff
-    sta (vwf_dst), y
-    sta (vwf_next), y
+    ; lda #$ff
+    ; sta (vwf_dst), y
+    ; sta (vwf_next), y
 
 ;   ; now even byte
-    dey
+    ; dey
 
     ; save existing tile byte
     lda (vwf_dst), y
@@ -161,7 +161,7 @@ _done_shifting
     rep #$20
 
     dec vwf_font_ptr
-    dec vwf_font_ptr
+    ; dec vwf_font_ptr
     dey
     bpl _each_byte
 
