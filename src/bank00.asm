@@ -59,40 +59,29 @@ RESET
     sta MDMAEN
 
     jsr clear_ppu_ram
+    jsr clear_oam
 
-    ; DMA geneva mac font and palette
-    jsr font_init
-    jsr blank_tile_init
     jsr palette_init
-    jsr test_map_init
+    jsr tileset_init
+    jsr blank_tile_init
+    jsr background_init
 
-    ; set up screen addresses
-    stz BG1SC ; we want the screen at $0000 and size 32x32
-    lda #%00001000 ; layer 3 at $0800.w and size 32x32
-    sta BG3SC
-    lda #1
-    sta BG12NBA ; we want BG1 tile data to be $1000 which is the first 4K word step
-    lda #3
-    sta BG34NBA ; BG3 tile data at $3000
-    lda #$9
-    sta BGMODE ; 8x8 chars mode 1, BG3 priority
-
-    ; enable bg1 on main screen, bg3 on subscreen
-    lda #$1
-    sta TM
-    lda #$4
-    sta TS
-    lda #$2
-    sta CGWSEL
-
-    ; $3ff = -1 vertical scroll, since first line is not drawn
-    lda #$ff
-    sta BG1VOFS
-    lda #$03
-    sta BG1VOFS
-
-    lda #$45
-    sta CGADSUB
+    ; testing objs
+    lda #$62 ; $4000
+    sta OBJSEL
+    ldx #$0
+    stx OAMADD
+    lda #$30
+    sta OAMDATA
+    sta OAMDATA
+    lda #$c
+    sta OAMDATA
+    lda #$30
+    sta OAMDATA
+    ldx #$100
+    stx OAMADD
+    lda #$0
+    sta OAMDATA
 
     ldx #$aa1
     lda #$1e
@@ -123,7 +112,7 @@ RESET
 
     lda #EFFECT_FADE_IN
     sta effect_id
-    lda #$f
+    lda #$1
     sta effect_speed
 
     ; initialization done, enable interrupts and auto joypad reading
@@ -187,6 +176,13 @@ NMI_ISR
     stz vwf_dmalen
 
 _no_font_dma
+
+    ldx #$0
+    stx OAMADD
+    lda script_id
+    sta OAMDATA
+    sta OAMDATA
+    inc script_id
 
     jsr run_effect
     inc frame_counter
@@ -282,6 +278,66 @@ clear_ppu_ram
 
     lda #1
     sta MDMAEN       ; fire dma
+    rts
+
+clear_oam
+.as
+.xl
+    lda #$0
+    ldx #$0
+    stx OAMADD
+
+    ldx #$7f
+-   sta OAMDATA
+    lda #224
+    sta OAMDATA
+    lda #0
+    sta OAMDATA
+    sta OAMDATA
+    dex
+    bpl -
+
+    ldx #$100
+    stx OAMADD
+    ldx #$1f
+-   sta OAMDATA
+    dex
+    bpl -
+
+    rts
+
+background_init
+.as
+.xl
+    ; set up screen addresses
+    stz BG1SC ; we want the screen at $0000 and size 32x32
+    lda #%00001000 ; layer 3 at $0800.w and size 32x32
+    sta BG3SC
+    lda #1
+    sta BG12NBA ; we want BG1 tile data to be $1000 which is the first 4K word step
+    lda #3
+    sta BG34NBA ; BG3 tile data at $3000
+    lda #$9
+    sta BGMODE ; 8x8 chars mode 1, BG3 priority
+
+    ; $3ff = -1 vertical scroll, since first line is not drawn
+    lda #$ff
+    sta BG1VOFS
+    lda #$03
+    sta BG1VOFS
+
+    ; enable bg1+obj on main screen, bg3 on subscreen
+    lda #$11
+    sta TM
+    lda #$4
+    sta TS
+    ; enable blending between layers, not constant color
+    lda #$2
+    sta CGWSEL
+
+    ; output = (subscreen + main screen) / 2
+    lda #$45
+    sta CGADSUB
     rts
 
 update_text

@@ -1,15 +1,3 @@
-dma_palette .macro
-    ldx #<>\1
-    stx DMAADDR
-    lda #`\1
-    sta DMAADDRBANK
-    ldx #size(\1)
-    stx DMALEN
-
-    lda #1
-    sta MDMAEN
-.endmacro
-
 FILLER_PALETTES .fill 128
 
 palette_init
@@ -21,9 +9,9 @@ palette_init
     ; destination address in palette ram
     stz CGADD
 
-    #dma_palette GENEVA_PALETTE
-    #dma_palette TEST_PALETTE
-    #dma_palette FILLER_PALETTES
-    #dma_palette PLAYER_PALETTE
+    #dma_ppu_data GENEVA_PALETTE
+    #dma_ppu_data TEST_PALETTE
+    #dma_ppu_data FILLER_PALETTES
+    #dma_ppu_data PLAYER_PALETTE
 
     rts

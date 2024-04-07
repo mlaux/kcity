@@ -1,5 +1,4 @@
-
-test_map_init
+tileset_init
 .as
 .xl
     ldx #DMAMODE_PPUDATA
@@ -11,56 +10,24 @@ test_map_init
     stz VMADDL
     stz VMADDH
 
-    ldx #<>TEST_TILEMAP
-    stx DMAADDR
-    lda #`TEST_TILEMAP
-    sta DMAADDRBANK
-
-    ldx #size(TEST_TILEMAP)
-    stx DMALEN
-
-    lda #1
-    sta MDMAEN
-
-    ldx #<>TEST_TILESET
-    stx DMAADDR
-    lda #`TEST_TILESET
-    sta DMAADDRBANK
-    ldx #size(TEST_TILESET)
-    stx DMALEN
+    #dma_ppu_data TEST_TILEMAP
 
     ; word address, not byte. 0-7fff
     ldx #$1000
     stx VMADD
 
-    lda #1
-    sta MDMAEN
-
-    rts
-
-; transfers 8x8 font tiles to VRAM for use with fixed-width text
-; assumes: A8, XY16
-font_init
-.as
-.xl
-    ; font tiles (2bpp)
-    ldx #DMAMODE_PPUDATA
-    stx DMAMODE
-
-    ldx #<>GENEVA_CHARS
-    stx DMAADDR
-    lda #`GENEVA_CHARS
-    sta DMAADDRBANK
-    ldx #size(GENEVA_CHARS)
-    stx DMALEN
+    #dma_ppu_data TEST_TILESET
 
     ldx #$2000
     stx VMADD
-    lda #$80
-    sta VMAIN
 
-    lda #1
-    sta MDMAEN
+    #dma_ppu_data GENEVA_CHARS
+
+    ldx #$4000
+    stx VMADD
+
+    #dma_ppu_data PLAYER_TILESET
+
     rts
 
 blank_tile_init
@@ -72,24 +39,8 @@ blank_tile_init
     sta VMAIN
 
     ldx #$ff00
-    stx VMDATA
-    stx VMDATA
-    stx VMDATA
-    stx VMDATA
-    stx VMDATA
-    stx VMDATA
-    stx VMDATA
-    stx VMDATA
-
-;     rep #$20
-;     lda #$ff00
-;     ldx #0
-;     ldy #NUM_TILE_BYTES >> 1
-; -   sta VWF_TILES, x
-;     inx
-;     inx
-;     dey
-;     bne -
-;     sep #$20
+    .rept 8
+        stx VMDATA
+    .endrept
 
     rts

@@ -7,6 +7,7 @@
 INIDISP = $2100
 
 OBJSEL = $2101
+OAMADD = $2102
 OAMADDL = $2102
 OAMADDH = $2103
 OAMDATA = $2104
@@ -214,3 +215,15 @@ OPHCT = $213C
 OPVCT = $213D
 STAT77 = $213E
 STAT78 = $213F
+
+dma_ppu_data .macro
+    ldx #<>\1
+    stx DMAADDR
+    lda #`\1
+    sta DMAADDRBANK
+    ldx #size(\1)
+    stx DMALEN
+
+    lda #1
+    sta MDMAEN
+.endmacro
