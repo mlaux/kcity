@@ -124,18 +124,30 @@ RESET
 main
     rep #$20
 
-    lda current_text
+    lda frame_counter
+    and #$1
     bne +
+    inc player_x
++   lda #$30
+    sta player_y
 
-    lda text_index
-    cmp #TEXT_COUNT
-    beq +
-
+    lda frame_counter
+    and #PLAYER_ANIMATION_SPEED
+    bne +
+    lda player_direction
+    and #$ff
     asl
+    asl
+    clc
+    adc player_animation_index
     tax
-    lda TEXT_LINES, x
-    sta current_text
-    inc text_index
+    lda PLAYER_SPLITE_TABLE, x
+    and #$ff
+    sta player_sprite_id
+    lda player_animation_index
+    inc a
+    and #$3
+    sta player_animation_index
 
 +   jsr update_text
 
@@ -179,12 +191,16 @@ _no_font_dma
 
     ldx #$0
     stx OAMADD
-    lda script_id
+    lda player_x
     sta OAMDATA
+    lda player_y
     sta OAMDATA
-    inc script_id
+    lda player_sprite_id
+    sta OAMDATA
+    lda #$30
+    sta OAMDATA
 
-    jsr run_effect
+ +  jsr run_effect
     inc frame_counter
 
     ; reset flag so main loop can continue
@@ -343,8 +359,21 @@ background_init
 update_text
 .al
 .xl
+    lda current_text
+    bne +
+
+    lda text_index
+    cmp #TEXT_COUNT
+    beq +
+
+    asl
+    tax
+    lda TEXT_LINES, x
+    sta current_text
+    inc text_index
+
     ; string currently being drawn?
-    lda vwf_end_of_string
++   lda vwf_end_of_string
     bne _no
 
     ; yes, keep going with current string
@@ -365,7 +394,7 @@ _draw_next_string
     jsr vwf_init_string
     bra _yes
 
-TEST_CHAR .text "Upper Lowercase - bdijgpqy.  [symbols] although,", 255
+TEST_CHAR .text "Testing character movement with random art", 255
 TEST_CHAR2 .text "line two", 255
 TEXT_LINES .word TEST_CHAR
 

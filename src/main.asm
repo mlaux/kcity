@@ -72,6 +72,12 @@ current_text .word ?
 script_id .word ?
 script_step .word ?
 
+player_x .word ?
+player_y .word ?
+player_direction .word ?
+player_sprite_id .word ?
+player_animation_index .word ?
+
 ; place first 32k
 .logical $008000
 .include "bank00.asm"
