@@ -8,6 +8,7 @@
 .include "tileset.asm"
 .include "palette.asm"
 .include "effect.asm"
+.include "player.asm"
 TEXT_COUNT = 1
 
 RESET

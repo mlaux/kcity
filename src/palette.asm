@@ -1,32 +1,29 @@
+dma_palette .macro
+    ldx #<>\1
+    stx DMAADDR
+    lda #`\1
+    sta DMAADDRBANK
+    ldx #size(\1)
+    stx DMALEN
+
+    lda #1
+    sta MDMAEN
+.endmacro
+
+FILLER_PALETTES .fill 128
+
 palette_init
 .as
 .xl
     ldx #DMAMODE_CGDATA
     stx DMAMODE
 
-    ; font palette (transparent, white, transparent, transparent)
-    ldx #<>GENEVA_PALETTE
-    stx DMAADDR
-    lda #`GENEVA_PALETTE
-    sta DMAADDRBANK
-    ldx #size(GENEVA_PALETTE)
-    stx DMALEN
-
     ; destination address in palette ram
     stz CGADD
 
-    lda #1
-    sta MDMAEN
-
-    ; test tilemap palette
-    ldx #<>TEST_PALETTE
-    stx DMAADDR
-    lda #`TEST_PALETTE
-    sta DMAADDRBANK
-    ldx #size(TEST_PALETTE)
-    stx DMALEN
-
-    lda #1
-    sta MDMAEN
+    #dma_palette GENEVA_PALETTE
+    #dma_palette TEST_PALETTE
+    #dma_palette FILLER_PALETTES
+    #dma_palette PLAYER_PALETTE
 
     rts
