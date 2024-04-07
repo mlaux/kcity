@@ -7,8 +7,9 @@
 .include "cpu.asm"
 .include "dma.asm"
 
-; start at beginning of .sfc
+; Zero page
 * = $0
+
 ; text source pointer for VWF routine
 vwf_src .word ?
 ; base address of current tile
@@ -18,16 +19,22 @@ vwf_next .word ?
 ; font byte currently being shifted/copied
 vwf_font_ptr .word ?
 
+; Work RAM variables
+; some of these are definitely redundant but made the algorithms easier
 * = $100
 
 ; 32 tiles * 16 bytes/tile * 4 lines = 1024 bytes
-vwf_tiles .fill $400
+NUM_TILE_BYTES = $400
+vwf_tiles .fill NUM_TILE_BYTES
 
 ; how many chars to draw
 vwf_count .word ?
 
-vwf_row .word ?
+; the byte currently being processed
+vwf_cur_tile_byte .word ?
+; the character currently being processed, could maybe optimize this away
 vwf_ch .word ?
+
 ; the horizontal pixel offset into the current tile
 vwf_offs .word ?
 vwf_remainder .word ?
@@ -39,13 +46,11 @@ vwf_dmadst .word ?
 vwf_dmalen .word ?
 vwf_end_of_string .word ?
 
-; start pointer into tilemap for currently rendered string
-vwf_mapstart .word ?
 ; current tile pointer for currently rendered string
-vwf_mapdst .word ?
+vwf_tilemap_dst .word ?
 ; current tile id
 ; ($20 << 8) | (how many tiles have been written to the tilemap so far)
-vwf_mapcount .word ?
+vwf_tilemap_id .word ?
 
 ; main vs. nmi flag, nmi is skipped if this is 0
 main_loop_done .word ?
@@ -58,10 +63,14 @@ effect_level .word ?
 ; 1, 3, 7, 15, ...
 effect_speed .word ?
 
+; temp index into test text array
+text_index .word ?
+; pointer to string that's being drawn
 current_text .word ?
+
+; unused so far
 script_id .word ?
 script_step .word ?
-text_index .word ?
 
 ; place first 32k
 .logical $008000

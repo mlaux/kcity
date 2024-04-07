@@ -25,7 +25,7 @@ vwf_reset_tiles
 
     ; incrementing tile counter
     lda #TILE_ID_START
-    sta vwf_mapcount
+    sta vwf_tilemap_id
 
     lda #1
     sta vwf_end_of_string
@@ -46,8 +46,7 @@ vwf_init_string
     sta vwf_next
 
     stx vwf_src
-    sty vwf_mapstart
-    sty vwf_mapdst
+    sty vwf_tilemap_dst
     stz vwf_offs
     stz vwf_end_of_string
 
@@ -116,7 +115,7 @@ _process_char
     asl
     clc
     adc #GENEVA_CHARS
-    adc #$f
+    adc #$e
     sta vwf_font_ptr
 
     ; for each byte in the current destination tile
@@ -124,9 +123,17 @@ _process_char
 _each_byte
     sep #$20
 
+    ; odd byte - ff (goes to transparent palette entry)
+    lda #$ff
+    sta (vwf_dst), y
+    sta (vwf_next), y
+
+;   ; now even byte
+    dey
+
     ; save existing tile byte
     lda (vwf_dst), y
-    sta vwf_row
+    sta vwf_cur_tile_byte
 
     lda #0
     sta vwf_remainder
@@ -145,10 +152,8 @@ _each_byte
 
 _done_shifting
     ; combine new partial character with existing tile
-    ; so since this is an or, white needs to be in the palette twice
-    ; 0 - transparent, 1 - individual letter, 2 - background, 3 - two letters ORed
-    ; i might need to figure out a way to avoid this
-    ora vwf_row
+    ; 0 - transparent, 1 - black, 2 - black, 3 - white
+    ora vwf_cur_tile_byte
     sta (vwf_dst), y
 
     ; leftover pixels need to go in the next tile
@@ -157,6 +162,7 @@ _done_shifting
 
     rep #$20
 
+    dec vwf_font_ptr
     dec vwf_font_ptr
     dey
     bpl _each_byte
@@ -195,7 +201,7 @@ _no_tile_increment
 vwf_transfer_map
 .as
 .xl
-    ldx vwf_mapdst
+    ldx vwf_tilemap_dst
     stx VMADD
     lda #$80
     sta VMAIN
@@ -208,10 +214,10 @@ vwf_transfer_map
     lsr
 
     ; write tile ids
--   ldx vwf_mapcount
+-   ldx vwf_tilemap_id
     stx VMDATA
-    inc vwf_mapcount
-    inc vwf_mapdst
+    inc vwf_tilemap_id
+    inc vwf_tilemap_dst
     dec a
     bne -
 

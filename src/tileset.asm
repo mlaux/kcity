@@ -81,4 +81,15 @@ blank_tile_init
     stx VMDATA
     stx VMDATA
 
+;     rep #$20
+;     lda #$ff00
+;     ldx #0
+;     ldy #NUM_TILE_BYTES >> 1
+; -   sta VWF_TILES, x
+;     inx
+;     inx
+;     dey
+;     bne -
+;     sep #$20
+
     rts
