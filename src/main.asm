@@ -83,6 +83,7 @@ player_sprite_id .word ?
 
 ; for calculating animation
 player_direction .word ?
+player_previous_direction .word ?
 player_animation_index .word ?
 
 text_box_enabled .word ?

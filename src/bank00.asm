@@ -4,6 +4,7 @@
 .databank $00
 .dpage $0000
 
+.include "input.asm"
 .include "text.asm"
 .include "tileset.asm"
 .include "palette.asm"
@@ -106,43 +107,9 @@ RESET
 main
     rep #$20
 
--   lda HBVJOY
-    and #1
-    bne -
-    lda joypad_current
-    sta joypad_last
-    lda JOY1L
-    sta joypad_current ; buttons currently pressed
-    eor joypad_last
-    and joypad_current
-    sta joypad_new  ; buttons newly pressed this frame (0->1)
-
-    lda frame_counter
-    and #$1
-    bne +
-    inc player_x
-+   lda #$30
-    sta player_y
-
-    lda frame_counter
-    and #PLAYER_ANIMATION_SPEED
-    bne +
-    lda player_direction
-    and #$ff
-    asl
-    asl
-    clc
-    adc player_animation_index
-    tax
-    lda PLAYER_SPLITE_TABLE, x
-    and #$ff
-    sta player_sprite_id
-    lda player_animation_index
-    inc a
-    and #$3
-    sta player_animation_index
-
-+   jsr update_text
+    jsr read_input
+    jsr move_player
+    jsr update_text
 
     lda #1
     sta main_loop_done
@@ -192,7 +159,7 @@ _no_font_dma
     sta OAMDATA
     lda player_sprite_id
     sta OAMDATA
-    lda #$30
+    lda #$20
     sta OAMDATA
 
     ; HDMA
