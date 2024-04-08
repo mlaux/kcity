@@ -56,6 +56,10 @@ vwf_tilemap_id .word ?
 main_loop_done .word ?
 frame_counter .word ?
 
+joypad_current .word ?
+joypad_last .word ?
+joypad_new .word ?
+
 ; fadein/fadeout/mosaic
 effect_id .word ?
 ; only need to set this if the effect isn't the opposite of the previous one
@@ -80,6 +84,9 @@ player_sprite_id .word ?
 ; for calculating animation
 player_direction .word ?
 player_animation_index .word ?
+
+text_box_enabled .word ?
+text_box_hdma_table .fill $9
 
 ; place first 32k
 .logical $008000

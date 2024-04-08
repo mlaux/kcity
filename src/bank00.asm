@@ -95,6 +95,7 @@ RESET
     sta effect_id
     lda #$1
     sta effect_speed
+    inc text_box_enabled
 
     ; initialization done, enable interrupts and auto joypad reading
     sep #$20
@@ -104,6 +105,17 @@ RESET
 
 main
     rep #$20
+
+-   lda HBVJOY
+    and #1
+    bne -
+    lda joypad_current
+    sta joypad_last
+    lda JOY1L
+    sta joypad_current ; buttons currently pressed
+    eor joypad_last
+    and joypad_current
+    sta joypad_new  ; buttons newly pressed this frame (0->1)
 
     lda frame_counter
     and #$1
@@ -156,7 +168,7 @@ NMI_ISR
     sep #$20
     bit RDNMI
 
-    ; if main loop is still running, this is a lag frame, leave immediately
+    ; if main loop is still running, this is a lag frame, do not update ppu
     lda main_loop_done
     beq _skip_vblank
 
@@ -167,6 +179,8 @@ NMI_ISR
     jsr vwf_dma_tiles
     jsr vwf_transfer_map
     stz vwf_dmalen
+
+    ; todo make player/text box handling into subloutines
 
 _no_font_dma
 
@@ -182,17 +196,21 @@ _no_font_dma
     sta OAMDATA
 
     ; HDMA
+    lda text_box_enabled
+    beq _no_text_box_hdma
+
     lda #$0
     sta $4300
     lda #$31
     sta $4301
-    ldx #TEXT_HDMA_TABLE
+    ldx #text_box_hdma_table
     stx $4302
     stz $4304
     lda #$1
     sta HDMAEN
 
- +  jsr run_effect
+_no_text_box_hdma
+    jsr run_effect
     inc frame_counter
 
     ; reset flag so main loop can continue
@@ -338,14 +356,6 @@ background_init
     lda #$15
     sta TM
 
-    ; ; enable blending between layers, not constant color
-    ; lda #$0
-    ; sta CGWSEL
-
-    ; output = (subscreen + main screen) / 2
-    ; lda #$41
-    ; sta CGADSUB
-
     lda #$8
     sta WH0
     lda #$f8
@@ -354,6 +364,12 @@ background_init
     sta WOBJSEL
     lda #$10
     sta CGWSEL
+
+    ldx #size(TEXT_HDMA_TABLE) - 1
+-   lda TEXT_HDMA_TABLE, x
+    sta text_box_hdma_table, x
+    dex
+    bpl -
 
     rts
 
@@ -395,7 +411,7 @@ _draw_next_string
     jsr vwf_init_string
     bra _yes
 
-TEXT_HDMA_TABLE .byte 1, $40, $7e, $40, 40, $40, 48, $41, 1, $40, 0
+TEXT_HDMA_TABLE .byte $7f, $40, 40, $40, 48, $41, 1, $40, 0
 
 TEST_CHAR .text "Testing text box with Geneva 9 point font...", 255
 TEST_CHAR2 .text "line two", 255
