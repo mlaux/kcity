@@ -19,6 +19,9 @@ vwf_next .word ?
 ; font byte currently being shifted/copied
 vwf_font_ptr .word ?
 
+script_ptr .word ?
+script_element_ptr .word ?
+
 ; Work RAM variables
 ; some of these are definitely redundant but made the algorithms easier
 * = $100
@@ -73,8 +76,9 @@ text_index .word ?
 current_text .word ?
 
 ; unused so far
-script_id .word ?
 script_step .word ?
+script_length .word ?
+script_step_start_frame .word ?
 
 ; for OAM
 player_x .word ?
