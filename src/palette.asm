@@ -1,4 +1,4 @@
-FILLER_PALETTES .fill 128
+FILLER_PALETTES .fill 256
 
 palette_init
 .as

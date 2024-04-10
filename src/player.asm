@@ -13,6 +13,21 @@ PLAYER_DIRECTION_UP = 4
 
 MOVEMENT_JUMP_TABLE .word go_right, go_down, go_left, go_up
 
+player_oam_update
+.as
+.xl
+    ldx #$0
+    stx OAMADD
+    lda player_x
+    sta OAMDATA
+    lda player_y
+    sta OAMDATA
+    lda player_sprite_id
+    sta OAMDATA
+    lda #$38
+    sta OAMDATA
+    rts
+
 move_player
 .al
 .xl

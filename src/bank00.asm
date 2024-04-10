@@ -70,19 +70,6 @@ RESET
     ; testing objs
     lda #$62 ; $4000
     sta OBJSEL
-    ldx #$0
-    stx OAMADD
-    lda #$30
-    sta OAMDATA
-    sta OAMDATA
-    lda #$c
-    sta OAMDATA
-    lda #$30
-    sta OAMDATA
-    ldx #$100
-    stx OAMADD
-    lda #$0
-    sta OAMDATA
 
     ; disable force blank, brightness still 0
     lda #$0
@@ -140,44 +127,17 @@ NMI_ISR
     beq _skip_vblank
 
     ; DMA generated text tiles if needed
-    ldy vwf_dmalen
-    beq _no_font_dma
+    jsr vwf_dma
 
-    jsr vwf_dma_tiles
-    jsr vwf_transfer_map
-    stz vwf_dmalen
+    ; move player and send updated position to OAM
+    jsr player_oam_update
 
-    ; todo make player/text box handling into subloutines
+    ; send HDMA table for text box overlay if needed
+    jsr text_box_update
 
-_no_font_dma
-
-    ldx #$0
-    stx OAMADD
-    lda player_x
-    sta OAMDATA
-    lda player_y
-    sta OAMDATA
-    lda player_sprite_id
-    sta OAMDATA
-    lda #$20
-    sta OAMDATA
-
-    ; HDMA
-    lda text_box_enabled
-    beq _no_text_box_hdma
-
-    lda #$0
-    sta $4300
-    lda #$31
-    sta $4301
-    ldx #text_box_hdma_table
-    stx $4302
-    stz $4304
-    lda #$1
-    sta HDMAEN
-
-_no_text_box_hdma
+    ; handle fade or mosaic effect if needed
     jsr run_effect
+
     inc frame_counter
 
     ; reset flag so main loop can continue
@@ -327,8 +287,12 @@ background_init
     sta WH0
     lda #$f8
     sta WH1
+
+    ; enable window 1 for color
     lda #$20
     sta WOBJSEL
+
+    ; "Sub screen color window transparent region" = "outside color window"
     lda #$10
     sta CGWSEL
 
@@ -378,7 +342,7 @@ _draw_next_string
     jsr vwf_init_string
     bra _yes
 
-TEXT_HDMA_TABLE .byte $7f, $40, 40, $40, 48, $41, 1, $40, 0
+TEXT_HDMA_TABLE .byte $7f, $40, 40, $40, 48, $51, 1, $40, 0
 
 TEST_CHAR .text "Testing text box with Geneva 9 point font...", 255
 TEST_CHAR2 .text "line two", 255
