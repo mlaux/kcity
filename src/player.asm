@@ -42,19 +42,22 @@ move_player
     ldx #PLAYER_DIRECTION_UP
     stx player_direction
 
-    ; i think this can be optimized, don't like how it looks up the direction
-    ; so many times
 +   lda player_direction
-    bne _moving_now
     eor player_previous_direction
-    beq +
+    ; if same as before, just go straight to processing the input
+    beq _process_movement
 
+    ; different than before, need to jump to a specific animation frame
+    lda player_direction
+    bne _starting_to_move
+
+    ; 1 -> 0
     ; not moving now but was moving before - skip to second animation frame (idle)
     lda player_previous_direction
     dec a
     asl
     asl
-    inc a
+    inc a ; frame 1
     tax
     lda PLAYER_SPLITE_TABLE, x
     and #$ff
@@ -62,15 +65,12 @@ move_player
     lda #$1
     sta player_animation_index
 
-+   rts
+    rts
 
-_moving_now
-    eor player_previous_direction
-    beq _same_direction
-
+    ; 0 -> 1
     ; was not moving before, but is now, or changed direction
     ; skip to first animation frame (step)
-    lda player_direction
+_starting_to_move
     dec a
     asl
     asl
@@ -80,9 +80,14 @@ _moving_now
     sta player_sprite_id
     stz player_animation_index
 
-_same_direction
+_process_movement
     lda player_direction
-    dec a
+    bne +
+    ; 0 -> 0
+    rts
+
+    ; 1 -> 1
++   dec a
     asl
     tax
     jmp (MOVEMENT_JUMP_TABLE, x)
