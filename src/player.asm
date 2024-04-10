@@ -42,15 +42,14 @@ move_player
     ldx #PLAYER_DIRECTION_UP
     stx player_direction
 
+    ; i think this can be optimized, don't like how it looks up the direction
+    ; so many times
 +   lda player_direction
     bne _moving_now
     eor player_previous_direction
-    bne _was_moving_before_but_not_now
+    beq +
 
-    ; not moving now, not moving before
-    rts
-
-_was_moving_before_but_not_now
+    ; not moving now but was moving before - skip to second animation frame (idle)
     lda player_previous_direction
     dec a
     asl
@@ -62,13 +61,15 @@ _was_moving_before_but_not_now
     sta player_sprite_id
     lda #$1
     sta player_animation_index
-    rts
+
++   rts
 
 _moving_now
     eor player_previous_direction
-    beq _moving_now_and_was_moving_before
+    beq _same_direction
 
-    ; was not moving before, but is now
+    ; was not moving before, but is now, or changed direction
+    ; skip to first animation frame (step)
     lda player_direction
     dec a
     asl
@@ -79,8 +80,7 @@ _moving_now
     sta player_sprite_id
     stz player_animation_index
 
-
-_moving_now_and_was_moving_before
+_same_direction
     lda player_direction
     dec a
     asl
