@@ -10,6 +10,8 @@
 .include "palette.asm"
 .include "effect.asm"
 .include "player.asm"
+.include "script.asm"
+
 TEXT_COUNT = 1
 
 RESET
@@ -89,13 +91,18 @@ RESET
     sep #$20
     lda #$81
     sta NMITIMEN
+
+    rep #$20
     ; fall through to main loop
+    lda #TEST_SCRIPT
+    sta script_ptr
+    lda #1
+    sta script_length
 
 main
-    rep #$20
-
     jsr read_input
     jsr move_player
+    jsr run_script
     jsr update_text
 
     lda #1

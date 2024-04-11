@@ -15,7 +15,11 @@
 ; 4x line pointers (empty slot = 0)
 ; height is always 2 + num lines
 
-; to run a script store its address in script_ptr and the number of elements in script_len
+TEST_SCRIPT .word 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+
+script_operations .word op_none, op_text_box
+
+; to run a script store its address in script_ptr and the number of elements in script_length
 activate_script
 .as
 .xl
@@ -29,12 +33,12 @@ run_script
     bne +
     rts
 
-    lda script_step
-    cmp script_len
++   lda script_step
+    cmp script_length
     bne +
     stz script_ptr
     stz script_element_ptr
-    stz script_len
+    stz script_length
     rts
 
 +   asl
@@ -53,5 +57,22 @@ run_script
 +   clc
     adc (script_element_ptr)
     cmp frame_counter
+    ; if start + length > frame_counter
+    beq +
+    bcs +
+    inc script_step
+    lda frame_counter
+    sta script_step_start_frame
+    rts
 
++   ldy #$2
+    lda (script_element_ptr), y
+    asl
+    tax
+    jmp (script_operations, x)
+
+op_none
+    rts
+
+op_text_box
     rts
