@@ -93,17 +93,16 @@ RESET
     sta NMITIMEN
 
     rep #$20
-    ; fall through to main loop
     lda #TEST_SCRIPT
     sta script_ptr
-    lda #1
+    lda #3
     sta script_length
 
+    ; fall through to main loop
 main
     jsr read_input
     jsr move_player
     jsr run_script
-    jsr update_text
 
     lda #1
     sta main_loop_done
@@ -133,14 +132,12 @@ NMI_ISR
     lda main_loop_done
     beq _skip_vblank
 
-    ; DMA generated text tiles if needed
-    jsr vwf_dma
+    ; DMA generated text tiles if needed, or reset tilemap if turning off text box
+    ; send HDMA table for text box overlay if needed
+    jsr text_box_vblank
 
     ; move player and send updated position to OAM
     jsr player_oam_update
-
-    ; send HDMA table for text box overlay if needed
-    jsr text_box_update
 
     ; handle fade or mosaic effect if needed
     jsr run_effect
@@ -314,7 +311,13 @@ background_init
 update_text
 .al
 .xl
-    lda current_text
+    lda text_box_enabled
+    bne +
+    stz current_text
+    stz text_index
+    rts
+
++   lda current_text
     bne +
 
     lda text_index
