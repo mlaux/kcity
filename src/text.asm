@@ -278,30 +278,38 @@ vwf_reset_map
     rep #$20
 
     lda vwf_tilemap_id
-    cmp #TILE_ID_START
+    sec
+    sbc #TILE_ID_START
     bne +
 
     ; if equal nothing to do
     sep #$20
     rts
 
-+   and #$ff
+    ; byte count to clear = 16 * num tiles used
++   asl
     asl
     asl
     asl
-    asl
-    tay
+    sta DMALEN
+
+    ldx #DMAMODE_PPUFILL
+    stx DMAMODE
 
     sep #$20
+
+    ldx #<>ZERO
+    stx DMAADDR
+    lda #`ZERO
+    sta DMAADDRBANK
+
     ldx #TILE_DESTINATION_START
     stx VMADD
     lda #$80
     sta VMAIN
 
-    ldx #$0
--   stx VMDATA
-    dey
-    bne -
+    lda #1
+    sta MDMAEN
 
     ldx #TILE_ID_START
     stx vwf_tilemap_id
