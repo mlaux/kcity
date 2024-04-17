@@ -288,9 +288,9 @@ background_init
     sta TM
 
     lda #$8
-    sta WH0
+    sta text_box_wh0
     lda #$f8
-    sta WH1
+    sta text_box_wh1
 
     ; enable window 1 for color
     lda #$20
@@ -321,12 +321,12 @@ update_text
     bne +
 
     lda text_index
-    cmp #TEXT_COUNT
+    cmp text_box_num_lines
     beq +
 
     asl
     tax
-    lda TEXT_LINES, x
+    lda (text_box_lines, x)
     sta current_text
     inc text_index
 
@@ -356,7 +356,6 @@ TEXT_HDMA_TABLE .byte $7f, $40, 40, $40, 48, $51, 1, $40, 0
 
 TEST_CHAR .text "Testing text box with Geneva 9 point font...", 255
 TEST_CHAR2 .text "line two", 255
-TEXT_LINES .word TEST_CHAR
 
 GENEVA_CHARS .binary "../font/geneva.tiles"
 GENEVA_PALETTE .binary "../font/geneva.palette"

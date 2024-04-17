@@ -22,7 +22,17 @@ text_box_vblank
     stz HDMAEN
     jmp vwf_reset_map ; reuse rts
 
-+   lda #$0
+    ; place text box at proper location
++   lda text_box_wh0
+    sta WH0
+    lda text_box_wh1
+    sta WH1
+
+    ldx text_box_num_lines
+    lda TEXT_BOX_HEIGHTS, x
+    sta text_box_hdma_table + 4
+
+    lda #$0
     sta DMAMODE
     lda #CGADSUB & $ff
     sta DMAPPUREG
@@ -191,10 +201,11 @@ _done_shifting
     clc
     adc vwf_offs
     sta vwf_offs
+
+    ; if vwf_offs < 8 move to next tile
     cmp #8
     bmi _no_tile_increment
-    sec
-    sbc #8
+    and #7
     sta vwf_offs
 
     lda vwf_next
@@ -317,3 +328,5 @@ vwf_reset_map
     rts
 
 LINE_START_TABLE .word DIALOG_BOX_BASE, DIALOG_BOX_BASE + $11, DIALOG_BOX_BASE + $21, DIALOG_BOX_BASE + $31
+; heights for 1, 2, 3, 4 lines
+TEXT_BOX_HEIGHTS .byte 0, $18, $20, $28, $30

@@ -21,6 +21,7 @@ vwf_font_ptr .word ?
 
 script_ptr .word ?
 script_element_ptr .word ?
+text_box_lines .word ?
 
 ; Work RAM variables
 ; some of these are definitely redundant but made the algorithms easier
@@ -92,6 +93,10 @@ player_animation_index .word ?
 
 text_box_enabled .word ?
 text_box_hdma_table .fill $9
+
+text_box_wh0 .word ?
+text_box_wh1 .word ?
+text_box_num_lines .word ?
 
 ; place first 32k
 .logical $008000

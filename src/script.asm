@@ -9,11 +9,11 @@
 
 ; for text boxes:
 ; x: byte
-; y: byte
+; y: byte (ignored for now)
 ; w: byte
 ; number of lines (1-4): byte
 ; 4x line pointers (empty slot = 0)
-; height is always 2 + num lines
+; height is always 8 * (2 + num lines)
 
 script_element_t .struct len, op
     frame_length .word \len
@@ -24,7 +24,7 @@ script_element_t .struct len, op
 TEST_SCRIPT
     .byte   10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; do nothing for 10 frames
 
-    .byte 200, 0, 1, 0, 20, 20, 150, 1 ; text box for 200 frames at (20, 20), width=150, lines=1
+    .byte 200, 0, 1, 0, 8, 20, 240, 1 ; text box for 200 frames at (8, 20), width=240, lines=1
     .word TEST_CHAR, 0, 0, 0 ; line pointers for text box
 
     .byte 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset
@@ -86,7 +86,22 @@ op_none
     rts
 
 op_text_box
+    sep #$20
+    ldy #$4
+    lda (script_element_ptr), y
+    sta text_box_wh0
+    ldy #$6
+    adc (script_element_ptr), y
+    sta text_box_wh1
+    ldy #$7
+    lda (script_element_ptr), y
+    sta text_box_num_lines
     lda #$1
     sta text_box_enabled
+    rep #$20
+    lda script_element_ptr
+    clc
+    adc #8
+    sta text_box_lines
     jsr update_text
     rts
