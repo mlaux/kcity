@@ -23,12 +23,12 @@ text_box_vblank
     jmp vwf_reset_map ; reuse rts
 
 +   lda #$0
-    sta $4300
-    lda #$31
-    sta $4301
+    sta DMAMODE
+    lda #CGADSUB & $ff
+    sta DMAPPUREG
     ldx #text_box_hdma_table
-    stx $4302
-    stz $4304
+    stx DMAADDR
+    stz DMAADDRBANK
     lda #$1
     sta HDMAEN
 
@@ -149,14 +149,6 @@ _process_char
 _each_byte
     sep #$20
 
-    ; odd byte - ff (goes to transparent palette entry)
-    ; lda #$ff
-    ; sta (vwf_dst), y
-    ; sta (vwf_next), y
-
-;   ; now even byte
-    ; dey
-
     ; save existing tile byte
     lda (vwf_dst), y
     sta vwf_cur_tile_byte
@@ -189,7 +181,6 @@ _done_shifting
     rep #$20
 
     dec vwf_font_ptr
-    ; dec vwf_font_ptr
     dey
     bpl _each_byte
 
