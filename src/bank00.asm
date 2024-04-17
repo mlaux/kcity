@@ -311,7 +311,9 @@ background_init
 TEXT_HDMA_TABLE .byte $7f, $40, 40, $40, 48, $51, 1, $40, 0
 
 TEST_CHAR .text "Testing text box with Geneva 9 point font...", 255
-TEST_CHAR2 .text "line two", 255
+TEST_CHAR2 .text "  ... And here's a second line", 255
+TEST_CHAR3 .text "  let's try a third", 255
+TEST_CHAR4 .text "  fourth line?", 255
 
 GENEVA_CHARS .binary "../font/geneva.tiles"
 GENEVA_PALETTE .binary "../font/geneva.palette"

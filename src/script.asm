@@ -8,9 +8,9 @@
 ; $1: show text box
 
 ; for text boxes:
-; x: byte
+; x: byte (should be 8 for now)
 ; y: byte (ignored for now)
-; w: byte
+; w: byte (should be 240 for now)
 ; number of lines (1-4): byte
 ; 4x line pointers (empty slot = 0)
 ; height is always 8 * (2 + num lines)
@@ -24,8 +24,8 @@ script_element_t .struct len, op
 TEST_SCRIPT
     .byte   10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; do nothing for 10 frames
 
-    .byte 200, 0, 1, 0, 8, 20, 240, 2 ; text box for 200 frames at (8, 20), width=240, lines=2
-    .word TEST_CHAR, TEST_CHAR2, 0, 0 ; line pointers for text box
+    .byte 0, 2, 1, 0, 8, 20, 240, 4 ; text box for 512 frames at (8, 20), width=240, lines=2
+    .word TEST_CHAR, TEST_CHAR2, TEST_CHAR3, TEST_CHAR4 ; line pointers for text box
 
     .byte 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset
 
@@ -103,5 +103,6 @@ op_text_box
     clc
     adc #8
     sta text_box_lines
+
     jsr vwf_frame_loop
     rts
