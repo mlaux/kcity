@@ -24,8 +24,8 @@ script_element_t .struct len, op
 TEST_SCRIPT
     .byte   10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; do nothing for 10 frames
 
-    .byte 200, 0, 1, 0, 8, 20, 240, 1 ; text box for 200 frames at (8, 20), width=240, lines=1
-    .word TEST_CHAR, 0, 0, 0 ; line pointers for text box
+    .byte 200, 0, 1, 0, 8, 20, 240, 2 ; text box for 200 frames at (8, 20), width=240, lines=2
+    .word TEST_CHAR, TEST_CHAR2, 0, 0 ; line pointers for text box
 
     .byte 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset
 
@@ -103,5 +103,5 @@ op_text_box
     clc
     adc #8
     sta text_box_lines
-    jsr update_text
+    jsr vwf_frame_loop
     rts

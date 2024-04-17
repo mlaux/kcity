@@ -6,6 +6,55 @@ TILE_DESTINATION_START = $3010
 TILE_ID_START = $2002
 BYTES_PER_TILE = $10
 
+vwf_frame_loop
+.al
+.xl
+    lda text_box_enabled
+    bne +
+    stz current_text
+    stz text_index
+    rts
+
++   lda current_text
+    bne +
+
+    lda text_index
+    cmp text_box_num_lines
+    beq +
+
+    asl
+    tay
+    lda (text_box_lines), y
+    sta current_text
+
+    ; string currently being drawn?
++   lda vwf_end_of_string
+    bne _no
+
+    ; yes, keep going with current string
+_yes
+    lda #1
+    sta vwf_count
+    jmp vwf_draw_string
+
+    ; no, anything to draw?
+_no
+    ldx current_text
+    bne _draw_next_string
+    rts
+
+    ; yes, start it
+_draw_next_string
+    lda text_index
+    asl
+    tax
+    lda LINE_START_TABLE, x
+    tay
+    ldx current_text
+    jsr vwf_init_string
+    inc text_index
+    bra _yes
+
 ; call from vblank to transfer text tiles and do text box background HDMA
 text_box_vblank
 .as
@@ -327,6 +376,6 @@ vwf_reset_map
 
     rts
 
-LINE_START_TABLE .word DIALOG_BOX_BASE, DIALOG_BOX_BASE + $11, DIALOG_BOX_BASE + $21, DIALOG_BOX_BASE + $31
+LINE_START_TABLE .word DIALOG_BOX_BASE, DIALOG_BOX_BASE + $20, DIALOG_BOX_BASE + $40, DIALOG_BOX_BASE + $60
 ; heights for 1, 2, 3, 4 lines
 TEXT_BOX_HEIGHTS .byte 0, $18, $20, $28, $30

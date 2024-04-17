@@ -308,50 +308,6 @@ background_init
 
     rts
 
-update_text
-.al
-.xl
-    lda text_box_enabled
-    bne +
-    stz current_text
-    stz text_index
-    rts
-
-+   lda current_text
-    bne +
-
-    lda text_index
-    cmp text_box_num_lines
-    beq +
-
-    asl
-    tax
-    lda (text_box_lines, x)
-    sta current_text
-    inc text_index
-
-    ; string currently being drawn?
-+   lda vwf_end_of_string
-    bne _no
-
-    ; yes, keep going with current string
-_yes
-    lda #1
-    sta vwf_count
-    jmp vwf_draw_string
-
-    ; no, anything to draw?
-_no
-    ldx current_text
-    bne _draw_next_string
-    rts
-
-    ; yes, start it
-_draw_next_string
-    ldy #DIALOG_BOX_BASE
-    jsr vwf_init_string
-    bra _yes
-
 TEXT_HDMA_TABLE .byte $7f, $40, 40, $40, 48, $51, 1, $40, 0
 
 TEST_CHAR .text "Testing text box with Geneva 9 point font...", 255
