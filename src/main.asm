@@ -7,6 +7,9 @@
 .include "cpu.asm"
 .include "dma.asm"
 
+SCREEN_WIDTH = 256
+SCREEN_HEIGHT = 224
+
 ; Zero page
 * = $0
 

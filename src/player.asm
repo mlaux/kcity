@@ -11,6 +11,8 @@ PLAYER_DIRECTION_DOWN = 2
 PLAYER_DIRECTION_LEFT = 3
 PLAYER_DIRECTION_UP = 4
 
+PLAYER_SIZE = 16
+
 MOVEMENT_JUMP_TABLE .word go_right, go_down, go_left, go_up
 
 player_oam_update
@@ -108,16 +110,30 @@ _process_movement
     jmp (MOVEMENT_JUMP_TABLE, x)
 
 go_right
-    inc player_x
+    lda player_x
+    cmp #SCREEN_WIDTH - PLAYER_SIZE
+    bne +
+    rts
++   inc player_x
     bra animate_player
 go_down
-    inc player_y
+    lda player_y
+    cmp #SCREEN_HEIGHT - PLAYER_SIZE
+    bne +
+    rts
++   inc player_y
     bra animate_player
 go_left
-    dec player_x
+    lda player_x
+    bne +
+    rts
++   dec player_x
     bra animate_player
 go_up
-    dec player_y
+    lda player_y
+    bne +
+    rts
++   dec player_y
     bra animate_player
 
 animate_player
