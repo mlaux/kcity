@@ -184,14 +184,14 @@ go_right
     ldx player_x
     cpx #SCREEN_WIDTH - PLAYER_SIZE
     bne +
-    rts
+    bra animate_player
 
     ; check tile at (x + 1, y)
 +   inx
     ldy player_y
     jsr check_tilemap_collision
     bne +
-    rts
+    bra animate_player
 
 +   inc player_x
     bra animate_player
@@ -199,14 +199,14 @@ go_down
     ldy player_y
     cpy #SCREEN_HEIGHT - PLAYER_SIZE
     bne +
-    rts
+    bra animate_player
 
     ; check tile at (x, y + 1)
 +   iny
     ldx player_x
     jsr check_tilemap_collision
     bne +
-    rts
+    bra animate_player
 
 +   inc player_y
     bra animate_player
@@ -214,28 +214,28 @@ go_left
     ; check left edge of screen
     ldx player_x
     bne +
-    rts
+    bra animate_player
 
     ; check tile at (x - 1, y)
 +   dex
     ldy player_y
     jsr check_tilemap_collision
     bne +
-    rts
+    bra animate_player
 
 +   dec player_x
     bra animate_player
 go_up
     ldy player_y
     bne +
-    rts
+    bra animate_player
 
     ; check tile at (x, y - 1)
 +   dey
     ldx player_x
     jsr check_tilemap_collision
     bne +
-    rts
+    bra animate_player
 
 +   dec player_y
     bra animate_player
