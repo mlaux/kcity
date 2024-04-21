@@ -13,6 +13,11 @@ SCREEN_HEIGHT = 224
 ; Zero page
 * = $0
 
+test0 .word ?
+test1 .word ?
+test2 .word ?
+test3 .word ?
+
 ; text source pointer for VWF routine
 vwf_src .word ?
 ; base address of current tile
@@ -88,6 +93,9 @@ script_step_start_frame .word ?
 player_x .word ?
 player_y .word ?
 player_sprite_id .word ?
+
+player_tile_x .word ?
+player_tile_y .word ?
 
 ; for calculating animation
 player_direction .word ?

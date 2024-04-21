@@ -15,6 +15,25 @@ PLAYER_SIZE = 16
 
 MOVEMENT_JUMP_TABLE .word go_right, go_down, go_left, go_up
 
+; 1 ok, 0 NG
+TEST_COLLISION_MAP .byte 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1
+                   .byte 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1
+                   .byte 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1
+                   .byte 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
+                   .byte 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
+                   .byte 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1
+                   .byte 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1
+                   .byte 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1
+                   .byte 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1
+                   .byte 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1
+                   .byte 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1
+                   .byte 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1
+                   .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1
+                   .byte 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
+
+; filler for other tiles
+.fill $20
+
 player_oam_update
 .as
 .xl
@@ -30,9 +49,61 @@ player_oam_update
     sta OAMDATA
     rts
 
+check_tilemap_collision
+.al
+.xl
+    stx test1
+    sty test2
+
+    lda test1
+    clc
+    adc #PLAYER_SIZE >> 1
+    lsr
+    lsr
+    lsr
+    lsr
+    sta test1
+
+    lda test2
+    clc
+    adc #PLAYER_SIZE >> 1
+    lsr
+    lsr
+    lsr
+    lsr
+    sta test2
+
+    ; y*width+x
+    lda test2
+    asl
+    asl
+    asl
+    asl
+    clc
+    adc test1
+    sta test3
+    tax
+    lda TEST_COLLISION_MAP, x
+    and #$ff
+    rts
+
 move_player
 .al
 .xl
+    lda player_x
+    lsr
+    lsr
+    lsr
+    lsr
+    sta player_tile_x
+
+    lda player_y
+    lsr
+    lsr
+    lsr
+    lsr
+    sta player_tile_y
+
     lda player_direction
     sta player_previous_direction
     stz player_direction
@@ -110,29 +181,62 @@ _process_movement
     jmp (MOVEMENT_JUMP_TABLE, x)
 
 go_right
-    lda player_x
-    cmp #SCREEN_WIDTH - PLAYER_SIZE
+    ldx player_x
+    cpx #SCREEN_WIDTH - PLAYER_SIZE
     bne +
     rts
+
+    ; check tile at (x + 1, y)
++   inx
+    ldy player_y
+    jsr check_tilemap_collision
+    bne +
+    rts
+
 +   inc player_x
     bra animate_player
 go_down
-    lda player_y
-    cmp #SCREEN_HEIGHT - PLAYER_SIZE
+    ldy player_y
+    cpy #SCREEN_HEIGHT - PLAYER_SIZE
     bne +
     rts
+
+    ; check tile at (x, y + 1)
++   iny
+    ldx player_x
+    jsr check_tilemap_collision
+    bne +
+    rts
+
 +   inc player_y
     bra animate_player
 go_left
-    lda player_x
+    ; check left edge of screen
+    ldx player_x
     bne +
     rts
+
+    ; check tile at (x - 1, y)
++   dex
+    ldy player_y
+    jsr check_tilemap_collision
+    bne +
+    rts
+
 +   dec player_x
     bra animate_player
 go_up
-    lda player_y
+    ldy player_y
     bne +
     rts
+
+    ; check tile at (x, y - 1)
++   dey
+    ldx player_x
+    jsr check_tilemap_collision
+    bne +
+    rts
+
 +   dec player_y
     bra animate_player
 
