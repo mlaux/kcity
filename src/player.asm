@@ -1,9 +1,13 @@
-
 PLAYER_PALETTE .binary "../experimental_gfx/player.palette"
 PLAYER_TILESET .binary "../experimental_gfx/player.tiles"
 
+; ANDed with the frame counter to decide whether to go to the next frame, should be 2^n - 1
 PLAYER_ANIMATION_SPEED = 7
-PLAYER_SPLITE_TABLE .byte $c, $e, $20, $e, $0, $2, $4, $2, $6, $8, $a, $8, $22, $24, $26, $24
+
+; OAM sprite ids for each direction
+; the first in a group is left foot forward, then idle, then right foot forward, then idle again
+;                        |     right      |     down      |     left      |        up        |
+PLAYER_SPRITE_TABLE .byte $c, $e, $20, $e, $0, $2, $4, $2, $6, $8, $a, $8, $22, $24, $26, $24
 
 PLAYER_DIRECTION_NONE = 0
 PLAYER_DIRECTION_RIGHT = 1
@@ -15,7 +19,7 @@ PLAYER_SIZE = 16
 
 MOVEMENT_JUMP_TABLE .word go_right, go_down, go_left, go_up
 
-; 1 ok, 0 NG
+; 1 is walkable, 0 is blocked, i guess next is to make (0x80 | map id) be a warp or something
 TEST_COLLISION_MAP .byte 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1
                    .byte 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1
                    .byte 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1
@@ -31,26 +35,12 @@ TEST_COLLISION_MAP .byte 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1
                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1
                    .byte 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
 
-; filler for other tiles
+; filler for final two rows just in case? idk, can probably remove
 .fill $20
 
-player_oam_update
-.as
-.xl
-    ldx #$0
-    stx OAMADD
-    lda player_x
-    sta OAMDATA
-    lda player_y
-    sta OAMDATA
-    lda player_sprite_id
-    sta OAMDATA
-    lda #$38
-    sta OAMDATA
-    rts
-
-; parameters: X = player X, Y = player Y (top left corner)
-; returns: A = 1 if walking is permitted, 0 otherwise
+; returns: A = 1 if walking to the tile at the given coordinates is permitted, 0 otherwise
+; parameters: X = player X in pixel coordinates, Y = player Y (top left corner)
+; assumes: AXY 16
 check_tilemap_collision
 .al
 .xl
@@ -83,6 +73,10 @@ check_tilemap_collision
     and #$ff
     rts
 
+; reads input, moves the player, and animates if necessary. call from the main loop
+; parameters: none
+; returns: none
+; assumes: AXY 16
 move_player
 .al
 .xl
@@ -91,6 +85,9 @@ move_player
     stz player_direction
 
     lda joypad_current
+
+    ; check each direction, directions that are checked later override directions
+    ; that are checked first. i checked some popular SNES RPGs and this behavior seems fine
 
     bit #RIGHT_BUTTON
     beq +
@@ -127,25 +124,26 @@ move_player
     dec a
     asl
     asl
-    inc a ; frame 1
     tax
-    lda PLAYER_SPLITE_TABLE, x
+    inx ; frame 1 in each animation group is idle
+    lda PLAYER_SPRITE_TABLE, x
     and #$ff
     sta player_sprite_id
     lda #$1
     sta player_animation_index
 
+    ; done
     rts
 
     ; 0 -> n, n -> m
     ; was not moving before, but is now, or changed direction
-    ; skip to first animation frame (step)
+    ; skip to first animation frame (stepping forward)
 _starting_to_move
     dec a
     asl
     asl
     tax
-    lda PLAYER_SPLITE_TABLE, x
+    lda PLAYER_SPRITE_TABLE, x
     and #$ff
     sta player_sprite_id
     stz player_animation_index
@@ -162,6 +160,7 @@ _process_movement
 +   dec a
     asl
     tax
+    ; MOVEMENT_JUMP_TABLE[(player_direction - 1) << 1]()
     jmp (MOVEMENT_JUMP_TABLE, x)
 
 go_right
@@ -200,7 +199,7 @@ go_left
     bne +
     bra animate_player
 
-    ; check tile at (x - 1, y + playersize / 2)
+    ; check tile at (x - 1, y)
 +   dex
     ldy player_y
     jsr check_tilemap_collision
@@ -214,7 +213,7 @@ go_up
     bne +
     bra animate_player
 
-    ; check tile at (x + playersize / 2, y - 1)
+    ; check tile at (x, y - 1)
 +   dey
     ldx player_x
     jsr check_tilemap_collision
@@ -223,10 +222,12 @@ go_up
     dec player_y
 
 animate_player
+    ; if it's not time to go to the next frame, exit
     lda frame_counter
     and #PLAYER_ANIMATION_SPEED
     bne +
 
+    ; player_sprite_id = PLAYER_SPRITE_TABLE[(player_direction - 1) << 2 + player_animation_index]
     lda player_direction
     and #$ff
     dec a
@@ -235,13 +236,33 @@ animate_player
     clc
     adc player_animation_index
     tax
-    lda PLAYER_SPLITE_TABLE, x
+    lda PLAYER_SPRITE_TABLE, x
     and #$ff
     sta player_sprite_id
 
+    ; 0123 0123 0123 ...
     lda player_animation_index
     inc a
     and #$3
     sta player_animation_index
 
 +   rts
+
+; send over the updated data calculated by move_player
+; parameters: none
+; returns: none
+; assumes: A8, XY16
+player_oam_update
+.as
+.xl
+    ldx #$0
+    stx OAMADD
+    lda player_x
+    sta OAMDATA
+    lda player_y
+    sta OAMDATA
+    lda player_sprite_id
+    sta OAMDATA
+    lda #$38
+    sta OAMDATA
+    rts
