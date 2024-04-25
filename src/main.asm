@@ -94,9 +94,6 @@ player_x .word ?
 player_y .word ?
 player_sprite_id .word ?
 
-player_tile_x .word ?
-player_tile_y .word ?
-
 ; for calculating animation
 player_direction .word ?
 player_previous_direction .word ?

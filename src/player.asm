@@ -49,14 +49,15 @@ player_oam_update
     sta OAMDATA
     rts
 
-; parameters: X = player X, Y = player Y
+; parameters: X = player X, Y = player Y (top left corner)
 ; returns: A = 1 if walking is permitted, 0 otherwise
 check_tilemap_collision
 .al
 .xl
     txa
-    ; clc
-    ; adc #PLAYER_SIZE >> 1
+    ; want to check middle of player, not top left
+    clc
+    adc #PLAYER_SIZE >> 1
     lsr
     lsr
     lsr
@@ -64,8 +65,8 @@ check_tilemap_collision
     sta zp1
 
     tya
-    ; clc
-    ; adc #PLAYER_SIZE >> 1
+    clc
+    adc #PLAYER_SIZE >> 1
 
     ; lsr lsr lsr lsr, asl asl asl asl
     and #$f0
@@ -75,6 +76,7 @@ check_tilemap_collision
     ; y*width+x
     clc
     adc zp1
+    ; for debugging
     sta zp3
     tax
     lda TEST_COLLISION_MAP, x
@@ -84,20 +86,6 @@ check_tilemap_collision
 move_player
 .al
 .xl
-    lda player_x
-    lsr
-    lsr
-    lsr
-    lsr
-    sta player_tile_x
-
-    lda player_y
-    lsr
-    lsr
-    lsr
-    lsr
-    sta player_tile_y
-
     lda player_direction
     sta player_previous_direction
     stz player_direction
@@ -133,7 +121,7 @@ move_player
     lda player_direction
     bne _starting_to_move
 
-    ; 1 -> 0
+    ; n -> 0
     ; not moving now but was moving before - skip to second animation frame (idle)
     lda player_previous_direction
     dec a
@@ -149,7 +137,7 @@ move_player
 
     rts
 
-    ; 0 -> 1
+    ; 0 -> n, n -> m
     ; was not moving before, but is now, or changed direction
     ; skip to first animation frame (step)
 _starting_to_move
@@ -165,55 +153,47 @@ _starting_to_move
 _process_movement
     lda player_direction
     bne +
+    ; not moving now, not moving before, done
     ; 0 -> 0
     rts
 
-    ; 1 -> 1
+    ; continue moving in same direction
+    ; n -> n
 +   dec a
     asl
     tax
     jmp (MOVEMENT_JUMP_TABLE, x)
 
 go_right
-    lda player_x
-    cmp #SCREEN_WIDTH - PLAYER_SIZE
+    ldx player_x
+    cpx #SCREEN_WIDTH - PLAYER_SIZE
     bne +
     bra animate_player
 
-    ; check tile at (x + player size + 1, y + playersize / 2)
-+   clc
-    adc #PLAYER_SIZE + 1
-    tax
-    lda player_y
-    clc
-    adc #PLAYER_SIZE >> 1
-    tay
+    ; check tile at (x + 1, y)
++   inx
+    ldy player_y
     jsr check_tilemap_collision
-    bne +
-    bra animate_player
+    beq +
 
-+   inc player_x
-    bra animate_player
+    inc player_x
++   bra animate_player
+
 go_down
-    lda player_y
-    cmp #SCREEN_HEIGHT - PLAYER_SIZE
+    ldy player_y
+    cpy #SCREEN_HEIGHT - PLAYER_SIZE
     bne +
     bra animate_player
 
-    ; check tile at (x + playersize / 2, y + player size + 1)
-+   clc
-    adc #PLAYER_SIZE + 1
-    tay
-    lda player_x
-    clc
-    adc #PLAYER_SIZE >> 1
-    tax
+    ; check tile at (x, y + 1)
++   iny
+    ldx player_x
     jsr check_tilemap_collision
-    bne +
-    bra animate_player
+    beq +
 
-+   inc player_y
-    bra animate_player
+    inc player_y
++   bra animate_player
+
 go_left
     ; check left edge of screen
     ldx player_x
@@ -222,16 +202,13 @@ go_left
 
     ; check tile at (x - 1, y + playersize / 2)
 +   dex
-    lda player_y
-    clc
-    adc #PLAYER_SIZE >> 1
-    tay
+    ldy player_y
     jsr check_tilemap_collision
-    bne +
-    bra animate_player
+    beq +
 
-+   dec player_x
-    bra animate_player
+    dec player_x
++   bra animate_player
+
 go_up
     ldy player_y
     bne +
@@ -239,16 +216,11 @@ go_up
 
     ; check tile at (x + playersize / 2, y - 1)
 +   dey
-    lda player_x
-    clc
-    adc #PLAYER_SIZE >> 1
-    tax
+    ldx player_x
     jsr check_tilemap_collision
-    bne +
-    bra animate_player
+    beq animate_player
 
-+   dec player_y
-    bra animate_player
+    dec player_y
 
 animate_player
     lda frame_counter
