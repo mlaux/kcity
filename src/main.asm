@@ -13,10 +13,10 @@ SCREEN_HEIGHT = 224
 ; Zero page
 * = $0
 
-test0 .word ?
-test1 .word ?
-test2 .word ?
-test3 .word ?
+zp0 .word ?
+zp1 .word ?
+zp2 .word ?
+zp3 .word ?
 
 ; text source pointer for VWF routine
 vwf_src .word ?
@@ -118,7 +118,7 @@ text_box_num_lines .word ?
 ; .include "bank01.asm"
 ; .here
 
-; 128k minus one byte
+; 128k minus one byte. TODO this isn't right because it includes the ram area, so the file is too small
 * = $01ffff
 .byte 0
 

@@ -49,39 +49,33 @@ player_oam_update
     sta OAMDATA
     rts
 
+; parameters: X = player X, Y = player Y
+; returns: A = 1 if walking is permitted, 0 otherwise
 check_tilemap_collision
 .al
 .xl
-    stx test1
-    sty test2
+    txa
+    ; clc
+    ; adc #PLAYER_SIZE >> 1
+    lsr
+    lsr
+    lsr
+    lsr
+    sta zp1
 
-    lda test1
-    clc
-    adc #PLAYER_SIZE >> 1
-    lsr
-    lsr
-    lsr
-    lsr
-    sta test1
+    tya
+    ; clc
+    ; adc #PLAYER_SIZE >> 1
 
-    lda test2
-    clc
-    adc #PLAYER_SIZE >> 1
-    lsr
-    lsr
-    lsr
-    lsr
-    sta test2
+    ; lsr lsr lsr lsr, asl asl asl asl
+    and #$f0
+    ; for debugging
+    sta zp2
 
     ; y*width+x
-    lda test2
-    asl
-    asl
-    asl
-    asl
     clc
-    adc test1
-    sta test3
+    adc zp1
+    sta zp3
     tax
     lda TEST_COLLISION_MAP, x
     and #$ff
@@ -181,14 +175,19 @@ _process_movement
     jmp (MOVEMENT_JUMP_TABLE, x)
 
 go_right
-    ldx player_x
-    cpx #SCREEN_WIDTH - PLAYER_SIZE
+    lda player_x
+    cmp #SCREEN_WIDTH - PLAYER_SIZE
     bne +
     bra animate_player
 
-    ; check tile at (x + 1, y)
-+   inx
-    ldy player_y
+    ; check tile at (x + player size + 1, y + playersize / 2)
++   clc
+    adc #PLAYER_SIZE + 1
+    tax
+    lda player_y
+    clc
+    adc #PLAYER_SIZE >> 1
+    tay
     jsr check_tilemap_collision
     bne +
     bra animate_player
@@ -196,14 +195,19 @@ go_right
 +   inc player_x
     bra animate_player
 go_down
-    ldy player_y
-    cpy #SCREEN_HEIGHT - PLAYER_SIZE
+    lda player_y
+    cmp #SCREEN_HEIGHT - PLAYER_SIZE
     bne +
     bra animate_player
 
-    ; check tile at (x, y + 1)
-+   iny
-    ldx player_x
+    ; check tile at (x + playersize / 2, y + player size + 1)
++   clc
+    adc #PLAYER_SIZE + 1
+    tay
+    lda player_x
+    clc
+    adc #PLAYER_SIZE >> 1
+    tax
     jsr check_tilemap_collision
     bne +
     bra animate_player
@@ -216,9 +220,12 @@ go_left
     bne +
     bra animate_player
 
-    ; check tile at (x - 1, y)
+    ; check tile at (x - 1, y + playersize / 2)
 +   dex
-    ldy player_y
+    lda player_y
+    clc
+    adc #PLAYER_SIZE >> 1
+    tay
     jsr check_tilemap_collision
     bne +
     bra animate_player
@@ -230,9 +237,12 @@ go_up
     bne +
     bra animate_player
 
-    ; check tile at (x, y - 1)
+    ; check tile at (x + playersize / 2, y - 1)
 +   dey
-    ldx player_x
+    lda player_x
+    clc
+    adc #PLAYER_SIZE >> 1
+    tax
     jsr check_tilemap_collision
     bne +
     bra animate_player
