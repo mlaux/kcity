@@ -66,13 +66,17 @@ RESET
     jsr clear_oam
 
     jsr palette_init
-    jsr tileset_init
-    ;jsr blank_tile_init
+    jsr tileset_init ; for font and player tiles
     jsr background_init
 
     ; testing objs
     lda #$62 ; $4000
     sta OBJSEL
+
+    ; hardcoded load of initial map
+    lda #1
+    sta target_warp_map
+    jsr check_map_warp
 
     ; disable force blank, brightness still 0
     lda #$0
@@ -91,9 +95,6 @@ RESET
     sta script_ptr
     lda #3
     sta script_length
-
-    lda #1
-    sta target_warp_map
 
     ; initialization done, enable interrupts and auto joypad reading
     sep #$20
@@ -335,6 +336,10 @@ BEDROOM_TILEMAP .binary "../experimental_gfx/bedroom.map"
 ALL_PALETTES .word TEST_PALETTE, BEDROOM_PALETTE
 ALL_TILESETS .word TEST_TILESET, BEDROOM_TILESET
 ALL_TILEMAPS .word TEST_TILEMAP, BEDROOM_TILEMAP
+ALL_TILESET_LENGTHS .word size(TEST_TILESET), size(BEDROOM_TILESET)
+
+START_X .word $20, $60
+START_Y .word $40, $90
 
 ; ROM header
 * = $ffb0
