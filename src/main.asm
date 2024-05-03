@@ -106,6 +106,8 @@ text_box_wh0 .word ?
 text_box_wh1 .word ?
 text_box_num_lines .word ?
 
+target_warp_map .word ?
+
 ; place first 32k
 .logical $008000
 .include "bank00.asm"

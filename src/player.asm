@@ -22,7 +22,7 @@ MOVEMENT_JUMP_TABLE .word go_right, go_down, go_left, go_up
 ; 1 is walkable, 0 is blocked, i guess next is to make (0x80 | map id) be a warp or something
 TEST_COLLISION_MAP .byte 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1
                    .byte 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1
-                   .byte 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1
+                   .byte 1, 1, 1, 0, 0, $82, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1
                    .byte 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
                    .byte 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
                    .byte 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1
@@ -70,7 +70,11 @@ check_tilemap_collision
     sta zp3
     tax
     lda TEST_COLLISION_MAP, x
-    and #$ff
+    bit #$80
+    beq +
+    and #$7f
+    sta target_warp_map
++   and #$ff
     rts
 
 ; reads input, moves the player, and animates if necessary. call from the main loop

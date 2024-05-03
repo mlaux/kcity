@@ -19,6 +19,7 @@ RESET
     sei
     clc
     xce
+    cld
 
 .al
 .xl
@@ -66,7 +67,7 @@ RESET
 
     jsr palette_init
     jsr tileset_init
-    jsr blank_tile_init
+    ;jsr blank_tile_init
     jsr background_init
 
     ; testing objs
@@ -85,18 +86,20 @@ RESET
     sta effect_id
     lda #$1
     sta effect_speed
-    inc text_box_enabled
+
+    lda #TEST_SCRIPT
+    sta script_ptr
+    lda #3
+    sta script_length
+
+    lda #1
+    sta target_warp_map
 
     ; initialization done, enable interrupts and auto joypad reading
     sep #$20
     lda #$81
     sta NMITIMEN
-
     rep #$20
-    lda #TEST_SCRIPT
-    sta script_ptr
-    lda #3
-    sta script_length
 
     ; fall through to main loop
 main
@@ -131,6 +134,8 @@ NMI_ISR
     ; if main loop is still running, this is a lag frame, do not update ppu
     lda main_loop_done
     beq _skip_vblank
+
+    jsr check_map_warp
 
     ; DMA generated text tiles if needed, or reset tilemap if turning off text box
     ; send HDMA table for text box overlay if needed
@@ -322,6 +327,14 @@ CHAR_WIDTHS .binary "../font/charwidths.bin"
 TEST_PALETTE .binary "../experimental_gfx/maptest.palette"
 TEST_TILESET .binary "../experimental_gfx/maptest.tiles"
 TEST_TILEMAP .binary "../experimental_gfx/maptest.map"
+
+BEDROOM_PALETTE .binary "../experimental_gfx/bedroom.palette"
+BEDROOM_TILESET .binary "../experimental_gfx/bedroom.tiles"
+BEDROOM_TILEMAP .binary "../experimental_gfx/bedroom.map"
+
+ALL_PALETTES .word TEST_PALETTE, BEDROOM_PALETTE
+ALL_TILESETS .word TEST_TILESET, BEDROOM_TILESET
+ALL_TILEMAPS .word TEST_TILEMAP, BEDROOM_TILEMAP
 
 ; ROM header
 * = $ffb0

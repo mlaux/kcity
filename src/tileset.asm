@@ -30,17 +30,40 @@ tileset_init
 
     rts
 
-blank_tile_init
+check_map_warp
 .as
 .xl
-    ldx #$3008
-    stx VMADD
+    lda target_warp_map
+    bne +
+    rts
+
++   php
+    rep #$30
+    stz target_warp_map
+    dec a
+    asl
+    tax
+    lda ALL_TILEMAPS, x
+    sta zp0
+    sta DMAADDR
+
+    sep #$20
+
     lda #$80
     sta VMAIN
+    stz DMAADDRBANK
 
-    ldx #$ff00
-    .rept 8
-        stx VMDATA
-    .endrept
+    stz VMADDL
+    stz VMADDH
 
+    ldx #DMAMODE_PPUDATA
+    stx DMAMODE
+
+    ldx #$800
+    stx DMALEN
+
+    lda #1
+    sta MDMAEN
+
+    plp
     rts
