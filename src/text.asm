@@ -6,6 +6,14 @@ TILE_DESTINATION_START = $3010
 TILE_ID_START = $2002
 BYTES_PER_TILE = $10
 
+GENEVA_CHARS .binary "../font/geneva.tiles"
+GENEVA_PALETTE .binary "../font/geneva.palette"
+CHAR_WIDTHS .binary "../font/charwidths.bin"
+
+LINE_START_TABLE .word DIALOG_BOX_BASE, DIALOG_BOX_BASE + $20, DIALOG_BOX_BASE + $40, DIALOG_BOX_BASE + $60
+; heights for 1, 2, 3, 4 lines
+TEXT_BOX_HEIGHTS .byte 0, $18, $20, $28, $30
+
 vwf_frame_loop
 .al
 .xl
@@ -375,7 +383,3 @@ vwf_reset_map
     stx vwf_tilemap_id
 
     rts
-
-LINE_START_TABLE .word DIALOG_BOX_BASE, DIALOG_BOX_BASE + $20, DIALOG_BOX_BASE + $40, DIALOG_BOX_BASE + $60
-; heights for 1, 2, 3, 4 lines
-TEXT_BOX_HEIGHTS .byte 0, $18, $20, $28, $30

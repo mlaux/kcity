@@ -11,6 +11,7 @@
 .include "effect.asm"
 .include "player.asm"
 .include "script.asm"
+.include "mapdata.asm"
 
 TEXT_COUNT = 1
 
@@ -320,26 +321,6 @@ TEST_CHAR .text "Testing text box with Geneva 9 point font...", 255
 TEST_CHAR2 .text "  ... And here's a second line", 255
 TEST_CHAR3 .text "  let's try a third", 255
 TEST_CHAR4 .text "  fourth line?", 255
-
-GENEVA_CHARS .binary "../font/geneva.tiles"
-GENEVA_PALETTE .binary "../font/geneva.palette"
-CHAR_WIDTHS .binary "../font/charwidths.bin"
-
-TEST_PALETTE .binary "../experimental_gfx/maptest.palette"
-TEST_TILESET .binary "../experimental_gfx/maptest.tiles"
-TEST_TILEMAP .binary "../experimental_gfx/maptest.map"
-
-BEDROOM_PALETTE .binary "../experimental_gfx/bedroom.palette"
-BEDROOM_TILESET .binary "../experimental_gfx/bedroom.tiles"
-BEDROOM_TILEMAP .binary "../experimental_gfx/bedroom.map"
-
-ALL_PALETTES .word TEST_PALETTE, BEDROOM_PALETTE
-ALL_TILESETS .word TEST_TILESET, BEDROOM_TILESET
-ALL_TILEMAPS .word TEST_TILEMAP, BEDROOM_TILEMAP
-ALL_TILESET_LENGTHS .word size(TEST_TILESET), size(BEDROOM_TILESET)
-
-START_X .word $20, $60
-START_Y .word $40, $90
 
 ; ROM header
 * = $ffb0

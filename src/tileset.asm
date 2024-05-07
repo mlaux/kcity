@@ -21,9 +21,11 @@ tileset_init
 
     #dma_ppu_data PLAYER_TILESET
 
+    inc player_locked
+
     rts
 
-set_map_warp
+load_map
     php
     sep #$20
     sta target_warp_map
@@ -31,11 +33,11 @@ set_map_warp
     sta effect_id
     lda #$1
     sta effect_speed
+    inc player_locked
     plp
     rts
 
 ; i can't tell if this is janky or good
-; TODO: animate fade/mosaic
 check_map_warp
 .as
 .xl
@@ -98,6 +100,10 @@ check_map_warp
     sta DMALEN
     lda #DMAMODE_CGDATA
     sta DMAMODE
+
+    stz player_locked
+    lda COLLISION_MAPS - 2, x
+    sta collision_map_ptr
 
     sep #$20
 

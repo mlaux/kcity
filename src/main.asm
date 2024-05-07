@@ -30,6 +30,7 @@ vwf_font_ptr .word ?
 script_ptr .word ?
 script_element_ptr .word ?
 text_box_lines .word ?
+collision_map_ptr .word ?
 
 ; Work RAM variables
 ; some of these are definitely redundant but made the algorithms easier
@@ -98,6 +99,7 @@ player_sprite_id .word ?
 player_direction .word ?
 player_previous_direction .word ?
 player_animation_index .word ?
+player_locked .word ?
 
 text_box_enabled .word ?
 text_box_hdma_table .fill $9

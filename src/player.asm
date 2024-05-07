@@ -19,25 +19,6 @@ PLAYER_SIZE = 16
 
 MOVEMENT_JUMP_TABLE .word go_right, go_down, go_left, go_up
 
-; 1 is walkable, 0 is blocked, i guess next is to make (0x80 | map id) be a warp or something
-TEST_COLLISION_MAP .byte 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1
-                   .byte 1, 1, 1, 0, 0, $82, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1
-                   .byte 1, 1, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1
-                   .byte 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
-                   .byte 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
-                   .byte 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1
-                   .byte 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1
-                   .byte 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1
-                   .byte 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1
-                   .byte 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1
-                   .byte 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1
-                   .byte 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1
-                   .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1
-                   .byte 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
-
-; filler for final two rows just in case? idk, can probably remove
-.fill $20
-
 ; returns: A = 1 if walking to the tile at the given coordinates is permitted, 0 otherwise
 ; parameters: X = player X in pixel coordinates, Y = player Y (top left corner)
 ; assumes: AXY 16
@@ -68,14 +49,15 @@ check_tilemap_collision
     adc zp1
     ; for debugging
     sta zp3
-    tax
-    lda TEST_COLLISION_MAP, x
+    tay
+    lda (collision_map_ptr), y
     bit #$80
-    beq +
-    and #$7f
-    jsr set_map_warp
-+   and #$ff
+    bne +
+    and #$ff
     rts
+
++   and #$7f
+    jmp load_map
 
 ; reads input, moves the player, and animates if necessary. call from the main loop
 ; parameters: none
@@ -84,7 +66,11 @@ check_tilemap_collision
 move_player
 .al
 .xl
-    lda player_direction
+    lda player_locked
+    beq +
+    rts
+
++   lda player_direction
     sta player_previous_direction
     stz player_direction
 
