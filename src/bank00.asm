@@ -108,6 +108,7 @@ main
     jsr read_input
     jsr move_player
     jsr run_script
+    jsr vwf_frame_loop
 
     lda #1
     sta main_loop_done
@@ -310,6 +311,12 @@ background_init
     ldx #size(TEXT_HDMA_TABLE) - 1
 -   lda TEXT_HDMA_TABLE, x
     sta text_box_hdma_table, x
+    dex
+    bpl -
+
+    ldx #DISPLAY_LOCATION_NAME_LENGTH - 1
+-   lda DISPLAY_LOCATION_NAME_TEMPLATE, x
+    sta location_name_script, x
     dex
     bpl -
 

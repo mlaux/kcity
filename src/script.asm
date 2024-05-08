@@ -24,12 +24,25 @@ script_element_t .struct len, op
 TEST_SCRIPT
     .byte   10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; do nothing for 10 frames
 
-    .byte 0, 2, 1, 0, 8, 20, 240, 4 ; text box for 512 frames at (8, 20), width=240, lines=2
+    .byte 0, 1, 1, 0, 8, 20, 240, 4 ; text box for 256 frames at (8, 20), width=240, lines=2
     .word TEST_CHAR, TEST_CHAR2, TEST_CHAR3, TEST_CHAR4 ; line pointers for text box
 
     .byte 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset
 
+DISPLAY_LOCATION_NAME_TEMPLATE
+    .byte $10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; do nothing for 16 frames
+    .byte $80, 0, 1, 0, 8, 20, 240, 1
+    .word $DEAD, 0, 0, 0 ; will be replaced
+    .byte 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset
+
+DISPLAY_LOCATION_NAME_LENGTH = * - DISPLAY_LOCATION_NAME_TEMPLATE
+
 script_operations .word op_none, op_text_box
+
+set_script
+.al
+.xl
+    rts
 
 ; to run a script store its address in script_ptr and the number of elements in script_length
 run_script
@@ -45,6 +58,8 @@ run_script
     stz script_ptr
     stz script_element_ptr
     stz script_length
+    stz script_step
+    stz script_step_start_frame
     rts
 
 +   asl
@@ -104,5 +119,4 @@ op_text_box
     adc #8
     sta text_box_lines
 
-    jsr vwf_frame_loop
     rts

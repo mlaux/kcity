@@ -109,6 +109,7 @@ text_box_wh1 .word ?
 text_box_num_lines .word ?
 
 target_warp_map .word ?
+location_name_script .fill DISPLAY_LOCATION_NAME_LENGTH
 
 ; place first 32k
 .logical $008000

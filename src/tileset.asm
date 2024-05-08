@@ -105,6 +105,14 @@ check_map_warp
     lda COLLISION_MAPS - 2, x
     sta collision_map_ptr
 
+    lda LOCATION_NAMES - 2, x
+    sta location_name_script + 24
+    lda #location_name_script
+    sta script_ptr
+    lda #3
+    sta script_length
+    stz script_step
+
     sep #$20
 
     lda #PALETTE_OFFSET

@@ -77,7 +77,8 @@ text_box_vblank
 +   lda text_box_enabled
     bne +
     stz HDMAEN
-    jmp vwf_reset_map ; reuse rts
+    jsr vwf_reset_map
+    jmp vwf_reset_tiles
 
     ; place text box at proper location
 +   lda text_box_wh0
@@ -104,14 +105,19 @@ text_box_vblank
 ; - resets destination text tile pointer to beginning of WRAM output buffer
 ; - resets next tile pointer to the tile after that
 ; - resets VRAM pointer to the beginning of tile data for BG3 tileset
-; assumes: A16
 vwf_reset_tiles
-.al
+    php
+    rep #$20
     lda #vwf_tiles
     sta vwf_dst
     clc
     adc #BYTES_PER_TILE
     sta vwf_next
+    lda #$0
+    ldy #$f
+ -  sta (vwf_next), y
+    dey
+    bpl -
 
     lda #TILE_DESTINATION_START
     sta vwf_dmadst
@@ -122,6 +128,7 @@ vwf_reset_tiles
 
     lda #1
     sta vwf_end_of_string
+    plp
     rts
 
 ; get ready to render the next string
