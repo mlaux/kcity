@@ -105,10 +105,26 @@ RESET
 
     ; fall through to main loop
 main
+    sep #$20
+    bit SLHV
+    lda OPVCT
+    bit STAT78
+    sta zp0
+    rep #$20
+
     jsr read_input
     jsr move_player
     jsr run_script
     jsr vwf_frame_loop
+
+    sep #$20
+    bit SLHV
+    lda OPVCT
+    bit STAT78
+    sec
+    sbc zp0
+    sta zp0
+    rep #$20
 
     lda #1
     sta main_loop_done

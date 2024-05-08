@@ -5,8 +5,8 @@ TEST_TILEMAP .binary "../experimental_gfx/maptest.map"
 
 ; 1 is walkable, 0 is blocked, i guess next is to make (0x80 | map id) be a warp or something
 TEST_COLLISION_MAP .byte 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1
-                   .byte 1, 1, 1, 0, 0, $82, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1
-                   .byte 1, 1, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1
+                   .byte 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1
+                   .byte 1, 1, 1, 0, 0, $82, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1
                    .byte 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
                    .byte 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
                    .byte 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1
@@ -49,5 +49,5 @@ ALL_TILESET_LENGTHS .word size(TEST_TILESET), size(BEDROOM_TILESET)
 COLLISION_MAPS .word TEST_COLLISION_MAP, BEDROOM_COLLISION_MAP
 LOCATION_NAMES .word TEST_MAP_NAME, BEDROOM_NAME
 
-START_X .word $20, $60
-START_Y .word $40, $90
+START_X .word $50, $60
+START_Y .word $30, $90

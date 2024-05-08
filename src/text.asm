@@ -100,7 +100,7 @@ text_box_vblank
     lda #$1
     sta HDMAEN
 
-+   rts
+    rts
 
 ; - resets destination text tile pointer to beginning of WRAM output buffer
 ; - resets next tile pointer to the tile after that
@@ -114,8 +114,9 @@ vwf_reset_tiles
     adc #BYTES_PER_TILE
     sta vwf_next
     lda #$0
-    ldy #$f
+    ldy #$e
  -  sta (vwf_next), y
+    dey
     dey
     bpl -
 
