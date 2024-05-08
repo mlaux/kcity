@@ -15,6 +15,9 @@
 ; 4x line pointers (empty slot = 0)
 ; height is always 8 * (2 + num lines)
 
+; TODO if lines are always stored contiguously in memory, only need one pointer
+; and can use the 255 to advance to the next line
+
 script_element_t .struct len, op
     frame_length .word \len
     opcode .word \op
@@ -31,13 +34,24 @@ TEST_SCRIPT
 
 DISPLAY_LOCATION_NAME_TEMPLATE
     .byte $10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; do nothing for 16 frames
-    .byte $80, 0, 1, 0, 8, 20, 240, 1
+    .byte $80, 0, 1, 0, 8, 20, 120, 1
     .word $DEAD, 0, 0, 0 ; will be replaced
     .byte 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset
 
 DISPLAY_LOCATION_NAME_LENGTH = * - DISPLAY_LOCATION_NAME_TEMPLATE
 
 script_operations .word op_none, op_text_box
+
+copy_ram_scripts
+.as
+.xl
+    ldx #DISPLAY_LOCATION_NAME_LENGTH - 1
+-   lda DISPLAY_LOCATION_NAME_TEMPLATE, x
+    sta location_name_script, x
+    dex
+    bpl -
+
+    rts
 
 set_script
 .al

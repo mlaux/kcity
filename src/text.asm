@@ -86,6 +86,8 @@ text_box_vblank
     lda text_box_wh1
     sta WH1
 
+    ; set active region for color window in hdma table
+    ; based on height of text box
     ldx text_box_num_lines
     lda TEXT_BOX_HEIGHTS, x
     sta text_box_hdma_table + 4

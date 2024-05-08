@@ -67,17 +67,16 @@ RESET
     jsr clear_oam
 
     jsr palette_init
-    jsr tileset_init ; for font and player tiles
+    jsr tileset_init ; for font and player tiles only
     jsr background_init
+    jsr player_init
+    jsr copy_ram_scripts
 
-    ; testing objs
-    lda #$62 ; $4000
-    sta OBJSEL
-
-    ; hardcoded load of initial map
+    ; hardcoded load of initial map. don't call map_set_warp because it'll
+    ; initiate a fade-out and lock the player's position, which i don't want
     lda #1
     sta target_warp_map
-    jsr check_map_warp
+    jsr map_run_warp
 
     ; disable force blank, brightness still 0
     lda #$0
@@ -117,6 +116,7 @@ main
     jsr run_script
     jsr vwf_frame_loop
 
+    ; measure CPU time in scanlines
     sep #$20
     bit SLHV
     lda OPVCT
@@ -154,7 +154,7 @@ NMI_ISR
     lda main_loop_done
     beq _skip_vblank
 
-    jsr check_map_warp
+    jsr map_run_warp
 
     ; DMA generated text tiles if needed, or reset tilemap if turning off text box
     ; send HDMA table for text box overlay if needed
@@ -330,15 +330,14 @@ background_init
     dex
     bpl -
 
-    ldx #DISPLAY_LOCATION_NAME_LENGTH - 1
--   lda DISPLAY_LOCATION_NAME_TEMPLATE, x
-    sta location_name_script, x
-    dex
-    bpl -
-
     rts
 
-TEXT_HDMA_TABLE .byte $7f, $40, 40, $40, 48, $51, 1, $40, 0
+; $40 for $7f lines
+; $40 for $28 more lines
+; $51 for $30 lines
+; $40 for 1 line (really to end of frame)
+; $0 for end
+TEXT_HDMA_TABLE .byte $7f, $40, $28, $40, $30, $51, $1, $40, 0
 
 TEST_CHAR .text "Testing text box with Geneva 9 point font...", 255
 TEST_CHAR2 .text "  ... And here's a second line", 255

@@ -21,11 +21,9 @@ tileset_init
 
     #dma_ppu_data PLAYER_TILESET
 
-    inc player_locked
-
     rts
 
-load_map
+map_set_warp
     php
     sep #$20
     sta target_warp_map
@@ -38,7 +36,7 @@ load_map
     rts
 
 ; i can't tell if this is janky or good
-check_map_warp
+map_run_warp
 .as
 .xl
     lda target_warp_map
@@ -50,8 +48,12 @@ check_map_warp
     ; still fading out
     rts
 
+    ; turn the screen off
 +   lda #$80
     sta INIDISP
+
+    ; if HDMA is enabled it'll interfere with normal DMA on the same channel
+    stz HDMAEN
 
     rep #$30
     lda target_warp_map
@@ -111,7 +113,6 @@ check_map_warp
     sta script_ptr
     lda #3
     sta script_length
-    stz script_step
 
     sep #$20
 

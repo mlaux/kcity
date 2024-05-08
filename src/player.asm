@@ -19,6 +19,20 @@ PLAYER_SIZE = 16
 
 MOVEMENT_JUMP_TABLE .word go_right, go_down, go_left, go_up
 
+player_init
+.as
+.xl
+    ; enable objs on top layer with base address of $4000
+    lda #$62
+    sta OBJSEL
+
+    lda #$2
+    sta player_sprite_id
+
+    inc player_locked
+
+    rts
+
 ; returns: A = 1 if walking to the tile at the given coordinates is permitted, 0 otherwise
 ; parameters: X = player X in pixel coordinates, Y = player Y (top left corner)
 ; assumes: AXY 16
@@ -57,7 +71,7 @@ check_tilemap_collision
     rts
 
 +   and #$7f
-    jmp load_map
+    jmp map_set_warp
 
 ; reads input, moves the player, and animates if necessary. call from the main loop
 ; parameters: none
@@ -111,12 +125,11 @@ move_player
     ; n -> 0
     ; not moving now but was moving before - skip to second animation frame (idle)
     lda player_previous_direction
-    dec a
     asl
     asl
     tax
     inx ; frame 1 in each animation group is idle
-    lda PLAYER_SPRITE_TABLE, x
+    lda PLAYER_SPRITE_TABLE - 2, x
     and #$ff
     sta player_sprite_id
     lda #$1
@@ -129,11 +142,10 @@ move_player
     ; was not moving before, but is now, or changed direction
     ; skip to first animation frame (stepping forward)
 _starting_to_move
-    dec a
     asl
     asl
     tax
-    lda PLAYER_SPRITE_TABLE, x
+    lda PLAYER_SPRITE_TABLE - 2, x
     and #$ff
     sta player_sprite_id
     stz player_animation_index
@@ -147,11 +159,10 @@ _process_movement
 
     ; continue moving in same direction
     ; n -> n
-+   dec a
-    asl
++   asl
     tax
     ; MOVEMENT_JUMP_TABLE[(player_direction - 1) << 1]()
-    jmp (MOVEMENT_JUMP_TABLE, x)
+    jmp (MOVEMENT_JUMP_TABLE - 2, x)
 
 go_right
     ldx player_x
