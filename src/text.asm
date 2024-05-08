@@ -1,7 +1,7 @@
 ; contains routines for rendering text in a variable-width font to WRAM,
 ; and copying those tiles to VRAM
 
-DIALOG_BOX_BASE = $ac2
+DIALOG_BOX_BASE = 22
 TILE_DESTINATION_START = $3010
 TILE_ID_START = $2002
 BYTES_PER_TILE = $10
@@ -10,7 +10,7 @@ GENEVA_CHARS .binary "../font/geneva.tiles"
 GENEVA_PALETTE .binary "../font/geneva.palette"
 CHAR_WIDTHS .binary "../font/charwidths.bin"
 
-LINE_START_TABLE .word DIALOG_BOX_BASE, DIALOG_BOX_BASE + $20, DIALOG_BOX_BASE + $40, DIALOG_BOX_BASE + $60
+LINE_START_TABLE .word DIALOG_BOX_BASE, DIALOG_BOX_BASE + 1, DIALOG_BOX_BASE + 2, DIALOG_BOX_BASE + 3
 ; heights for 1, 2, 3, 4 lines
 TEXT_BOX_HEIGHTS .byte 0, $18, $20, $28, $30
 
@@ -58,7 +58,8 @@ _draw_next_string
     tax
     lda LINE_START_TABLE, x
     tay
-    ldx current_text
+    ldx #$2
+    lda current_text
     jsr vwf_init_string
     inc text_index
     bra _yes
@@ -135,12 +136,15 @@ vwf_reset_tiles
     rts
 
 ; get ready to render the next string
-; input: X - address of string
-;        Y - destination in tilemap
-; assumes: A16
+; input: A - address of string
+;        X - x coordinate
+;        Y - y coordinate
+; assumes: AXY16
 vwf_init_string
 .al
 .xl
+    sta vwf_src
+
     lda vwf_dst
     clc
     adc #BYTES_PER_TILE
@@ -148,8 +152,21 @@ vwf_init_string
     adc #BYTES_PER_TILE
     sta vwf_next
 
-    stx vwf_src
-    sty vwf_tilemap_dst
+    ; convert tile coordinates to layer 3 tilemap address
+    ; $800 + (y << 5) + x
+    tya
+    asl
+    asl
+    asl
+    asl
+    asl
+    sta vwf_tilemap_dst
+    txa
+    clc
+    adc vwf_tilemap_dst
+    adc #$800
+    sta vwf_tilemap_dst
+
     stz vwf_offs
     stz vwf_end_of_string
 
