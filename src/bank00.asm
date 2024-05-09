@@ -313,11 +313,6 @@ background_init
     lda #$15
     sta TM
 
-    lda #$8
-    sta text_box_wh0
-    lda #$f8
-    sta text_box_wh1
-
     ; enable window 1 for color
     lda #$20
     sta WOBJSEL

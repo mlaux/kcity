@@ -53,14 +53,19 @@ _no
 
     ; yes, start it
 _draw_next_string
+    ; y = LINE_START_TABLE[text_index]
     lda text_index
     asl
     tax
     lda LINE_START_TABLE, x
     tay
-    ldx #$2
+
+    ldx text_box_x
+    inx
+
     lda current_text
     jsr vwf_init_string
+
     inc text_index
     bra _yes
 
@@ -81,10 +86,20 @@ text_box_vblank
     jsr vwf_reset_map
     jmp vwf_reset_tiles
 
-    ; place text box at proper location
-+   lda text_box_wh0
+    ; place text box at proper location, convert x tile to pixels
++   lda text_box_x
+    asl
+    asl
+    asl
+    sta zp1
     sta WH0
-    lda text_box_wh1
+
+    lda text_box_width
+    asl
+    asl
+    asl
+    clc
+    adc zp1
     sta WH1
 
     ; set active region for color window in hdma table

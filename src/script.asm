@@ -8,9 +8,9 @@
 ; $1: show text box
 
 ; for text boxes:
-; x: byte (should be 8 for now)
-; y: byte (ignored for now)
-; w: byte (should be 240 for now)
+; x: byte (8x8 tile coordinates)
+; y: byte (8x8 tile coordinates)
+; w: byte (8x8 tile coordinates)
 ; number of lines (1-4): byte
 ; 4x line pointers (empty slot = 0)
 ; height is always 8 * (2 + num lines)
@@ -27,14 +27,14 @@ script_element_t .struct len, op
 TEST_SCRIPT
     .byte   10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; do nothing for 10 frames
 
-    .byte 0, 1, 1, 0, 8, 20, 240, 4 ; text box for 256 frames at (8, 20), width=240, lines=2
+    .byte 0, 1, 1, 0, 1, 20, 30, 4 ; text box for 256 frames at (1, 20), width=30 tiles, lines=4
     .word TEST_CHAR, TEST_CHAR2, TEST_CHAR3, TEST_CHAR4 ; line pointers for text box
 
     .byte 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset
 
 DISPLAY_LOCATION_NAME_TEMPLATE
-    .byte $10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; do nothing for 16 frames
-    .byte $80, 0, 1, 0, 8, 20, 120, 1
+    .byte $8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; do nothing for 8 frames
+    .byte $80, 0, 1, 0, 1, 20, 120, 1
     .word $DEAD, 0, 0, 0 ; will be replaced
     .byte 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset
 
@@ -118,10 +118,11 @@ op_text_box
     sep #$20
     ldy #$4
     lda (script_element_ptr), y
-    sta text_box_wh0
+    sta text_box_x
+    ; todo Y
     ldy #$6
-    adc (script_element_ptr), y
-    sta text_box_wh1
+    lda (script_element_ptr), y
+    sta text_box_width
     ldy #$7
     lda (script_element_ptr), y
     sta text_box_num_lines

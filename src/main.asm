@@ -104,8 +104,9 @@ player_locked .word ?
 text_box_enabled .word ?
 text_box_hdma_table .fill $9
 
-text_box_wh0 .word ?
-text_box_wh1 .word ?
+text_box_x .word ?
+text_box_y .word ?
+text_box_width .word ?
 text_box_num_lines .word ?
 
 target_warp_map .word ?
