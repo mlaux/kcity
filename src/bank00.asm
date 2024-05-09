@@ -154,8 +154,6 @@ NMI_ISR
     lda main_loop_done
     beq _skip_vblank
 
-    jsr map_run_warp
-
     ; DMA generated text tiles if needed, or reset tilemap if turning off text box
     ; send HDMA table for text box overlay if needed
     jsr text_box_vblank
@@ -167,6 +165,10 @@ NMI_ISR
     jsr run_effect
 
     inc frame_counter
+
+    ; this might go into the next frame (but it's ok because it enables force blank)
+    ; but this means it needs to run last
+    jsr map_run_warp
 
     ; reset flag so main loop can continue
     stz main_loop_done

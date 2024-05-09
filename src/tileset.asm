@@ -56,32 +56,32 @@ map_run_warp
     stz HDMAEN
 
     rep #$30
+    lda #DMAMODE_PPUDATA
+    sta DMAMODE
+
+    ; get x set up with offset of this map's data in each array
     lda target_warp_map
     stz target_warp_map
     and #$ff
     asl
     tax
+
     lda ALL_TILEMAPS - 2, x
     sta DMAADDR
-
-    lda #DMAMODE_PPUDATA
-    sta DMAMODE
-
     lda #TILEMAP_SIZE
     sta DMALEN
 
     stz VMADD
 
     sep #$20
-
     lda #$80
     sta VMAIN
     stz DMAADDRBANK
 
     lda #1
     sta MDMAEN
-
     rep #$20
+
     lda ALL_TILESETS - 2, x
     sta DMAADDR
     lda ALL_TILESET_LENGTHS - 2, x
@@ -91,11 +91,10 @@ map_run_warp
     sta VMADD
 
     sep #$20
-
     lda #1
     sta MDMAEN
-
     rep #$20
+
     lda ALL_PALETTES - 2, x
     sta DMAADDR
     lda #PALETTE_SIZE
@@ -107,6 +106,8 @@ map_run_warp
     lda COLLISION_MAPS - 2, x
     sta collision_map_ptr
 
+    ; patch script that displays location names in memory to have
+    ; the new location's name and start the script
     lda LOCATION_NAMES - 2, x
     sta location_name_script + 24
     lda #location_name_script
@@ -116,17 +117,20 @@ map_run_warp
 
     sep #$20
 
+    ; write the palette
     lda #PALETTE_OFFSET
     sta CGADD
 
     lda #1
     sta MDMAEN
 
+    ; set initial player coordinates
     lda START_X - 2, x
     sta player_x
     lda START_Y - 2, x
     sta player_y
 
+    ; start fade in effect
     lda #EFFECT_FADE_IN
     sta effect_id
 

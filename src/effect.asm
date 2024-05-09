@@ -4,6 +4,7 @@ EFFECT_FADE_OUT = 2
 EFFECT_MOSAIC_ON = 3
 EFFECT_MOSAIC_OFF = 4
 
+; todo: integrate this with script system, no reason for it to be separate
 run_effect
 .as
 .xl
