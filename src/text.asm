@@ -1,7 +1,6 @@
 ; contains routines for rendering text in a variable-width font to WRAM,
 ; and copying those tiles to VRAM
 
-DIALOG_BOX_BASE = 22
 TILE_DESTINATION_START = $3010
 TILE_ID_START = $2002
 BYTES_PER_TILE = $10
@@ -10,7 +9,6 @@ GENEVA_CHARS .binary "../font/geneva.tiles"
 GENEVA_PALETTE .binary "../font/geneva.palette"
 CHAR_WIDTHS .binary "../font/charwidths.bin"
 
-LINE_START_TABLE .word DIALOG_BOX_BASE, DIALOG_BOX_BASE + 1, DIALOG_BOX_BASE + 2, DIALOG_BOX_BASE + 3
 ; heights for 1, 2, 3, 4 lines
 TEXT_BOX_HEIGHTS .byte 0, $18, $20, $28, $30
 
@@ -55,9 +53,9 @@ _no
 _draw_next_string
     ; y = LINE_START_TABLE[text_index]
     lda text_index
-    asl
-    tax
-    lda LINE_START_TABLE, x
+    clc
+    adc text_box_y
+    adc #$1
     tay
 
     ldx text_box_x
@@ -87,6 +85,8 @@ text_box_vblank
     jmp vwf_reset_tiles
 
     ; place text box at proper location, convert x tile to pixels
+    ; this all only needs to be done once when the text box is shown
+    ; todo: optimize
 +   lda text_box_x
     asl
     asl
@@ -102,8 +102,36 @@ text_box_vblank
     adc zp1
     sta WH1
 
+    ; convert y position to pixels
+    lda text_box_y
+    asl
+    asl
+    asl
+
+    ; if <= 7f, subtract 2, and use in first hdma table entry
+    ; (1 to account for necessary second entry, and 1 because hdma takes effect
+    ; on the next line)
+    ; second hdma entry should be 1
+
+    cmp #$80
+    bcs +
+    dec a
+    dec a
+    sta text_box_hdma_table
+    lda #$1
+    sta text_box_hdma_table + 2
+    bra _set_height
+
++   ; otherwise first entry is 7f and second entry is y - $80
+    sec
+    sbc #$80
+    sta text_box_hdma_table + 2
+    lda #$7f
+    sta text_box_hdma_table
+
     ; set active region for color window in hdma table
     ; based on height of text box
+_set_height
     ldx text_box_num_lines
     lda TEXT_BOX_HEIGHTS, x
     sta text_box_hdma_table + 4
@@ -413,12 +441,21 @@ vwf_reset_map
     lda #`ZERO
     sta DMAADDRBANK
 
+    ; clear tiles
     ldx #TILE_DESTINATION_START
     stx VMADD
     lda #$80
     sta VMAIN
 
     lda #1
+    sta MDMAEN
+
+    ; clear tilemap
+    ldx #$800 ; 400 words
+    stx DMALEN
+    ldx #$800
+    stx VMADD
+    lda #$1
     sta MDMAEN
 
     ldx #TILE_ID_START

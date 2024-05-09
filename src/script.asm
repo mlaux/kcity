@@ -27,14 +27,14 @@ script_element_t .struct len, op
 TEST_SCRIPT
     .byte   10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; do nothing for 10 frames
 
-    .byte 0, 1, 1, 0, 1, 20, 30, 4 ; text box for 256 frames at (1, 20), width=30 tiles, lines=4
+    .byte 0, 1, 1, 0, 1, 21, 30, 4 ; text box for 256 frames at (1, 21), width=30 tiles, lines=4
     .word TEST_CHAR, TEST_CHAR2, TEST_CHAR3, TEST_CHAR4 ; line pointers for text box
 
     .byte 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset
 
 DISPLAY_LOCATION_NAME_TEMPLATE
     .byte $8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; do nothing for 8 frames
-    .byte $80, 0, 1, 0, 1, 20, 120, 1
+    .byte $80, 0, 1, 0, 1, 1, 15, 1
     .word $DEAD, 0, 0, 0 ; will be replaced
     .byte 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset
 
@@ -119,7 +119,10 @@ op_text_box
     ldy #$4
     lda (script_element_ptr), y
     sta text_box_x
-    ; todo Y
+    ldy #$5
+    lda (script_element_ptr), y
+    sta text_box_y
+
     ldy #$6
     lda (script_element_ptr), y
     sta text_box_width
