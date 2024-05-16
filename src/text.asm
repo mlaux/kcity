@@ -450,7 +450,8 @@ vwf_reset_map
     lda #1
     sta MDMAEN
 
-    ; clear tilemap
+    ; clear tilemap - actually only need to clear where the text box was
+    ; future optimization
     ldx #$800 ; 400 words
     stx DMALEN
     ldx #$800

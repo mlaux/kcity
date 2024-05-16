@@ -25,18 +25,28 @@ script_element_t .struct len, op
 .endstruct
 
 TEST_SCRIPT
-    .byte   10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; do nothing for 10 frames
+    .byte 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; do nothing for 10 frames
 
-    .byte 0, 1, 1, 0, 1, 21, 30, 4 ; text box for 256 frames at (1, 21), width=30 tiles, lines=4
+    .byte $80, 0, 1, 0, 1, 21, 30, 4 ; text box for 128 frames at (1, 21), width=30 tiles, lines=4
     .word TEST_CHAR, TEST_CHAR2, TEST_CHAR3, TEST_CHAR4 ; line pointers for text box
 
     .byte 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset
 
 DISPLAY_LOCATION_NAME_TEMPLATE
     .byte $8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; do nothing for 8 frames
-    .byte $80, 0, 1, 0, 1, 1, 15, 1
+    .byte $80, 0, 1, 0, 1, 1, 15, 1 ; location name text box at (1, 1), width=15 tiles, lines=1
     .word $DEAD, 0, 0, 0 ; will be replaced
     .byte 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset
+
+OBJECT_DESC .text "What could be down here?", 255
+
+TEST_OBJECT_SCRIPT
+    .byte $80, 0, 1, 0, 1, 21, 30, 1 ; text box for 128 frames at (1, 21), width=30 tiles, lines=1
+    .word OBJECT_DESC, 0, 0, 0
+    .byte 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset
+
+OBJECT_SCRIPTS .word TEST_OBJECT_SCRIPT
+OBJECT_SCRIPT_LENGTHS .word 2
 
 DISPLAY_LOCATION_NAME_LENGTH = * - DISPLAY_LOCATION_NAME_TEMPLATE
 

@@ -74,7 +74,7 @@ RESET
 
     ; hardcoded load of initial map. don't call map_set_warp because it'll
     ; initiate a fade-out and lock the player's position, which i don't want
-    lda #1
+    lda #2
     sta target_warp_map
     jsr map_run_warp
 

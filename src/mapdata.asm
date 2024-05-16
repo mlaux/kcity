@@ -1,12 +1,14 @@
-TEST_MAP_NAME .text "Test map", 255
+TEST_MAP_NAME .text "Industrial zone - south", 255
 TEST_PALETTE .binary "../experimental_gfx/maptest.palette"
 TEST_TILESET .binary "../experimental_gfx/maptest.tiles"
 TEST_TILEMAP .binary "../experimental_gfx/maptest.map"
 
-; 1 is walkable, 0 is blocked, i guess next is to make (0x80 | map id) be a warp or something
+; 1 is walkable, 0 is blocked
+; 0x80 | warp lookup id
+; 0x40 | script lookup id
 TEST_COLLISION_MAP .byte 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1
                    .byte 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1
-                   .byte 1, 1, 1, 0, 0, $82, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1
+                   .byte 1, 1, $41, 0, 0, $82, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1
                    .byte 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
                    .byte 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
                    .byte 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1

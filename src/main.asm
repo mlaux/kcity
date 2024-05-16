@@ -31,6 +31,7 @@ script_ptr .word ?
 script_element_ptr .word ?
 text_box_lines .word ?
 collision_map_ptr .word ?
+facing_object_script .word ?
 
 ; Work RAM variables
 ; some of these are definitely redundant but made the algorithms easier

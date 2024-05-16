@@ -66,12 +66,22 @@ check_tilemap_collision
     tay
     lda (collision_map_ptr), y
     bit #$80
-    bne +
-    and #$ff
+    beq +
+    and #$7f
+    jmp map_set_warp
+
++   bit #$40
+    beq +
+    and #$3f
+    asl
+    sta facing_object_script
+    lda #0
     rts
 
-+   and #$7f
-    jmp map_set_warp
++   and #$ff
+    stz facing_object_script
+    rts
+
 
 ; reads input, moves the player, and animates if necessary. call from the main loop
 ; parameters: none

@@ -2,6 +2,7 @@ UP_BUTTON       = $0800
 DOWN_BUTTON     = $0400
 LEFT_BUTTON     = $0200
 RIGHT_BUTTON    = $0100
+A_BUTTON = $80
 
 read_input
 .al
@@ -18,4 +19,17 @@ read_input
     and joypad_current
     sta joypad_new  ; buttons newly pressed this frame (0->1)
 
-    rts
+    ; if (A pressed && !script_ptr && facing_object_script)
+    bit #A_BUTTON
+    beq +
+    lda script_ptr
+    bne +
+    ldx facing_object_script
+    beq +
+
+    lda OBJECT_SCRIPTS - 2, x
+    sta script_ptr
+    lda OBJECT_SCRIPT_LENGTHS - 2, x
+    sta script_length
+
++   rts
