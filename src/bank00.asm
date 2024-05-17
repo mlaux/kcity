@@ -332,18 +332,6 @@ background_init
 
     rts
 
-; $40 for $AA lines
-; $40 for $BB more lines
-; $51 for $CC lines
-; $40 for 1 line (really to end of frame)
-; $0 for end
-TEXT_HDMA_TABLE .byte $AA, $40, $BB, $40, $CC, $51, $1, $40, 0
-
-TEST_CHAR .text "MMMMMMMMMMMMMMMMMMMMMMMM", 255
-TEST_CHAR2 .text "MMMMMMMMMMMMMMMMMMMMMMMM", 255
-TEST_CHAR3 .text "MMMMMMMMMMMMMMMMMMMMMMMM", 255
-TEST_CHAR4 .text "MMMMMMMMMMMMMMMMMMMMMMMM", 255
-
 ; ROM header
 * = $ffb0
 ZERO

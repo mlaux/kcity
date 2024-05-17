@@ -115,6 +115,8 @@ text_box_num_lines .word ?
 target_warp_map .word ?
 location_name_script .fill DISPLAY_LOCATION_NAME_LENGTH
 
+* = $0
+
 ; place first 32k
 .logical $008000
 .include "bank00.asm"
@@ -124,7 +126,7 @@ location_name_script .fill DISPLAY_LOCATION_NAME_LENGTH
 ; .include "bank01.asm"
 ; .here
 
-; 128k minus one byte. TODO this isn't right because it includes the ram area, so the file is too small
+; 128k minus one byte
 * = $01ffff
 .byte 0
 

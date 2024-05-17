@@ -29,6 +29,11 @@ script_element_t .struct len, op
     params .fill 12
 .endstruct
 
+TEST_CHAR .text "MMMMMMMMMMMMMMMMMMMMMMMM", 255
+TEST_CHAR2 .text "MMMMMMMMMMMMMMMMMMMMMMMM", 255
+TEST_CHAR3 .text "MMMMMMMMMMMMMMMMMMMMMMMM", 255
+TEST_CHAR4 .text "MMMMMMMMMMMMMMMMMMMMMMMM", 255
+
 TEST_SCRIPT
     .byte 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; do nothing for 10 frames
 
