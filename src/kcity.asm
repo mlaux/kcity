@@ -120,12 +120,12 @@ location_name_script .fill DISPLAY_LOCATION_NAME_LENGTH
 ; place first 32k
 .logical $008000
 .dsection bank00
-.cerror * > $10000, "bank00 too long"
-.here
-
 .section bank00
 .include "bank00.asm"
 .endsection bank00
+.warn str(*)
+.cerror * > $10000, "bank00 too long"
+.here
 
 ; .logical $010000
 ; .include "bank01.asm"
