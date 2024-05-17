@@ -6,6 +6,7 @@
 ; script opcode
 ; $0: nop
 ; $1: show text box
+; $2: run fade
 
 ; for text boxes:
 ; x: byte (8x8 tile coordinates)
@@ -14,6 +15,10 @@
 ; number of lines (1-4): byte
 ; 4x line pointers (empty slot = 0)
 ; height is always 8 * (2 + num lines)
+
+; for fade:
+; speed: byte (2^n - 1)
+; blank frames: 
 
 ; TODO if lines are always stored contiguously in memory, only need one pointer
 ; and can use the 255 to advance to the next line
@@ -38,15 +43,26 @@ DISPLAY_LOCATION_NAME_TEMPLATE
     .word $DEAD, 0, 0, 0 ; will be replaced
     .byte 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset
 
+EMPTY_STRING .byte $ff
 OBJECT_DESC .text "What could be down here?", 255
+OBJECT_DESC2_1 .text "It's a standard 55-gallon drum.", 255
+OBJECT_DESC2_2 .text "'AMMONIUM PERSULFATE NET WT 412 KG'", 255
 
 TEST_OBJECT_SCRIPT
     .byte $80, 0, 1, 0, 1, 21, 30, 1 ; text box for 128 frames at (1, 21), width=30 tiles, lines=1
     .word OBJECT_DESC, 0, 0, 0
     .byte 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset
 
-OBJECT_SCRIPTS .word TEST_OBJECT_SCRIPT
-OBJECT_SCRIPT_LENGTHS .word 2
+TEST_HAIR_BLEACH
+    .byte $c0, 0, 1, 0, 1, 21, 30, 3 ; text box for 192 frames at (1, 21), width=30 tiles, lines=2
+    .word OBJECT_DESC2_1, EMPTY_STRING, OBJECT_DESC2_2, 0
+    .byte 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset
+
+SLEEP_SCRIPT
+    .byte $
+
+OBJECT_SCRIPTS .word TEST_OBJECT_SCRIPT, TEST_HAIR_BLEACH
+OBJECT_SCRIPT_LENGTHS .word 2, 2
 
 DISPLAY_LOCATION_NAME_LENGTH = * - DISPLAY_LOCATION_NAME_TEMPLATE
 

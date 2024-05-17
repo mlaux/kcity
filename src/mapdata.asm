@@ -7,7 +7,7 @@ TEST_TILEMAP .binary "../experimental_gfx/maptest.map"
 ; 0x80 | warp lookup id
 ; 0x40 | script lookup id
 TEST_COLLISION_MAP .byte 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1
-                   .byte 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1
+                   .byte 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, $42, 0, 1, 1, 1, 1
                    .byte 1, 1, $41, 0, 0, $82, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1
                    .byte 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
                    .byte 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
