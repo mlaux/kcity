@@ -110,10 +110,11 @@ map_run_warp
     ; the new location's name and start the script
     lda LOCATION_NAMES - 2, x
     sta location_name_script + 24
-    lda #location_name_script
-    sta script_ptr
-    lda #3
-    sta script_length
+    phx
+    ldx #location_name_script
+    ldy #3
+    jsr set_script
+    plx
 
     sep #$20
 

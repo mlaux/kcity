@@ -80,10 +80,18 @@ copy_ram_scripts
 
     rts
 
+; sets the script to run, if a script is not already running
+; X: address of script to run
+; Y: length of the script
+; assumes: AXY 16
 set_script
 .al
 .xl
-    rts
+    lda script_ptr
+    bne +
+    stx script_ptr
+    sty script_length
++   rts
 
 ; to run a script store its address in script_ptr and the number of elements in script_length
 run_script
