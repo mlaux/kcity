@@ -1,5 +1,3 @@
-FILLER_PALETTES .fill 256
-
 TEST_MAP_NAME .text "Industrial zone - south", 255
 TEST_PALETTE .binary "../experimental_gfx/maptest.palette"
 TEST_TILESET .binary "../experimental_gfx/maptest.tiles"
@@ -22,9 +20,9 @@ TEST_COLLISION_MAP .byte 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1
                    .byte 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1
                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1
                    .byte 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
-
 ; filler for final two rows just in case? idk, can probably remove
-.fill $20
+                   .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                   .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
 BEDROOM_NAME .text "Juno and Leif's room", 255
 BEDROOM_PALETTE .binary "../experimental_gfx/bedroom.palette"
@@ -43,8 +41,10 @@ BEDROOM_COLLISION_MAP .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                       .byte 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0
                       .byte 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0
                       .byte 0, 0, 0, 0, 0, 0, $81, 0, 0, 0, 0, 0, 0, 0, 0, 0
-
-.fill $40
+                      .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                      .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                      .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                      .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
 ALL_PALETTES .word TEST_PALETTE, BEDROOM_PALETTE
 ALL_TILESETS .word TEST_TILESET, BEDROOM_TILESET

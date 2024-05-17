@@ -21,6 +21,7 @@
 .include "mapdata.asm"
 .include "playerdata.asm"
 .include "fontdata.asm"
+FILLER_PALETTES .fill 256
 .endsection
 
 * = $ffb0
