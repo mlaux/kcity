@@ -1,5 +1,3 @@
-FILLER_PALETTES .fill 256
-
 palette_init
 .as
 .xl

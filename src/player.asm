@@ -1,13 +1,5 @@
-PLAYER_PALETTE .binary "../experimental_gfx/player.palette"
-PLAYER_TILESET .binary "../experimental_gfx/player.tiles"
-
 ; ANDed with the frame counter to decide whether to go to the next frame, should be 2^n - 1
 PLAYER_ANIMATION_SPEED = 7
-
-; OAM sprite ids for each direction
-; the first in a group is left foot forward, then idle, then right foot forward, then idle again
-;                        |     right      |     down      |     left      |        up        |
-PLAYER_SPRITE_TABLE .byte $c, $e, $20, $e, $0, $2, $4, $2, $6, $8, $a, $8, $22, $24, $26, $24
 
 PLAYER_DIRECTION_NONE = 0
 PLAYER_DIRECTION_RIGHT = 1

@@ -5,20 +5,6 @@ TILE_DESTINATION_START = $3010
 TILE_ID_START = $2002
 BYTES_PER_TILE = $10
 
-GENEVA_CHARS .binary "../font/geneva.tiles"
-GENEVA_PALETTE .binary "../font/geneva.palette"
-CHAR_WIDTHS .binary "../font/charwidths.bin"
-
-; heights for 1, 2, 3, 4 lines
-TEXT_BOX_HEIGHTS .byte 0, $18, $20, $28, $30
-
-; $40 for $AA lines
-; $40 for $BB more lines
-; $51 for $CC lines
-; $40 for 1 line (really to end of frame)
-; $0 for end
-TEXT_HDMA_TABLE .byte $AA, $40, $BB, $40, $CC, $51, $1, $40, 0
-
 vwf_frame_loop
 .al
 .xl

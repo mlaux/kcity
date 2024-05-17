@@ -1,3 +1,5 @@
+FILLER_PALETTES .fill 256
+
 TEST_MAP_NAME .text "Industrial zone - south", 255
 TEST_PALETTE .binary "../experimental_gfx/maptest.palette"
 TEST_TILESET .binary "../experimental_gfx/maptest.tiles"
