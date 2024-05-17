@@ -47,7 +47,7 @@ check_tilemap_collision
     lsr
     lsr
     lsr
-    sta zp1
+    sta zp2
 
     tya
     clc
@@ -55,14 +55,10 @@ check_tilemap_collision
 
     ; lsr lsr lsr lsr, asl asl asl asl
     and #$f0
-    ; for debugging
-    sta zp2
 
     ; y*width+x
     clc
-    adc zp1
-    ; for debugging
-    sta zp3
+    adc zp2
     tay
     lda (collision_map_ptr), y
     bit #$80

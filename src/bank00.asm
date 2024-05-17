@@ -13,8 +13,6 @@
 .include "script.asm"
 .include "mapdata.asm"
 
-TEXT_COUNT = 1
-
 RESET
     ; enter 65816 mode
     sei
@@ -124,7 +122,12 @@ main
     sec
     sbc zp0
     sta zp0
-    rep #$20
+
+    ; update CPU high water mark
+    cmp zp1
+    bcc +
+    sta zp1
++   rep #$20
 
     lda #1
     sta main_loop_done
@@ -336,10 +339,10 @@ background_init
 ; $0 for end
 TEXT_HDMA_TABLE .byte $AA, $40, $BB, $40, $CC, $51, $1, $40, 0
 
-TEST_CHAR .text "Testing text box with Geneva 9 point font...", 255
-TEST_CHAR2 .text "  ... And here's a second line", 255
-TEST_CHAR3 .text "  let's try a third", 255
-TEST_CHAR4 .text "  fourth line?", 255
+TEST_CHAR .text "MMMMMMMMMMMMMMMMMMMMMMMM", 255
+TEST_CHAR2 .text "MMMMMMMMMMMMMMMMMMMMMMMM", 255
+TEST_CHAR3 .text "MMMMMMMMMMMMMMMMMMMMMMMM", 255
+TEST_CHAR4 .text "MMMMMMMMMMMMMMMMMMMMMMMM", 255
 
 ; ROM header
 * = $ffb0

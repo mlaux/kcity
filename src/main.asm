@@ -15,6 +15,8 @@ SCREEN_HEIGHT = 224
 
 zp0 .word ?
 zp1 .word ?
+; used from both "main thread" and vblank, todo push if needed to avoid
+; "NES tetris crash bug"
 zp2 .word ?
 zp3 .word ?
 
@@ -37,8 +39,8 @@ facing_object_script .word ?
 ; some of these are definitely redundant but made the algorithms easier
 * = $100
 
-; 32 tiles * 16 bytes/tile * 4 lines = 1024 bytes
-NUM_TILE_BYTES = $400
+; $700 bytes is enough for 4 full lines of 24 'M's lol
+NUM_TILE_BYTES = $700
 vwf_tiles .fill NUM_TILE_BYTES
 
 ; how many chars to draw

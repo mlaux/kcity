@@ -98,7 +98,7 @@ text_box_vblank
     asl
     asl
     asl
-    sta zp1
+    sta zp2
     sta WH0
 
     lda text_box_width
@@ -106,7 +106,7 @@ text_box_vblank
     asl
     asl
     clc
-    adc zp1
+    adc zp2
     sta WH1
 
     ; convert y position to pixels

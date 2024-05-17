@@ -43,6 +43,8 @@ DISPLAY_LOCATION_NAME_TEMPLATE
     .word $DEAD, 0, 0, 0 ; will be replaced
     .byte 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset
 
+DISPLAY_LOCATION_NAME_LENGTH = * - DISPLAY_LOCATION_NAME_TEMPLATE
+
 EMPTY_STRING .byte $ff
 OBJECT_DESC .text "What could be down here?", 255
 OBJECT_DESC2_1 .text "It's a standard 55-gallon drum.", 255
@@ -64,7 +66,6 @@ SLEEP_SCRIPT
 OBJECT_SCRIPTS .word TEST_OBJECT_SCRIPT, TEST_HAIR_BLEACH
 OBJECT_SCRIPT_LENGTHS .word 2, 2
 
-DISPLAY_LOCATION_NAME_LENGTH = * - DISPLAY_LOCATION_NAME_TEMPLATE
 
 script_operations .word op_none, op_text_box
 
