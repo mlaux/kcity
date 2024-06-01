@@ -63,7 +63,7 @@ TEST_OBJECT_SCRIPT
 TEST_HAIR_BLEACH
     .byte $c0, 0, 1, 0, 1, 21, 30, 3 ; text box for 192 frames at (1, 21), width=30 tiles, lines=2
     .word OBJECT_DESC2_1, EMPTY_STRING, OBJECT_DESC2_2, 0
-    .byte 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset
+    .byte 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset everything
 
 SLEEP_SCRIPT
     .byte $

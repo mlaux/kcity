@@ -1,9 +1,3 @@
-.as
-.xl
-.autsiz
-.databank $00
-.dpage $0000
-
 .dsection code
 .section code
 .include "main.asm"

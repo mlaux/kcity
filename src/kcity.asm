@@ -1,3 +1,9 @@
+.as
+.xl
+.autsiz
+.databank $00
+.dpage $0000
+
 ; define an ascii encoding
 .enc "ascii"
 ; identity mapping for printable
@@ -118,12 +124,11 @@ location_name_script .fill DISPLAY_LOCATION_NAME_LENGTH
 * = $0
 
 ; place first 32k
-.logical $008000
+.logical $8000
 .dsection bank00
 .section bank00
 .include "bank00.asm"
 .endsection bank00
-.warn str(*)
 .cerror * > $10000, "bank00 too long"
 .here
 
