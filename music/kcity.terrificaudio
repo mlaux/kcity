@@ -1,0 +1,37 @@
+{
+  "_about": {
+    "file_type": "Terrific Audio Driver project file",
+    "version": "0.0.8"
+  },
+  "instruments": [
+    {
+      "name": "piano_C4",
+      "source": "samples/PianoC4_2.brr",
+      "freq": 500.0,
+      "loop": "none",
+      "first_octave": 3,
+      "last_octave": 5,
+      "envelope": "adsr 12 2 7 15",
+      "comment": null
+    },
+    {
+      "name": "piano_C3",
+      "source": "samples/PianoC3.brr",
+      "freq": 500.0,
+      "loop": "none",
+      "first_octave": 3,
+      "last_octave": 4,
+      "envelope": "adsr 12 2 7 15",
+      "comment": null
+    }
+  ],
+  "samples": [],
+  "sound_effects": [],
+  "sound_effect_file": null,
+  "songs": [
+    {
+      "name": "greenhouse",
+      "source": "greenhouse.mml"
+    }
+  ]
+}
