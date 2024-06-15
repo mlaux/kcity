@@ -6,7 +6,7 @@
   "instruments": [
     {
       "name": "piano_C4",
-      "source": "samples/PianoC4_2.brr",
+      "source": "samples/PianoC4.brr",
       "freq": 500.0,
       "loop": "none",
       "first_octave": 3,
