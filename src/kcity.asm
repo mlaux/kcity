@@ -41,6 +41,8 @@ text_box_lines .word ?
 collision_map_ptr .word ?
 facing_object_script .word ?
 
+.warn "zero page end: ", *
+
 ; Work RAM variables
 ; some of these are definitely redundant but made the algorithms easier
 * = $100
@@ -121,6 +123,8 @@ text_box_num_lines .word ?
 target_warp_map .word ?
 location_name_script .fill DISPLAY_LOCATION_NAME_LENGTH
 
+.warn "lowram end: ", *
+
 * = $0
 
 ; place first 32k
@@ -132,9 +136,19 @@ location_name_script .fill DISPLAY_LOCATION_NAME_LENGTH
 .cerror * > $10000, "bank00 too long"
 .here
 
-; .logical $010000
-; .include "bank01.asm"
-; .here
+.logical $10000
+.dsection bank01
+.section bank01
+.binary "spc700/audio-bank01.bin"
+.endsection bank01
+.here
+
+.logical $18000
+.dsection bank02
+.section bank02
+.binary "spc700/audio-bank02.bin"
+.endsection bank02
+.here
 
 ; 128k minus one byte
 * = $01ffff

@@ -27,7 +27,7 @@
   ],
   "samples": [],
   "sound_effects": [],
-  "sound_effect_file": null,
+  "sound_effect_file": "se.txt",
   "songs": [
     {
       "name": "greenhouse",
