@@ -65,6 +65,11 @@ RESET
     lda #$0
     sta INIDISP
 
+    ; init audio
+    jsl Tad_Init
+    lda #$1
+    jsr Tad_LoadSong
+
     rep #$20
 
     jsr vwf_reset_tiles
@@ -92,6 +97,14 @@ main
     lda OPVCT
     bit STAT78
     sta zp0
+
+    lda #$7e
+    pha
+    plb
+    jsl Tad_Process
+    phk
+    plb
+
     rep #$20
 
     jsr read_input

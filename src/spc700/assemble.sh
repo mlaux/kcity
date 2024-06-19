@@ -4,11 +4,8 @@ set -ex
     ca65-export \
     --output-asm kcity-audio.s \
     --output-bin kcity-audio.bin \
-    --segment BANK2 \
+    --segment BANK1 \
     --lorom ../../music/kcity.terrificaudio
 ca65 -DLOROM kcity-audio.s -o kcity-audio.o
 ca65 -DLOROM tad-audio.s -o tad-audio.o
-ld65 -o kcity-audio.sfc --dbgfile kcity-audio.dbg -m kcity-audio-map.txt -C kcity-lorom.cfg *.o
-split -d -b 32768 kcity-audio.sfc audio-bank
-mv audio-bank01 audio-bank02.bin
-mv audio-bank00 audio-bank01.bin
+ld65 -o kcity-audio.sfc --dbgfile kcity-audio.dbg -m kcity-audio-map.txt -vm -C kcity-lorom.cfg *.o

@@ -12,6 +12,7 @@
 .include "ppu.asm"
 .include "cpu.asm"
 .include "dma.asm"
+.include "tad-api.asm"
 
 SCREEN_WIDTH = 256
 SCREEN_HEIGHT = 224
@@ -139,15 +140,8 @@ location_name_script .fill DISPLAY_LOCATION_NAME_LENGTH
 .logical $10000
 .dsection bank01
 .section bank01
-.binary "spc700/audio-bank01.bin"
+.binary "spc700/kcity-audio.sfc", $1000, $8000
 .endsection bank01
-.here
-
-.logical $18000
-.dsection bank02
-.section bank02
-.binary "spc700/audio-bank02.bin"
-.endsection bank02
 .here
 
 ; 128k minus one byte

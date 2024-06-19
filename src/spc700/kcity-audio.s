@@ -51,7 +51,7 @@ AUDIO_DATA_BANK = .bankbyte(__Tad_AudioData_0)
 .assert TAD_IO_VERSION = 14, lderror, "TAD_IO_VERSION in audio driver does not match TAD_IO_VERSION in tad-audio.s"
 
 
-.segment "BANK2"
+.segment "BANK1"
   __Tad_AudioData_0: .incbin "kcity-audio.bin", $0
   .assert .sizeof(__Tad_AudioData_0) = $2c3c, error, "kcity-audio.bin file size does not match binary size in the assembly file"
 

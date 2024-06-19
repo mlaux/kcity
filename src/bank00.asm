@@ -18,6 +18,12 @@
 FILLER_PALETTES .fill 256
 .endsection
 
+* = $f000
+.dsection audiodriver
+.section audiodriver
+.binary "spc700/kcity-audio.sfc", 0, $1000
+.endsection
+
 * = $ffb0
 .dsection header
 .section header
