@@ -102,6 +102,14 @@ TEST_REACT_TO_BOOKSHELF
 OBJECT_SCRIPTS .word TEST_OBJECT_SCRIPT, TEST_HAIR_BLEACH, TEST_REACT_TO_BOOKSHELF
 OBJECT_SCRIPT_LENGTHS .word 2, 2, 12
 
+load_sprite_byte_index .macro
+    ; x = sprite_id * 2
+    ldy #$4
+    lda (script_element_ptr), y
+    asl
+    tax
+.endm
+
 ; can eliminate some redundancy in the implementations of these
 script_operations .word op_none, op_text_box, op_set_sprite_flags, op_set_sprite_position, op_move_sprite_x, op_move_sprite_y
 
@@ -178,6 +186,7 @@ run_script
     lda (script_element_ptr), y
     asl
     tax
+    sep #$20
     jmp (script_operations, x)
 
 op_none
@@ -186,7 +195,6 @@ op_none
     rts
 
 op_text_box
-    sep #$20
     ldy #$4
     lda (script_element_ptr), y
     sta text_box_x
@@ -211,12 +219,7 @@ op_text_box
     rts
 
 op_set_sprite_flags
-    sep #$20
-    ; x = sprite_id * 2
-    ldy #$4
-    lda (script_element_ptr), y
-    asl
-    tax
+    #load_sprite_byte_index
 
     ldy #$5
     lda (script_element_ptr), y
@@ -225,12 +228,7 @@ op_set_sprite_flags
     rts
 
 op_set_sprite_position
-    sep #$20
-    ; x = sprite_id * 2
-    ldy #$4
-    lda (script_element_ptr), y
-    asl
-    tax
+    #load_sprite_byte_index
 
     ldy #$5
     lda (script_element_ptr), y
@@ -243,12 +241,7 @@ op_set_sprite_position
     rts
 
 op_move_sprite_x
-    sep #$20
-    ; x = sprite_id * 2
-    ldy #$4
-    lda (script_element_ptr), y
-    asl
-    tax
+    #load_sprite_byte_index
 
     lda sprites_x, x
     ldy #$5
@@ -259,12 +252,7 @@ op_move_sprite_x
     rts
 
 op_move_sprite_y
-    sep #$20
-    ; x = sprite_id * 2
-    ldy #$4
-    lda (script_element_ptr), y
-    asl
-    tax
+    #load_sprite_byte_index
 
     lda sprites_y, x
     ldy #$5
