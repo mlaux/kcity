@@ -1,5 +1,7 @@
 PLAYER_PALETTE .binary "../experimental_gfx/player.palette"
 PLAYER_TILESET .binary "../experimental_gfx/player.tiles"
+NPC_PALETTE .binary "../experimental_gfx/npc.palette"
+NPC_TILESET .binary "../experimental_gfx/npc.tiles"
 
 ; OAM sprite ids for each direction
 ; the first in a group is left foot forward, then idle, then right foot forward, then idle again

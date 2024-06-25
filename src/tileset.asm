@@ -20,6 +20,7 @@ tileset_init
     stx VMADD
 
     #dma_ppu_data PLAYER_TILESET
+    #dma_ppu_data NPC_TILESET
 
     rts
 
