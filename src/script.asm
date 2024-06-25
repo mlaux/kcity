@@ -70,7 +70,8 @@ OBJECT_DESC .text "What could be down here?", 255
 OBJECT_DESC2_1 .text "It's a standard 55-gallon drum.", 255
 OBJECT_DESC2_2 .text "'AMMONIUM PERSULFATE NET WT 412 KG'", 255
 
-BOOKSHELF_MESSAGE .text "Hey, don't look in there.", 255
+BOOKSHELF_MESSAGE1 .text "Hey!", 255
+BOOKSHELF_MESSAGE2 .text "Don't look in there.", 255
 
 TEST_OBJECT_SCRIPT
     .byte $80, 0, OPCODE_TEXT_BOX, 0, 1, 21, 30, 1 ; text box for 128 frames at (1, 21), width=30 tiles, lines=1
@@ -86,14 +87,20 @@ TEST_REACT_TO_BOOKSHELF
     .byte 1, 0, OPCODE_SET_SPRITE_POS, 0, 1, 96, 152, 0, 0, 0, 0, 0, 0, 0, 0, 0
     .byte 1, 0, OPCODE_SET_SPRITE_FLAGS, 0, 1, $3a, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     .byte 8, 0, OPCODE_MOVE_SPRITE_Y, 0, 1, $ff, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    .byte $20, 0, OPCODE_TEXT_BOX, 0, 7, 18, 4, 1
+    .word BOOKSHELF_MESSAGE1, 0, 0, 0
+    .byte 1, 0, OPCODE_NOP, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset
     .byte 24, 0, OPCODE_MOVE_SPRITE_X, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     .byte 48, 0, OPCODE_MOVE_SPRITE_Y, 0, 1, $ff, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     .byte $80, 0, OPCODE_TEXT_BOX, 0, 1, 21, 30, 1
-    .word BOOKSHELF_MESSAGE, 0, 0, 0
+    .word BOOKSHELF_MESSAGE2, 0, 0, 0
     .byte 1, 0, OPCODE_NOP, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset
+    .byte 32, 0, OPCODE_MOVE_SPRITE_Y, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    .byte 64, 0, OPCODE_MOVE_SPRITE_X, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    .byte 1, 0, OPCODE_SET_SPRITE_FLAGS, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
 OBJECT_SCRIPTS .word TEST_OBJECT_SCRIPT, TEST_HAIR_BLEACH, TEST_REACT_TO_BOOKSHELF
-OBJECT_SCRIPT_LENGTHS .word 2, 2, 7
+OBJECT_SCRIPT_LENGTHS .word 2, 2, 12
 
 ; can eliminate some redundancy in the implementations of these
 script_operations .word op_none, op_text_box, op_set_sprite_flags, op_set_sprite_position, op_move_sprite_x, op_move_sprite_y
@@ -161,6 +168,8 @@ run_script
 
     ; if start + length >= frame_counter
     bcs +
+
+
     inc script_step
     stz script_step_start_frame
     rts
