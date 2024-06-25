@@ -155,12 +155,12 @@ NMI_ISR
     lda main_loop_done
     beq _skip_vblank
 
+    ; move player and send updated position to OAM
+    jsr vblank_oam_dma
+
     ; DMA generated text tiles if needed, or reset tilemap if turning off text box
     ; send HDMA table for text box overlay if needed
     jsr text_box_vblank
-
-    ; move player and send updated position to OAM
-    jsr player_oam_update
 
     ; handle fade or mosaic effect if needed
     jsr run_effect

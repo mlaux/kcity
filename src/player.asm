@@ -20,6 +20,8 @@ player_init
 
     lda #$2
     sta player_sprite_id
+    lda #$38
+    sta player_visibility_flags
 
     inc player_locked
 
@@ -251,17 +253,43 @@ animate_player
 ; parameters: none
 ; returns: none
 ; assumes: A8, XY16
-player_oam_update
+vblank_oam_dma
 .as
 .xl
-    ldx #$0
+    ; this whole copy can go away once i change some 16-bit writes to 8-bit
+    ; then data can go directly into the oam_data_main instead_of the sprite_*
+
+    ; source
+    ldx #2 * NUM_OAM_ENTRIES - 2
+    ; destination
+    ldy #4 * NUM_OAM_ENTRIES - 1
+-   lda sprites_flag, x
+    sta oam_data_main, y
+    dey
+    lda sprites_id, x
+    sta oam_data_main, y
+    dey
+    lda sprites_y, x
+    sta oam_data_main, y
+    dey
+    lda sprites_x, x
+    sta oam_data_main, y
+    dey
+    dex
+    dex
+    bpl -
+
+    ldx #0
     stx OAMADD
-    lda player_x
-    sta OAMDATA
-    lda player_y
-    sta OAMDATA
-    lda player_sprite_id
-    sta OAMDATA
-    lda #$38
-    sta OAMDATA
+    ldx #DMAMODE_OAMDATA
+    stx DMAMODE
+    ldx #<>oam_data_main
+    stx DMAADDR
+    lda #`oam_data_main
+    sta DMAADDRBANK
+    lda #OAM_MAIN_LENGTH
+    sta DMALEN
+    lda #1
+    sta MDMAEN
+    
     rts

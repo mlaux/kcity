@@ -102,10 +102,17 @@ script_step .word ?
 script_length .word ?
 script_step_start_frame .word ?
 
-; for OAM
-player_x .word ?
-player_y .word ?
-player_sprite_id .word ?
+; for all sprites including player
+sprites_x .fill 2 * NUM_OAM_ENTRIES
+sprites_y .fill 2 * NUM_OAM_ENTRIES
+sprites_id .fill 2 * NUM_OAM_ENTRIES
+sprites_flag .fill 2 * NUM_OAM_ENTRIES
+
+; player is the first entry in the above tables
+player_x = sprites_x
+player_y = sprites_y
+player_sprite_id = sprites_id
+player_visibility_flags = sprites_flag
 
 ; for calculating animation
 player_direction .word ?
@@ -114,6 +121,7 @@ player_animation_index .word ?
 player_locked .word ?
 
 text_box_enabled .word ?
+; should be using a different dma channel for this
 text_box_hdma_table .fill $9
 
 text_box_x .word ?
@@ -123,6 +131,12 @@ text_box_num_lines .word ?
 
 target_warp_map .word ?
 location_name_script .fill DISPLAY_LOCATION_NAME_LENGTH
+
+NUM_OAM_ENTRIES = 16
+OAM_MAIN_LENGTH = NUM_OAM_ENTRIES * 4
+OAM_AUX_LENGTH = NUM_OAM_ENTRIES / 4
+oam_data_main .fill OAM_MAIN_LENGTH
+oam_data_aux .fill OAM_AUX_LENGTH
 
 .warn "lowram end: ", *
 
