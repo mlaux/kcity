@@ -81,7 +81,7 @@ RESET
 
     lda #TEST_SCRIPT
     sta script_ptr
-    lda #3
+    lda #6
     sta script_length
 
     ; initialization done, enable interrupts and auto joypad reading

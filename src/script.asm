@@ -6,7 +6,17 @@
 ; script opcode
 ; $0: nop
 ; $1: show text box
-; $2: run fade
+; $2: set sprite flags
+; $3: set sprite position
+; $4: add/sub sprite x
+; $5: add/sub sprite y
+
+OPCODE_NOP = 0
+OPCODE_TEXT_BOX = 1
+OPCODE_SET_SPRITE_FLAGS = 2
+OPCODE_SET_SPRITE_POS = 3
+OPCODE_MOVE_SPRITE_X = 4
+OPCODE_MOVE_SPRITE_Y = 5
 
 ; for text boxes:
 ; x: byte (8x8 tile coordinates)
@@ -35,18 +45,22 @@ TEST_CHAR3 .text "MMMMMMMMMMMMMMMMMMMMMMMM", 255
 TEST_CHAR4 .text "MMMMMMMMMMMMMMMMMMMMMMMM", 255
 
 TEST_SCRIPT
-    .byte 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; do nothing for 10 frames
+    .byte 10, 0, OPCODE_NOP, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; do nothing for 10 frames
 
-    .byte $80, 0, 1, 0, 1, 21, 30, 4 ; text box for 128 frames at (1, 21), width=30 tiles, lines=4
+    .byte $80, 0, OPCODE_TEXT_BOX, 0, 1, 21, 30, 4 ; text box for 128 frames at (1, 21), width=30 tiles, lines=4
     .word TEST_CHAR, TEST_CHAR2, TEST_CHAR3, TEST_CHAR4 ; line pointers for text box
 
-    .byte 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset
+    .byte 1, 0, OPCODE_SET_SPRITE_POS, 0, 1, $20, $20, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; sprite 1 position 32, 32
+    .byte 1, 0, OPCODE_SET_SPRITE_FLAGS, 0, 1, $3a, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; sprite 1 flags $3a
+    .byte $20, 0, OPCODE_MOVE_SPRITE_X, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+
+    .byte 1, 0, OPCODE_NOP, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset
 
 DISPLAY_LOCATION_NAME_TEMPLATE
-    .byte $8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; do nothing for 8 frames
-    .byte $80, 0, 1, 0, 1, 1, 15, 1 ; location name text box at (1, 1), width=15 tiles, lines=1
+    .byte $8, 0, OPCODE_NOP, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; do nothing for 8 frames
+    .byte $80, 0, OPCODE_TEXT_BOX, 0, 1, 1, 15, 1 ; location name text box at (1, 1), width=15 tiles, lines=1
     .word $DEAD, 0, 0, 0 ; will be replaced
-    .byte 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset
+    .byte 1, 0, OPCODE_NOP, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset
 
 DISPLAY_LOCATION_NAME_LENGTH = * - DISPLAY_LOCATION_NAME_TEMPLATE
 
@@ -56,14 +70,14 @@ OBJECT_DESC2_1 .text "It's a standard 55-gallon drum.", 255
 OBJECT_DESC2_2 .text "'AMMONIUM PERSULFATE NET WT 412 KG'", 255
 
 TEST_OBJECT_SCRIPT
-    .byte $80, 0, 1, 0, 1, 21, 30, 1 ; text box for 128 frames at (1, 21), width=30 tiles, lines=1
+    .byte $80, 0, OPCODE_TEXT_BOX, 0, 1, 21, 30, 1 ; text box for 128 frames at (1, 21), width=30 tiles, lines=1
     .word OBJECT_DESC, 0, 0, 0
-    .byte 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset
+    .byte 1, 0, OPCODE_NOP, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset
 
 TEST_HAIR_BLEACH
-    .byte $c0, 0, 1, 0, 1, 21, 30, 3 ; text box for 192 frames at (1, 21), width=30 tiles, lines=2
+    .byte $c0, 0, OPCODE_TEXT_BOX, 0, 1, 21, 30, 3 ; text box for 192 frames at (1, 21), width=30 tiles, lines=2
     .word OBJECT_DESC2_1, EMPTY_STRING, OBJECT_DESC2_2, 0
-    .byte 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset everything
+    .byte 1, 0, OPCODE_NOP, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset everything
 
 SLEEP_SCRIPT
     .byte $
@@ -72,7 +86,7 @@ OBJECT_SCRIPTS .word TEST_OBJECT_SCRIPT, TEST_HAIR_BLEACH
 OBJECT_SCRIPT_LENGTHS .word 2, 2
 
 
-script_operations .word op_none, op_text_box
+script_operations .word op_none, op_text_box, op_set_sprite_flags, op_set_sprite_position, op_move_sprite_x, op_move_sprite_y
 
 copy_ram_scripts
 .as
@@ -143,9 +157,7 @@ run_script
 
 +   ldy #$2
     lda (script_element_ptr), y
-;    bne +
-
-+   asl
+    asl
     tax
     jmp (script_operations, x)
 
@@ -178,3 +190,60 @@ op_text_box
     sta text_box_lines
 
     rts
+
+op_set_sprite_flags
+    sep #$20
+    ; x = sprite_id * 2
+    ldy #$4
+    lda (script_element_ptr), y
+    asl
+    tax
+
+    ldy #$5
+    lda (script_element_ptr), y
+    sta sprites_flag, x
+
+    rts
+
+op_set_sprite_position
+    sep #$20
+    ; x = sprite_id * 2
+    ldy #$4
+    lda (script_element_ptr), y
+    asl
+    tax
+
+    ldy #$5
+    lda (script_element_ptr), y
+    sta sprites_x, x
+
+    ldy #$6
+    lda (script_element_ptr), y
+    sta sprites_y, x
+
+    rts
+
+op_move_sprite_x
+    sep #$20
+    ; x = sprite_id * 2
+    ldy #$4
+    lda (script_element_ptr), y
+    asl
+    tax
+
+    lda sprites_x, x
+    ldy #$5
+    clc
+    adc (script_element_ptr), y
+    sta sprites_x, x
+
+    rts
+
+op_move_sprite_y
+    rts
+
+
+; $2: set sprite flags
+; $3: set sprite position
+; $4: add/sub sprite x
+; $5: add/sub sprite y

@@ -23,6 +23,11 @@ player_init
     lda #$38
     sta player_visibility_flags
 
+    lda #$42
+    sta sprites_id + 2
+    ;lda #$3a
+    ;sta sprites_flag + 2
+
     inc player_locked
 
     rts
