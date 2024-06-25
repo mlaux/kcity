@@ -50,11 +50,12 @@ TEST_SCRIPT
     .byte $80, 0, OPCODE_TEXT_BOX, 0, 1, 21, 30, 4 ; text box for 128 frames at (1, 21), width=30 tiles, lines=4
     .word TEST_CHAR, TEST_CHAR2, TEST_CHAR3, TEST_CHAR4 ; line pointers for text box
 
-    .byte 1, 0, OPCODE_SET_SPRITE_POS, 0, 1, $20, $20, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; sprite 1 position 32, 32
-    .byte 1, 0, OPCODE_SET_SPRITE_FLAGS, 0, 1, $3a, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; sprite 1 flags $3a
-    .byte $20, 0, OPCODE_MOVE_SPRITE_X, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    ;.byte 1, 0, OPCODE_SET_SPRITE_POS, 0, 1, $20, $20, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; sprite 1 position 32, 32
+    ;.byte 1, 0, OPCODE_SET_SPRITE_FLAGS, 0, 1, $3a, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; sprite 1 flags $3a
+    ;.byte $20, 0, OPCODE_MOVE_SPRITE_X, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
     .byte 1, 0, OPCODE_NOP, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset
+TEST_SCRIPT_LENGTH = 3
 
 DISPLAY_LOCATION_NAME_TEMPLATE
     .byte $8, 0, OPCODE_NOP, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; do nothing for 8 frames
@@ -69,6 +70,8 @@ OBJECT_DESC .text "What could be down here?", 255
 OBJECT_DESC2_1 .text "It's a standard 55-gallon drum.", 255
 OBJECT_DESC2_2 .text "'AMMONIUM PERSULFATE NET WT 412 KG'", 255
 
+BOOKSHELF_MESSAGE .text "Hey, don't look in there.", 255
+
 TEST_OBJECT_SCRIPT
     .byte $80, 0, OPCODE_TEXT_BOX, 0, 1, 21, 30, 1 ; text box for 128 frames at (1, 21), width=30 tiles, lines=1
     .word OBJECT_DESC, 0, 0, 0
@@ -79,13 +82,20 @@ TEST_HAIR_BLEACH
     .word OBJECT_DESC2_1, EMPTY_STRING, OBJECT_DESC2_2, 0
     .byte 1, 0, OPCODE_NOP, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset everything
 
-SLEEP_SCRIPT
-    .byte $
+TEST_REACT_TO_BOOKSHELF
+    .byte 1, 0, OPCODE_SET_SPRITE_POS, 0, 1, 96, 152, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    .byte 1, 0, OPCODE_SET_SPRITE_FLAGS, 0, 1, $3a, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    .byte 8, 0, OPCODE_MOVE_SPRITE_Y, 0, 1, $ff, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    .byte 24, 0, OPCODE_MOVE_SPRITE_X, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    .byte 48, 0, OPCODE_MOVE_SPRITE_Y, 0, 1, $ff, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    .byte $80, 0, OPCODE_TEXT_BOX, 0, 1, 21, 30, 1
+    .word BOOKSHELF_MESSAGE, 0, 0, 0
+    .byte 1, 0, OPCODE_NOP, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset
 
-OBJECT_SCRIPTS .word TEST_OBJECT_SCRIPT, TEST_HAIR_BLEACH
-OBJECT_SCRIPT_LENGTHS .word 2, 2
+OBJECT_SCRIPTS .word TEST_OBJECT_SCRIPT, TEST_HAIR_BLEACH, TEST_REACT_TO_BOOKSHELF
+OBJECT_SCRIPT_LENGTHS .word 2, 2, 7
 
-
+; can eliminate some redundancy in the implementations of these
 script_operations .word op_none, op_text_box, op_set_sprite_flags, op_set_sprite_position, op_move_sprite_x, op_move_sprite_y
 
 copy_ram_scripts
@@ -240,10 +250,17 @@ op_move_sprite_x
     rts
 
 op_move_sprite_y
+    sep #$20
+    ; x = sprite_id * 2
+    ldy #$4
+    lda (script_element_ptr), y
+    asl
+    tax
+
+    lda sprites_y, x
+    ldy #$5
+    clc
+    adc (script_element_ptr), y
+    sta sprites_y, x
+
     rts
-
-
-; $2: set sprite flags
-; $3: set sprite position
-; $4: add/sub sprite x
-; $5: add/sub sprite y
