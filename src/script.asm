@@ -47,7 +47,7 @@ TEST_CHAR4 .text "MMMMMMMMMMMMMMMMMMMMMMMM", 255
 TEST_SCRIPT
     .byte 10, 0, OPCODE_NOP, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; do nothing for 10 frames
 
-    .byte $80, 0, OPCODE_TEXT_BOX, 0, 1, 21, 30, 4 ; text box for 128 frames at (1, 21), width=30 tiles, lines=4
+    .byte $ff, $ff, OPCODE_TEXT_BOX, 0, 1, 21, 30, 4 ; text box for 128 frames at (1, 21), width=30 tiles, lines=4
     .word TEST_CHAR, TEST_CHAR2, TEST_CHAR3, TEST_CHAR4 ; line pointers for text box
 
     ;.byte 1, 0, OPCODE_SET_SPRITE_POS, 0, 1, $20, $20, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; sprite 1 position 32, 32
@@ -74,7 +74,7 @@ BOOKSHELF_MESSAGE1 .text "Hey!", 255
 BOOKSHELF_MESSAGE2 .text "Don't look in there.", 255
 
 TEST_OBJECT_SCRIPT
-    .byte $80, 0, OPCODE_TEXT_BOX, 0, 1, 21, 30, 1 ; text box for 128 frames at (1, 21), width=30 tiles, lines=1
+    .byte $ff, $ff, OPCODE_TEXT_BOX, 0, 1, 21, 30, 1 ; text box for 128 frames at (1, 21), width=30 tiles, lines=1
     .word OBJECT_DESC, 0, 0, 0
     .byte 1, 0, OPCODE_NOP, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset
 
@@ -164,25 +164,43 @@ run_script
     sta script_element_ptr
 
     lda script_step_start_frame
+    bne _check_next_step_conditions
 
-    ; if 0, the step started on this frame
-    bne +
+    ; if 0, the step started on this frame, need to set the
+    ; script_set_start_frame = current_frame
     lda frame_counter
     sta script_step_start_frame
+    ; skip expiration checks because A button might still be set from
+    ; interacting with an object to start this step!
+    bra _run_step
 
-+   clc
-    adc (script_element_ptr)
+    ; check for -1 length
+_check_next_step_conditions
+    lda (script_element_ptr)
+    cmp #$ffff
+    bne _check_time
+
+    lda joypad_new
+    bit #A_BUTTON
+    bne _go_to_next_step
+    bra _run_step
+
+    ; not indeterminate
+_check_time
+    lda (script_element_ptr)
+    clc
+    adc script_step_start_frame
     cmp frame_counter
+    bcs _run_step
 
-    ; if start + length >= frame_counter
-    bcs +
-
-
+_go_to_next_step
+    ; if start + length >= frame_counter or duration == -1 and A pressed
     inc script_step
     stz script_step_start_frame
     rts
 
-+   ldy #$2
+_run_step
+    ldy #$2
     lda (script_element_ptr), y
     asl
     tax

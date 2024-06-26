@@ -165,11 +165,11 @@ NMI_ISR
     ; handle fade or mosaic effect if needed
     jsr run_effect
 
-    inc frame_counter
-
     ; this might go into the next frame (but it's ok because it enables force blank)
     ; but this means it needs to run last
     jsr map_run_warp
+
+    inc frame_counter
 
     ; reset flag so main loop can continue
     stz main_loop_done
