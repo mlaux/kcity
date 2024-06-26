@@ -1,51 +1,68 @@
-; each element is 16 bytes long (1 timing word, 1 opcode word, and 12 data bytes)
-; - number of frames to wait before continuing (-1 = wait for A button)
-; - opcode
-; - 12 bytes depending on the type of element
+; script interpreter and related test scripts
 
-; script opcode
-; $0: nop
+; a script is an array of steps and a length
+; each step is 16 bytes long (1 timing word, 1 opcode word, and 12 data bytes)
+; +0: number of frames to wait before continuing
+;     -1: wait for A button
+;      0: one-time action
+;    > 0: time delay
+; +2: opcode
+; +4..F: up to 12 parameter bytes depending on the type of step, then padding
+;        to 16 byte boundary
+; the last step only needs the bytes actually read for the step, not all 16
+
+; script opcodes:
+; $0: reset text box
 ; $1: show text box
 ; $2: set sprite flags
 ; $3: set sprite position
 ; $4: add/sub sprite x
 ; $5: add/sub sprite y
+; TODO:
+; $6: lock/unlock player
+; $7: set variable
+; $8..?: conditional branch
+; - change sprite movement to use same direction system as player
+; - variable length steps using table of lengths?
 
-OPCODE_NOP = 0
+; stop showing a text box if one is showing
+OPCODE_RESET_TEXT_BOX = 0
+
+; for text boxes:
+; +4: x byte (8x8 tile coordinates)
+; +5: y byte (8x8 tile coordinates)
+; +6: width byte (8x8 tile coordinates)
+; +7: number of lines (1-4)
+; +8..F: up to 4 line pointers
+; height is always 8px * (2 + num lines)
 OPCODE_TEXT_BOX = 1
+
+; sets flip/priority/palette byte in OAM
+; +4: sprite index (currently 0 to 15)
+; +5: value to set
 OPCODE_SET_SPRITE_FLAGS = 2
+
+; sets x/y position of sprite
+; +4: sprite index
+; +5: x coordinate in pixels
+; +6: y coordinate in pixels
 OPCODE_SET_SPRITE_POS = 3
+
+; moves the sprite by the given signed value in a direction
+; +4: sprite index
+; +5: signed value to add to the position
 OPCODE_MOVE_SPRITE_X = 4
 OPCODE_MOVE_SPRITE_Y = 5
 
-; for text boxes:
-; x: byte (8x8 tile coordinates)
-; y: byte (8x8 tile coordinates)
-; w: byte (8x8 tile coordinates)
-; number of lines (1-4): byte
-; 4x line pointers (empty slot = 0)
-; height is always 8 * (2 + num lines)
-
-; for fade:
-; speed: byte (2^n - 1)
-; blank frames: 
-
 ; TODO if lines are always stored contiguously in memory, only need one pointer
 ; and can use the 255 to advance to the next line
-
-script_element_t .struct len, op
-    frame_length .word \len
-    opcode .word \op
-    params .fill 12
-.endstruct
-
-TEST_CHAR .text "MMMMMMMMMMMMMMMMMMMMMMMM", 255
-TEST_CHAR2 .text "MMMMMMMMMMMMMMMMMMMMMMMM", 255
-TEST_CHAR3 .text "MMMMMMMMMMMMMMMMMMMMMMMM", 255
-TEST_CHAR4 .text "MMMMMMMMMMMMMMMMMMMMMMMM", 255
+TEST_CHAR .text "Just a sample text box to test tile memory usage", 255
+TEST_CHAR2 .text "MMMMMMMMMMMMMMMMMMMMMMMMMM", 255
+TEST_CHAR3 .text "MMMMMMMMMMMMMMMMMMMMMMMMMM", 255
+TEST_CHAR4 .text "MMMMMMMMMMMMMMMMMMMMMMMMMM", 255
 
 TEST_SCRIPT
-    .byte 10, 0, OPCODE_NOP, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; do nothing for 10 frames
+    .byte 10, 0, OPCODE_RESET_TEXT_BOX, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; do nothing for 10 frames
 
     .byte $ff, $ff, OPCODE_TEXT_BOX, 0, 1, 21, 30, 4 ; text box for 128 frames at (1, 21), width=30 tiles, lines=4
     .word TEST_CHAR, TEST_CHAR2, TEST_CHAR3, TEST_CHAR4 ; line pointers for text box
@@ -54,14 +71,14 @@ TEST_SCRIPT
     ;.byte 1, 0, OPCODE_SET_SPRITE_FLAGS, 0, 1, $3a, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; sprite 1 flags $3a
     ;.byte $20, 0, OPCODE_MOVE_SPRITE_X, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
-    .byte 1, 0, OPCODE_NOP, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset
+    .byte 0, 0, OPCODE_RESET_TEXT_BOX, 0 ; reset
 TEST_SCRIPT_LENGTH = 3
 
 DISPLAY_LOCATION_NAME_TEMPLATE
-    .byte $8, 0, OPCODE_NOP, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; do nothing for 8 frames
+    .byte $8, 0, OPCODE_RESET_TEXT_BOX, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; do nothing for 8 frames
     .byte $80, 0, OPCODE_TEXT_BOX, 0, 1, 1, 15, 1 ; location name text box at (1, 1), width=15 tiles, lines=1
     .word $DEAD, 0, 0, 0 ; will be replaced
-    .byte 1, 0, OPCODE_NOP, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset
+    .byte 0, 0, OPCODE_RESET_TEXT_BOX, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset
 
 DISPLAY_LOCATION_NAME_LENGTH = * - DISPLAY_LOCATION_NAME_TEMPLATE
 
@@ -74,14 +91,14 @@ BOOKSHELF_MESSAGE1 .text "Hey!", 255
 BOOKSHELF_MESSAGE2 .text "Don't look in there.", 255
 
 TEST_OBJECT_SCRIPT
-    .byte $ff, $ff, OPCODE_TEXT_BOX, 0, 1, 21, 30, 1 ; text box for 128 frames at (1, 21), width=30 tiles, lines=1
+    .byte $ff, $ff, OPCODE_TEXT_BOX, 0, 1, 21, 30, 1
     .word OBJECT_DESC, 0, 0, 0
-    .byte 1, 0, OPCODE_NOP, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset
+    .byte 1, 0, OPCODE_RESET_TEXT_BOX, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
 TEST_HAIR_BLEACH
-    .byte $c0, 0, OPCODE_TEXT_BOX, 0, 1, 21, 30, 3 ; text box for 192 frames at (1, 21), width=30 tiles, lines=2
+    .byte $c0, 0, OPCODE_TEXT_BOX, 0, 1, 21, 30, 3
     .word OBJECT_DESC2_1, EMPTY_STRING, OBJECT_DESC2_2, 0
-    .byte 1, 0, OPCODE_NOP, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset everything
+    .byte 1, 0, OPCODE_RESET_TEXT_BOX, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
 TEST_REACT_TO_BOOKSHELF
     .byte 1, 0, OPCODE_SET_SPRITE_POS, 0, 1, 96, 152, 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -89,12 +106,12 @@ TEST_REACT_TO_BOOKSHELF
     .byte 8, 0, OPCODE_MOVE_SPRITE_Y, 0, 1, $ff, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     .byte $20, 0, OPCODE_TEXT_BOX, 0, 7, 18, 4, 1
     .word BOOKSHELF_MESSAGE1, 0, 0, 0
-    .byte 1, 0, OPCODE_NOP, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset
+    .byte 1, 0, OPCODE_RESET_TEXT_BOX, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     .byte 24, 0, OPCODE_MOVE_SPRITE_X, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     .byte 48, 0, OPCODE_MOVE_SPRITE_Y, 0, 1, $ff, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     .byte $80, 0, OPCODE_TEXT_BOX, 0, 1, 21, 30, 1
     .word BOOKSHELF_MESSAGE2, 0, 0, 0
-    .byte 1, 0, OPCODE_NOP, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset
+    .byte 1, 0, OPCODE_RESET_TEXT_BOX, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     .byte 32, 0, OPCODE_MOVE_SPRITE_Y, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     .byte 64, 0, OPCODE_MOVE_SPRITE_X, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     .byte 1, 0, OPCODE_SET_SPRITE_FLAGS, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
