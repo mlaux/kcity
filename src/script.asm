@@ -5,7 +5,7 @@
 ; +0: number of frames to wait before continuing
 ;     -1: wait for A button
 ;      0: one-time action
-;    > 0: time delay
+;    > 0: time delay before moving on
 ; +2: opcode
 ; +4..F: up to 12 parameter bytes depending on the type of step, then padding
 ;        to 16 byte boundary
@@ -25,8 +25,14 @@
 ; - change sprite movement to use same direction system as player
 ; - variable length steps using table of lengths?
 
-; stop showing a text box if one is showing
-OPCODE_RESET_TEXT_BOX = 0
+; just wait for the specified amount of frames
+OPCODE_WAIT = 0
+
+step_wait .macro
+    .sint \1
+    .word OPCODE_WAIT
+    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+.endm
 
 ; for text boxes:
 ; +4: x byte (8x8 tile coordinates)
@@ -37,22 +43,77 @@ OPCODE_RESET_TEXT_BOX = 0
 ; height is always 8px * (2 + num lines)
 OPCODE_TEXT_BOX = 1
 
+; TODO: named/default parameters
+step_text_box .macro
+    .sint \1
+    .word OPCODE_TEXT_BOX
+    .byte \2
+    .byte \3
+    .byte \4
+    .byte \5
+    .word \6
+    .word \7
+    .word \8
+    .word \9
+.endm
+
+; hide the currently shown text box and return
+OPCODE_HIDE_TEXT_BOX = 2
+
+step_hide_text_box .macro
+    .sint 0
+    .word OPCODE_HIDE_TEXT_BOX
+    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+.endm
+
 ; sets flip/priority/palette byte in OAM
 ; +4: sprite index (currently 0 to 15)
 ; +5: value to set
-OPCODE_SET_SPRITE_FLAGS = 2
+OPCODE_SET_SPRITE_FLAGS = 3
+
+step_set_sprite_flags .macro
+    .sint 0
+    .word OPCODE_SET_SPRITE_FLAGS
+    .byte \1
+    .byte \2
+    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+.endm
 
 ; sets x/y position of sprite
 ; +4: sprite index
 ; +5: x coordinate in pixels
 ; +6: y coordinate in pixels
-OPCODE_SET_SPRITE_POS = 3
+OPCODE_SET_SPRITE_POS = 4
+
+step_set_sprite_pos .macro
+    .sint 0
+    .word OPCODE_SET_SPRITE_POS
+    .byte \1
+    .byte \2
+    .byte \3
+    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0
+.endm
 
 ; moves the sprite by the given signed value in a direction
 ; +4: sprite index
 ; +5: signed value to add to the position
-OPCODE_MOVE_SPRITE_X = 4
-OPCODE_MOVE_SPRITE_Y = 5
+OPCODE_MOVE_SPRITE_X = 5
+step_move_sprite_x .macro
+    .sint \1
+    .word OPCODE_MOVE_SPRITE_X
+    .byte \2
+    .byte \3
+    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+.endm
+
+OPCODE_MOVE_SPRITE_Y = 6
+step_move_sprite_y .macro
+    .sint \1
+    .word OPCODE_MOVE_SPRITE_Y
+    .byte \2
+    .byte \3
+    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+.endm
 
 ; TODO if lines are always stored contiguously in memory, only need one pointer
 ; and can use the 255 to advance to the next line
@@ -62,23 +123,19 @@ TEST_CHAR3 .text "MMMMMMMMMMMMMMMMMMMMMMMMMM", 255
 TEST_CHAR4 .text "MMMMMMMMMMMMMMMMMMMMMMMMMM", 255
 
 TEST_SCRIPT
-    .byte 10, 0, OPCODE_RESET_TEXT_BOX, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; do nothing for 10 frames
+    #step_wait 10
+    #step_text_box -1, 1, 21, 30, 4, TEST_CHAR, TEST_CHAR2, TEST_CHAR3, TEST_CHAR4
+    #step_hide_text_box
 
-    .byte $ff, $ff, OPCODE_TEXT_BOX, 0, 1, 21, 30, 4 ; text box for 128 frames at (1, 21), width=30 tiles, lines=4
-    .word TEST_CHAR, TEST_CHAR2, TEST_CHAR3, TEST_CHAR4 ; line pointers for text box
-
-    ;.byte 1, 0, OPCODE_SET_SPRITE_POS, 0, 1, $20, $20, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; sprite 1 position 32, 32
-    ;.byte 1, 0, OPCODE_SET_SPRITE_FLAGS, 0, 1, $3a, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; sprite 1 flags $3a
-    ;.byte $20, 0, OPCODE_MOVE_SPRITE_X, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-
-    .byte 0, 0, OPCODE_RESET_TEXT_BOX, 0 ; reset
 TEST_SCRIPT_LENGTH = 3
 
+; this gets copied to RAM so it can modify the script with a pointer to the
+; location name that's being entered when the map is loaded
 DISPLAY_LOCATION_NAME_TEMPLATE
-    .byte $8, 0, OPCODE_RESET_TEXT_BOX, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; do nothing for 8 frames
-    .byte $80, 0, OPCODE_TEXT_BOX, 0, 1, 1, 15, 1 ; location name text box at (1, 1), width=15 tiles, lines=1
-    .word $DEAD, 0, 0, 0 ; will be replaced
-    .byte 0, 0, OPCODE_RESET_TEXT_BOX, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ; reset
+    #step_wait 8
+    ; first line pointer is modified
+    #step_text_box $80, 1, 1, 15, 1, $DEAD, 0, 0, 0
+    #step_hide_text_box
 
 DISPLAY_LOCATION_NAME_LENGTH = * - DISPLAY_LOCATION_NAME_TEMPLATE
 
@@ -91,30 +148,26 @@ BOOKSHELF_MESSAGE1 .text "Hey!", 255
 BOOKSHELF_MESSAGE2 .text "Don't look in there.", 255
 
 TEST_OBJECT_SCRIPT
-    .byte $ff, $ff, OPCODE_TEXT_BOX, 0, 1, 21, 30, 1
-    .word OBJECT_DESC, 0, 0, 0
-    .byte 1, 0, OPCODE_RESET_TEXT_BOX, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    #step_text_box -1, 1, 21, 30, 1, OBJECT_DESC, 0, 0, 0
+    #step_hide_text_box
 
 TEST_HAIR_BLEACH
-    .byte $c0, 0, OPCODE_TEXT_BOX, 0, 1, 21, 30, 3
-    .word OBJECT_DESC2_1, EMPTY_STRING, OBJECT_DESC2_2, 0
-    .byte 1, 0, OPCODE_RESET_TEXT_BOX, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    #step_text_box $c0, 1, 21, 30, 3, OBJECT_DESC2_1, EMPTY_STRING, OBJECT_DESC2_2, 0
+    #step_hide_text_box
 
 TEST_REACT_TO_BOOKSHELF
-    .byte 1, 0, OPCODE_SET_SPRITE_POS, 0, 1, 96, 152, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    .byte 1, 0, OPCODE_SET_SPRITE_FLAGS, 0, 1, $3a, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    .byte 8, 0, OPCODE_MOVE_SPRITE_Y, 0, 1, $ff, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    .byte $20, 0, OPCODE_TEXT_BOX, 0, 7, 18, 4, 1
-    .word BOOKSHELF_MESSAGE1, 0, 0, 0
-    .byte 1, 0, OPCODE_RESET_TEXT_BOX, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    .byte 24, 0, OPCODE_MOVE_SPRITE_X, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    .byte 48, 0, OPCODE_MOVE_SPRITE_Y, 0, 1, $ff, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    .byte $80, 0, OPCODE_TEXT_BOX, 0, 1, 21, 30, 1
-    .word BOOKSHELF_MESSAGE2, 0, 0, 0
-    .byte 1, 0, OPCODE_RESET_TEXT_BOX, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    .byte 32, 0, OPCODE_MOVE_SPRITE_Y, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    .byte 64, 0, OPCODE_MOVE_SPRITE_X, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    .byte 1, 0, OPCODE_SET_SPRITE_FLAGS, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    #step_set_sprite_pos 1, 96, 152
+    #step_set_sprite_flags 1, $3a
+    #step_move_sprite_y 8, 1, $ff
+    #step_text_box $20, 7, 18, 4, 1, BOOKSHELF_MESSAGE1, 0, 0, 0
+    #step_move_sprite_x 24, 1, 1
+    #step_hide_text_box
+    #step_move_sprite_y 48, 1, $ff
+    #step_text_box $80, 1, 21, 30, 1, BOOKSHELF_MESSAGE2, 0, 0, 0
+    #step_hide_text_box
+    #step_move_sprite_y 32, 1, 1
+    #step_move_sprite_x 64, 1, 1
+    #step_set_sprite_flags 1, 0
 
 OBJECT_SCRIPTS .word TEST_OBJECT_SCRIPT, TEST_HAIR_BLEACH, TEST_REACT_TO_BOOKSHELF
 OBJECT_SCRIPT_LENGTHS .word 2, 2, 12
@@ -128,7 +181,8 @@ load_sprite_byte_index .macro
 .endm
 
 ; can eliminate some redundancy in the implementations of these
-script_operations .word op_none, op_text_box, op_set_sprite_flags, op_set_sprite_position, op_move_sprite_x, op_move_sprite_y
+script_operations
+    .word op_none, op_text_box, op_hide_text_box, op_set_sprite_flags, op_set_sprite_position, op_move_sprite_x, op_move_sprite_y
 
 copy_ram_scripts
 .as
@@ -225,7 +279,9 @@ _run_step
     jmp (script_operations, x)
 
 op_none
-    ; 0 = reset everything
+    rts
+
+op_hide_text_box
     stz text_box_enabled
     rts
 
