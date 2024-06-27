@@ -23,10 +23,8 @@ player_init
     lda #$38
     sta player_visibility_flags
 
-    lda #$42
+    lda #$64
     sta sprites_id + 2
-    ;lda #$3a
-    ;sta sprites_flag + 2
 
     inc player_locked
 
@@ -134,7 +132,7 @@ move_player
     asl
     tax
     inx ; frame 1 in each animation group is idle
-    lda PLAYER_SPRITE_TABLE - 2, x
+    lda WALK_CYCLE_TABLE - 2, x
     and #$ff
     sta player_sprite_id
     lda #$1
@@ -150,7 +148,7 @@ _starting_to_move
     asl
     asl
     tax
-    lda PLAYER_SPRITE_TABLE - 2, x
+    lda WALK_CYCLE_TABLE - 2, x
     and #$ff
     sta player_sprite_id
     stz player_animation_index
@@ -233,7 +231,7 @@ animate_player
     and #PLAYER_ANIMATION_SPEED
     bne +
 
-    ; player_sprite_id = PLAYER_SPRITE_TABLE[(player_direction - 1) << 2 + player_animation_index]
+    ; player_sprite_id = WALK_CYCLE_TABLE[(player_direction - 1) << 2 + player_animation_index]
     lda player_direction
     and #$ff
     dec a
@@ -242,7 +240,7 @@ animate_player
     clc
     adc player_animation_index
     tax
-    lda PLAYER_SPRITE_TABLE, x
+    lda WALK_CYCLE_TABLE, x
     and #$ff
     sta player_sprite_id
 
@@ -253,6 +251,64 @@ animate_player
     sta player_animation_index
 
 +   rts
+
+
+animate_sprite
+.al
+.xl
++   tya
+    asl
+    tay
+
+    ; cycle_index = (sprites_direction[y] - 1) << 2 + sprites_animation_index[y]
+    ; sprites_id[y] = SPRITE_BASE_IDS[y] + WALK_CYCLE_TABLE[cycle_index]
+    lda sprites_direction, y
+    and #$ff
+    bne +
+    
+    ; if direction = 0 try previous direction so it can set a final idle frame
+    lda sprites_previous_direction, y
+    and #$ff
+    bne +
+    rts
+
++   dec a
+    asl
+    asl
+    clc
+    adc sprites_animation_index, y
+    tax
+    lda WALK_CYCLE_TABLE, x
+    clc
+    adc SPRITE_BASE_IDS, y
+    and #$ff
+    sta sprites_id, y
+
+    ; if current direction is 0, done
+    lda sprites_direction, y
+    and #$ff
+    bne +
+    rts
+
+    ; if it's not time to go to the next frame, done
++   lda frame_counter
+    and #PLAYER_ANIMATION_SPEED
+    beq +
+    rts
+
+    ; 0123 0123 0123 ...
++   lda sprites_animation_index, y
+    inc a
+    and #$3
+    sta sprites_animation_index, y
+
+    rts
+
+animate_npcs
+.al
+.xl
+    ldy #1
+    jmp animate_sprite
 
 ; send over the updated data calculated by move_player
 ; parameters: none

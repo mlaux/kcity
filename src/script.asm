@@ -18,6 +18,7 @@
 ; $3: set sprite position
 ; $4: add/sub sprite x
 ; $5: add/sub sprite y
+; $6: set sprite direction
 ; TODO:
 ; $6: lock/unlock player
 ; $7: set variable
@@ -115,6 +116,19 @@ step_move_sprite_y .macro
     .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 .endm
 
+; sets the direction (calculates the offset into the walk cycle)
+; eventually will be used for other animations too?
+; +4: sprite index
+; +5: direction
+OPCODE_SET_SPRITE_DIRECTION = 7
+step_set_sprite_direction .macro
+    .sint 0
+    .word OPCODE_SET_SPRITE_DIRECTION
+    .byte \1
+    .byte \2
+    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+.endm
+
 ; TODO if lines are always stored contiguously in memory, only need one pointer
 ; and can use the 255 to advance to the next line
 TEST_CHAR .text "Just a sample text box to test tile memory usage", 255
@@ -123,11 +137,15 @@ TEST_CHAR3 .text "MMMMMMMMMMMMMMMMMMMMMMMMMM", 255
 TEST_CHAR4 .text "MMMMMMMMMMMMMMMMMMMMMMMMMM", 255
 
 TEST_SCRIPT
-    #step_wait 10
-    #step_text_box -1, 1, 21, 30, 4, TEST_CHAR, TEST_CHAR2, TEST_CHAR3, TEST_CHAR4
-    #step_hide_text_box
+    ; #step_wait 10
 
-TEST_SCRIPT_LENGTH = 3
+    ; #step_set_sprite_pos 1, 96, 152
+    ; #step_set_sprite_flags 1, $3a
+    ; #step_set_sprite_direction 1, 3
+    ; #step_text_box -1, 1, 21, 30, 4, TEST_CHAR, TEST_CHAR2, TEST_CHAR3, TEST_CHAR4
+    ; #step_hide_text_box
+
+TEST_SCRIPT_LENGTH = 0
 
 ; this gets copied to RAM so it can modify the script with a pointer to the
 ; location name that's being entered when the map is loaded
@@ -157,20 +175,28 @@ TEST_HAIR_BLEACH
 
 TEST_REACT_TO_BOOKSHELF
     #step_set_sprite_pos 1, 96, 152
+    #step_set_sprite_direction 1, PLAYER_DIRECTION_UP
     #step_set_sprite_flags 1, $3a
     #step_move_sprite_y 8, 1, $ff
+    #step_set_sprite_direction 1, 0
     #step_text_box $20, 7, 18, 4, 1, BOOKSHELF_MESSAGE1, 0, 0, 0
+    #step_set_sprite_direction 1, PLAYER_DIRECTION_RIGHT
     #step_move_sprite_x 24, 1, 1
+    #step_set_sprite_direction 1, 0
     #step_hide_text_box
+    #step_set_sprite_direction 1, PLAYER_DIRECTION_UP
     #step_move_sprite_y 48, 1, $ff
+    #step_set_sprite_direction 1, 0
     #step_text_box $80, 1, 21, 30, 1, BOOKSHELF_MESSAGE2, 0, 0, 0
     #step_hide_text_box
+    #step_set_sprite_direction 1, PLAYER_DIRECTION_DOWN
     #step_move_sprite_y 32, 1, 1
+    #step_set_sprite_direction 1, PLAYER_DIRECTION_RIGHT
     #step_move_sprite_x 64, 1, 1
     #step_set_sprite_flags 1, 0
 
 OBJECT_SCRIPTS .word TEST_OBJECT_SCRIPT, TEST_HAIR_BLEACH, TEST_REACT_TO_BOOKSHELF
-OBJECT_SCRIPT_LENGTHS .word 2, 2, 12
+OBJECT_SCRIPT_LENGTHS .word 2, 2, 20
 
 load_sprite_byte_index .macro
     ; x = sprite_id * 2
@@ -182,7 +208,11 @@ load_sprite_byte_index .macro
 
 ; can eliminate some redundancy in the implementations of these
 script_operations
-    .word op_none, op_text_box, op_hide_text_box, op_set_sprite_flags, op_set_sprite_position, op_move_sprite_x, op_move_sprite_y
+    .word op_none
+    .word op_text_box, op_hide_text_box
+    .word op_set_sprite_flags, op_set_sprite_position
+    .word op_move_sprite_x, op_move_sprite_y
+    .word op_set_sprite_direction
 
 copy_ram_scripts
 .as
@@ -268,7 +298,6 @@ _go_to_next_step
     ; if start + length >= frame_counter or duration == -1 and A pressed
     inc script_step
     stz script_step_start_frame
-    rts
 
 _run_step
     ldy #$2
@@ -350,5 +379,23 @@ op_move_sprite_y
     clc
     adc (script_element_ptr), y
     sta sprites_y, x
+
+    rts
+
+op_set_sprite_direction
+    #load_sprite_byte_index
+
+    rep #$20
+    lda sprites_direction, x
+    sta sprites_previous_direction, x
+    ldy #$5
+    lda (script_element_ptr), y
+    and #$ff
+    bne +
+
+    stz sprites_animation_index, x
+    inc sprites_animation_index, x
+
++   sta sprites_direction, x
 
     rts

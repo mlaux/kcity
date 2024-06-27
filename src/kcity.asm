@@ -107,17 +107,20 @@ sprites_x .fill 2 * NUM_OAM_ENTRIES
 sprites_y .fill 2 * NUM_OAM_ENTRIES
 sprites_id .fill 2 * NUM_OAM_ENTRIES
 sprites_flag .fill 2 * NUM_OAM_ENTRIES
+sprites_direction .fill 2 * NUM_OAM_ENTRIES
+sprites_previous_direction .fill 2 * NUM_OAM_ENTRIES
+sprites_animation_index .fill 2 * NUM_OAM_ENTRIES
 
 ; player is the first entry in the above tables
 player_x = sprites_x
 player_y = sprites_y
 player_sprite_id = sprites_id
 player_visibility_flags = sprites_flag
+player_direction = sprites_direction
+player_previous_direction = sprites_previous_direction
+player_animation_index = sprites_animation_index
 
 ; for calculating animation
-player_direction .word ?
-player_previous_direction .word ?
-player_animation_index .word ?
 player_locked .word ?
 
 text_box_enabled .word ?

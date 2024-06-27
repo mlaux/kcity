@@ -110,6 +110,8 @@ main
     jsr read_input
     jsr move_player
     jsr run_script
+    rep #$20
+    jsr animate_npcs
     jsr vwf_frame_loop
 
     ; measure CPU time in scanlines
