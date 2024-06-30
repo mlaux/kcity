@@ -42,6 +42,8 @@ step_wait .macro
 ; +7: number of lines (1-4)
 ; +8..F: up to 4 line pointers
 ; height is always 8px * (2 + num lines)
+; TODO if lines are always stored contiguously in memory, only need one pointer
+; and can use the 255 to advance to the next line
 OPCODE_TEXT_BOX = 1
 
 ; TODO: named/default parameters
@@ -128,24 +130,6 @@ step_set_sprite_direction .macro
     .byte \2
     .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 .endm
-
-; TODO if lines are always stored contiguously in memory, only need one pointer
-; and can use the 255 to advance to the next line
-TEST_CHAR .text "Just a sample text box to test tile memory usage", 255
-TEST_CHAR2 .text "MMMMMMMMMMMMMMMMMMMMMMMMMM", 255
-TEST_CHAR3 .text "MMMMMMMMMMMMMMMMMMMMMMMMMM", 255
-TEST_CHAR4 .text "MMMMMMMMMMMMMMMMMMMMMMMMMM", 255
-
-TEST_SCRIPT
-    ; #step_wait 10
-
-    ; #step_set_sprite_pos 1, 96, 152
-    ; #step_set_sprite_flags 1, $3a
-    ; #step_set_sprite_direction 1, 3
-    ; #step_text_box -1, 1, 21, 30, 4, TEST_CHAR, TEST_CHAR2, TEST_CHAR3, TEST_CHAR4
-    ; #step_hide_text_box
-
-TEST_SCRIPT_LENGTH = 0
 
 ; this gets copied to RAM so it can modify the script with a pointer to the
 ; location name that's being entered when the map is loaded

@@ -79,10 +79,6 @@ RESET
     lda #$1
     sta effect_speed
 
-    ldx #TEST_SCRIPT
-    ldy #TEST_SCRIPT_LENGTH
-    jsr set_script
-
     ; initialization done, enable interrupts and auto joypad reading
     sep #$20
     lda #$81
