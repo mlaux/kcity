@@ -97,10 +97,9 @@ text_index .word ?
 ; pointer to string that's being drawn
 current_text .word ?
 
-; unused so far
 script_step .word ?
 script_length .word ?
-script_step_start_frame .word ?
+script_step_time_remaining .word ?
 
 ; for all sprites including player
 sprites_x .fill 2 * NUM_OAM_ENTRIES

@@ -166,6 +166,9 @@ BOOKSHELF_MESSAGE1 .text "Hey!", 255
 BOOKSHELF_MESSAGE2 .text "Don't look in there.", 255
 
 TEST_OBJECT_SCRIPT
+    ; bug: if the script was triggered by pressing A, that A press would
+    ; immediately dismiss the indeterminate text box, so wait a frame
+    #step_wait 1
     #step_text_box -1, 1, 21, 30, 1, OBJECT_DESC, 0, 0, 0
     #step_hide_text_box
 
@@ -196,7 +199,7 @@ TEST_REACT_TO_BOOKSHELF
     #step_set_sprite_flags 1, 0
 
 OBJECT_SCRIPTS .word TEST_OBJECT_SCRIPT, TEST_HAIR_BLEACH, TEST_REACT_TO_BOOKSHELF
-OBJECT_SCRIPT_LENGTHS .word 2, 2, 20
+OBJECT_SCRIPT_LENGTHS .word 3, 2, 20
 
 load_sprite_byte_index .macro
     ; x = sprite_id * 2
@@ -235,86 +238,85 @@ set_script
     lda script_ptr
     bne +
     stx script_ptr
+    stx script_element_ptr
     sty script_length
+    lda (script_element_ptr)
+    sta script_step_time_remaining
 +   rts
 
-; to run a script store its address in script_ptr and the number of elements in script_length
-run_script
+run_script_v2
 .al
 .xl
     lda script_ptr
-    bne +
+    bne _check_script_end
     rts
 
-+   lda script_step
+_check_script_end
+    lda script_step
     cmp script_length
-    bne +
+    bne _run_step
     stz script_ptr
     stz script_element_ptr
-    stz script_length
     stz script_step
-    stz script_step_start_frame
+    stz script_length
     rts
-
-+   asl
-    asl
-    asl
-    asl
-    clc
-    adc script_ptr
-    sta script_element_ptr
-
-    lda script_step_start_frame
-    bne _check_next_step_conditions
-
-    ; if 0, the step started on this frame, need to set the
-    ; script_set_start_frame = current_frame
-    lda frame_counter
-    sta script_step_start_frame
-    ; skip expiration checks because A button might still be set from
-    ; interacting with an object to start this step!
-    bra _run_step
-
-    ; check for -1 length
-_check_next_step_conditions
-    lda (script_element_ptr)
-    cmp #$ffff
-    bne _check_time
-
-    lda joypad_new
-    bit #A_BUTTON
-    bne _go_to_next_step
-    bra _run_step
-
-    ; not indeterminate
-_check_time
-    lda (script_element_ptr)
-    clc
-    adc script_step_start_frame
-    cmp frame_counter
-    bcs _run_step
-
-_go_to_next_step
-    ; if start + length >= frame_counter or duration == -1 and A pressed
-    inc script_step
-    stz script_step_start_frame
 
 _run_step
     ldy #$2
     lda (script_element_ptr), y
     asl
     tax
+    pea #_done_with_step - 1
     sep #$20
     jmp (script_operations, x)
 
+_done_with_step
+    rep #$20
+    ; check for -1 length
+    lda script_step_time_remaining
+    cmp #$ffff
+    bne _check_time
+
+    lda joypad_new
+    bit #A_BUTTON
+    bne _go_to_next_step
+    rts
+
+    ; not indeterminate
+_check_time
+    dec script_step_time_remaining
+    bmi _go_to_next_step
+    rts
+
+_go_to_next_step
+    inc script_step
+    lda script_step
+    cmp script_length
+    bne +
+    rts
+
++   lda script_element_ptr
+    clc
+    adc #$10
+    sta script_element_ptr
+    lda (script_element_ptr)
+    sta script_step_time_remaining
+    bra _run_step
+
 op_none
+.as
+.xl
     rts
 
 op_hide_text_box
+.as
+.xl
     stz text_box_enabled
     rts
 
 op_text_box
+.as
+.xl
     ldy #$4
     lda (script_element_ptr), y
     sta text_box_x
@@ -339,6 +341,8 @@ op_text_box
     rts
 
 op_set_sprite_flags
+.as
+.xl
     #load_sprite_byte_index
 
     ldy #$5
@@ -348,6 +352,8 @@ op_set_sprite_flags
     rts
 
 op_set_sprite_position
+.as
+.xl
     #load_sprite_byte_index
 
     ldy #$5
@@ -361,6 +367,8 @@ op_set_sprite_position
     rts
 
 op_move_sprite_x
+.as
+.xl
     #load_sprite_byte_index
 
     lda sprites_x, x
@@ -372,6 +380,8 @@ op_move_sprite_x
     rts
 
 op_move_sprite_y
+.as
+.xl
     #load_sprite_byte_index
 
     lda sprites_y, x
@@ -383,6 +393,8 @@ op_move_sprite_y
     rts
 
 op_set_sprite_direction
+.as
+.xl
     #load_sprite_byte_index
 
     rep #$20

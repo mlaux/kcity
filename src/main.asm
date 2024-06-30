@@ -79,10 +79,9 @@ RESET
     lda #$1
     sta effect_speed
 
-    lda #TEST_SCRIPT
-    sta script_ptr
-    lda #TEST_SCRIPT_LENGTH
-    sta script_length
+    ldx #TEST_SCRIPT
+    ldy #TEST_SCRIPT_LENGTH
+    jsr set_script
 
     ; initialization done, enable interrupts and auto joypad reading
     sep #$20
@@ -109,7 +108,7 @@ main
 
     jsr read_input
     jsr move_player
-    jsr run_script
+    jsr run_script_v2
     rep #$20
     jsr animate_npcs
     jsr vwf_frame_loop
