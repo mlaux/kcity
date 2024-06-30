@@ -131,6 +131,14 @@ step_set_sprite_direction .macro
     .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 .endm
 
+OPCODE_UNCONDITIONAL_BRANCH = 8
+step_unconditional_branch .macro
+    .sint 0
+    .word OPCODE_UNCONDITIONAL_BRANCH
+    .byte \1
+    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+.endm
+
 ; this gets copied to RAM so it can modify the script with a pointer to the
 ; location name that's being entered when the map is loaded
 DISPLAY_LOCATION_NAME_TEMPLATE
@@ -159,6 +167,11 @@ TEST_OBJECT_SCRIPT
 TEST_HAIR_BLEACH
     #step_text_box $c0, 1, 21, 30, 3, OBJECT_DESC2_1, EMPTY_STRING, OBJECT_DESC2_2, 0
     #step_hide_text_box
+    ; #step_wait 20
+    ; #step_text_box $c0, 1, 21, 30, 1, OBJECT_DESC, 0, 0, 0
+    ; #step_hide_text_box
+    ; #step_wait 20
+    ; #step_unconditional_branch 3
 
 TEST_REACT_TO_BOOKSHELF
     #step_set_sprite_pos 1, 96, 152
@@ -200,6 +213,7 @@ script_operations
     .word op_set_sprite_flags, op_set_sprite_position
     .word op_move_sprite_x, op_move_sprite_y
     .word op_set_sprite_direction
+    .word op_unconditional_branch
 
 copy_ram_scripts
 .as
@@ -394,4 +408,22 @@ op_set_sprite_direction
 
 +   sta sprites_direction, x
 
+    rts
+
+op_unconditional_branch
+.as
+.xl
+    rep #$20
+    ldy #$4
+    lda (script_element_ptr), y
+    ; will be incremented after this runs, so need to decrement here
+    dec a
+    sta script_step
+    asl
+    asl
+    asl
+    asl
+    clc
+    adc script_ptr
+    sta script_element_ptr
     rts
