@@ -168,6 +168,14 @@ step_branch_eq .macro
     .byte 0, 0, 0, 0, 0, 0
 .endm
 
+OPCODE_INC_VARIABLE = $b
+step_inc_variable .macro
+    .sint 0
+    .word OPCODE_INC_VARIABLE
+    .word \1
+    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+.endm
+
 ; this gets copied to RAM so it can modify the script with a pointer to the
 ; location name that's being entered when the map is loaded
 DISPLAY_LOCATION_NAME_TEMPLATE
@@ -182,6 +190,14 @@ EMPTY_STRING .byte $ff
 OBJECT_DESC .text "What could be down here?", 255
 OBJECT_DESC2_1 .text "It's a standard 55-gallon drum.", 255
 OBJECT_DESC2_2 .text "'AMMONIUM PERSULFATE NET WT 412 KG'", 255
+
+BOOK_TITLE1 .text "Investing in Your Future", 255
+BOOK_TITLE2 .text "Artificial Intelligence:", 255
+BOOK_TITLE2_2 .text "The best thing since sliced bread!", 255
+BOOK_TITLE3 .text "Numbers in Science", 255
+
+BOOK_REACTION1 .text "...investing in what future?", 255
+BOOK_REACTION2 .text "Darker than usual... I should see where everyone is.", 255
 
 BOOKSHELF_MESSAGE1 .text "Hey!", 255
 BOOKSHELF_MESSAGE2 .text "Don't look in there.", 255
@@ -225,16 +241,34 @@ TEST_REACT_TO_BOOKSHELF
     #step_set_sprite_flags 1, 0
     #step_set_sprite_direction 1, 0
 
-TEST_VARIABLES
-    #step_set_variable 0, $aa55
-    #step_branch_eq 0, $55aa, 4
-    #step_set_variable 1, $1111
-    #step_unconditional_branch 5
-    #step_set_variable 1, $2222
-    #step_wait 0
+TEST_BOOK1
+    #step_wait 1
+    #step_text_box -1, 1, 21, 30, 1, BOOK_TITLE1, 0, 0, 0
+    #step_hide_text_box
+    #step_inc_variable 0
+TEST_BOOK2
+    #step_wait 1
+    #step_text_box -1, 1, 21, 30, 3, BOOK_TITLE2, EMPTY_STRING, BOOK_TITLE2_2, 0
+    #step_hide_text_box
+    #step_inc_variable 0
+TEST_BOOK3
+    #step_wait 1
+    #step_text_box -1, 1, 21, 30, 1, BOOK_TITLE3, 0, 0, 0
+    #step_hide_text_box
+    ; todo: shouldn't have to have a wait between text boxes
+    #step_wait 1
+    #step_inc_variable 0
+    #step_branch_eq 0, 3, 7
+    #step_unconditional_branch 10
+    #step_text_box -1, 1, 21, 30, 1, BOOK_REACTION1, 0, 0, 0
+    #step_hide_text_box
+    #step_wait 1
+    #step_text_box -1, 1, 21, 30, 1, BOOK_REACTION2, 0, 0, 0
+    #step_hide_text_box
+    #step_wait 1
 
-OBJECT_SCRIPTS .word TEST_OBJECT_SCRIPT, TEST_HAIR_BLEACH, TEST_REACT_TO_BOOKSHELF, TEST_VARIABLES
-OBJECT_SCRIPT_LENGTHS .word 3, 2, 21, 6
+OBJECT_SCRIPTS .word TEST_OBJECT_SCRIPT, TEST_HAIR_BLEACH, TEST_REACT_TO_BOOKSHELF, TEST_BOOK1, TEST_BOOK2, TEST_BOOK3
+OBJECT_SCRIPT_LENGTHS .word 3, 2, 21, 4, 4, 13
 
 load_sprite_byte_index .macro
     ; x = sprite_id * 2
@@ -254,6 +288,7 @@ script_operations
     .word op_unconditional_branch
     .word op_set_variable
     .word op_branch_eq
+    .word op_inc_variable
 
 copy_ram_scripts
 .as
@@ -503,3 +538,14 @@ op_branch_eq
     dec a
     jmp set_script_step
 +   rts
+
+op_inc_variable
+.as
+.xl
+    rep #$20
+    ldy #$4
+    lda (script_element_ptr), y
+    asl
+    tax
+    inc script_storage, x
+    rts
