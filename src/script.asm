@@ -14,11 +14,15 @@
 ; script opcodes:
 ; $0: reset text box
 ; $1: show text box
-; $2: set sprite flags
-; $3: set sprite position
-; $4: add/sub sprite x
-; $5: add/sub sprite y
-; $6: set sprite direction
+; $2: hide text box
+; $3: set sprite flags
+; $4: set sprite position
+; $5: add/sub sprite x
+; $6: add/sub sprite y
+; $7: set sprite direction
+; $8: unconditional branch
+; $9: set variable
+; $a: branch if equal
 ; TODO:
 ; $6: lock/unlock player
 ; $7: set variable
@@ -131,12 +135,37 @@ step_set_sprite_direction .macro
     .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 .endm
 
+; +4: step to branch to
 OPCODE_UNCONDITIONAL_BRANCH = 8
 step_unconditional_branch .macro
     .sint 0
     .word OPCODE_UNCONDITIONAL_BRANCH
-    .byte \1
-    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    .word \1
+    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+.endm
+
+; +4: variable slot
+; +6: the value
+OPCODE_SET_VARIABLE = 9
+step_set_variable .macro
+    .sint 0
+    .word OPCODE_SET_VARIABLE
+    .word \1
+    .word \2
+    .byte 0, 0, 0, 0, 0, 0, 0, 0
+.endm
+
+; +4: variable slot
+; +6: value to compare
+; +8: step to branch to
+OPCODE_BRANCH_EQ = $a
+step_branch_eq .macro
+    .sint 0
+    .word OPCODE_BRANCH_EQ
+    .word \1
+    .word \2
+    .word \3
+    .byte 0, 0, 0, 0, 0, 0
 .endm
 
 ; this gets copied to RAM so it can modify the script with a pointer to the
@@ -194,9 +223,18 @@ TEST_REACT_TO_BOOKSHELF
     #step_set_sprite_direction 1, PLAYER_DIRECTION_RIGHT
     #step_move_sprite_x 64, 1, 1
     #step_set_sprite_flags 1, 0
+    #step_set_sprite_direction 1, 0
 
-OBJECT_SCRIPTS .word TEST_OBJECT_SCRIPT, TEST_HAIR_BLEACH, TEST_REACT_TO_BOOKSHELF
-OBJECT_SCRIPT_LENGTHS .word 3, 2, 20
+TEST_VARIABLES
+    #step_set_variable 0, $aa55
+    #step_branch_eq 0, $55aa, 4
+    #step_set_variable 1, $1111
+    #step_unconditional_branch 5
+    #step_set_variable 1, $2222
+    #step_wait 0
+
+OBJECT_SCRIPTS .word TEST_OBJECT_SCRIPT, TEST_HAIR_BLEACH, TEST_REACT_TO_BOOKSHELF, TEST_VARIABLES
+OBJECT_SCRIPT_LENGTHS .word 3, 2, 21, 6
 
 load_sprite_byte_index .macro
     ; x = sprite_id * 2
@@ -214,6 +252,8 @@ script_operations
     .word op_move_sprite_x, op_move_sprite_y
     .word op_set_sprite_direction
     .word op_unconditional_branch
+    .word op_set_variable
+    .word op_branch_eq
 
 copy_ram_scripts
 .as
@@ -241,6 +281,19 @@ set_script
     lda (script_element_ptr)
     sta script_step_time_remaining
 +   rts
+
+set_script_step
+.al
+.xl
+    sta script_step
+    asl
+    asl
+    asl
+    asl
+    clc
+    adc script_ptr
+    sta script_element_ptr
+    rts
 
 run_script_v2
 .al
@@ -418,12 +471,35 @@ op_unconditional_branch
     lda (script_element_ptr), y
     ; will be incremented after this runs, so need to decrement here
     dec a
-    sta script_step
+    jmp set_script_step
+
+op_set_variable
+.as
+.xl
+    rep #$20
+    ldy #$4
+    lda (script_element_ptr), y
     asl
-    asl
-    asl
-    asl
-    clc
-    adc script_ptr
-    sta script_element_ptr
+    tax
+    ldy #$6
+    lda (script_element_ptr), y
+    sta script_storage, x
     rts
+
+op_branch_eq
+.as
+.xl
+    rep #$20
+    ldy #$4
+    lda (script_element_ptr), y
+    asl
+    tax
+    ldy #$6
+    lda (script_element_ptr), y
+    cmp script_storage, x
+    bne +
+    ldy #$8
+    lda (script_element_ptr), y
+    dec a
+    jmp set_script_step
++   rts

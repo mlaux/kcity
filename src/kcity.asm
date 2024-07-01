@@ -101,6 +101,8 @@ script_step .word ?
 script_length .word ?
 script_step_time_remaining .word ?
 
+script_storage .fill $20
+
 ; for all sprites including player
 sprites_x .fill 2 * NUM_OAM_ENTRIES
 sprites_y .fill 2 * NUM_OAM_ENTRIES

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="16" height="16" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="1">
  <tileset firstgid="1" source="indoor.tsx"/>
+ <tileset firstgid="78" source="oga test.tsx"/>
  <layer id="2" name="floor" width="16" height="16">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -68,7 +69,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,29,30,30,30,30,30,30,30,30,31,0,0,0,
-0,0,0,36,0,0,0,0,0,0,0,0,38,0,0,0,
+0,0,0,36,0,0,0,0,321,321,321,0,38,0,0,0,
 0,0,0,36,0,0,0,0,0,0,0,0,38,0,0,0,
 0,0,0,36,0,0,0,0,0,29,44,44,45,0,0,0,
 0,0,0,36,0,0,0,0,0,0,0,0,38,0,0,0,
