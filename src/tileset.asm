@@ -77,7 +77,8 @@ map_run_warp
     sep #$20
     lda #$80
     sta VMAIN
-    stz DMAADDRBANK
+    lda #`TEST_TILEMAP
+    sta DMAADDRBANK
 
     lda #1
     sta MDMAEN

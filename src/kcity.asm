@@ -155,11 +155,19 @@ oam_data_aux .fill OAM_AUX_LENGTH
 .cerror * > $10000, "bank00 too long"
 .here
 
-.logical $10000
+.logical $18000
 .dsection bank01
 .section bank01
 .binary "spc700/kcity-audio.sfc", $1000, $8000
 .endsection bank01
+.here
+
+.logical $28000
+.dsection bank02
+.section bank02
+.include "bank02.asm"
+.endsection bank02
+.cerror * > $30000, "bank02 too long"
 .here
 
 ; 128k minus one byte

@@ -9,6 +9,14 @@ PLAYER_DIRECTION_UP = 4
 
 PLAYER_SIZE = 16
 
+; hardcoding for each slot for now
+SPRITE_BASE_IDS .word 0, $40
+
+; OAM sprite ids for each direction
+; the first in a group is left foot forward, then idle, then right foot forward, then idle again
+;                      |     right     |     down      |     left      |        up       |
+WALK_CYCLE_TABLE .byte $c, $e, $20, $e, $0, $2, $4, $2, $6, $8, $a, $8, $22, $24, $26, $24
+
 MOVEMENT_JUMP_TABLE .word go_right, go_down, go_left, go_up
 
 player_init
