@@ -68,7 +68,7 @@ step_text_box .macro
 OPCODE_HIDE_TEXT_BOX = 2
 
 step_hide_text_box .macro
-    .sint 0
+    .sint 1
     .word OPCODE_HIDE_TEXT_BOX
     .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 .endm
@@ -255,20 +255,16 @@ TEST_BOOK3
     #step_wait 1
     #step_text_box -1, 1, 21, 30, 1, BOOK_TITLE3, 0, 0, 0
     #step_hide_text_box
-    ; todo: shouldn't have to have a wait between text boxes
-    #step_wait 1
     #step_inc_variable 0
-    #step_branch_eq 0, 3, 7
-    #step_unconditional_branch 10
+    #step_branch_eq 0, 3, 6
+    #step_unconditional_branch 8
     #step_text_box -1, 1, 21, 30, 1, BOOK_REACTION1, 0, 0, 0
     #step_hide_text_box
-    #step_wait 1
     #step_text_box -1, 1, 21, 30, 1, BOOK_REACTION2, 0, 0, 0
     #step_hide_text_box
-    #step_wait 1
 
 OBJECT_SCRIPTS .word TEST_OBJECT_SCRIPT, TEST_HAIR_BLEACH, TEST_REACT_TO_BOOKSHELF, TEST_BOOK1, TEST_BOOK2, TEST_BOOK3
-OBJECT_SCRIPT_LENGTHS .word 3, 2, 21, 4, 4, 13
+OBJECT_SCRIPT_LENGTHS .word 3, 2, 21, 4, 4, 10
 
 load_sprite_byte_index .macro
     ; x = sprite_id * 2
