@@ -390,12 +390,6 @@ op_none
 .xl
     rts
 
-op_hide_text_box
-.as
-.xl
-    stz text_box_enabled
-    rts
-
 op_text_box
 .as
 .xl
@@ -420,6 +414,12 @@ op_text_box
     adc #8
     sta text_box_lines
 
+    rts
+
+op_hide_text_box
+.as
+.xl
+    stz text_box_enabled
     rts
 
 op_set_sprite_flags
