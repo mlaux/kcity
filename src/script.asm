@@ -23,10 +23,8 @@
 ; $8: unconditional branch
 ; $9: set variable
 ; $a: branch if equal
-; TODO:
-; $6: lock/unlock player
-; $7: set variable
-; $8..?: conditional branch
+; $b: increment variable
+; $c: 
 ; - change sprite movement to use same direction system as player
 ; - variable length steps using table of lengths?
 
@@ -176,6 +174,14 @@ step_inc_variable .macro
     .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 .endm
 
+OPCODE_SET_PLAYER_LOCKED = $c
+step_set_player_locked .macro
+    .sint 0
+    .word OPCODE_SET_PLAYER_LOCKED
+    .word \1
+    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+.endm
+
 ; this gets copied to RAM so it can modify the script with a pointer to the
 ; location name that's being entered when the map is loaded
 DISPLAY_LOCATION_NAME_TEMPLATE
@@ -219,6 +225,7 @@ TEST_HAIR_BLEACH
     ; #step_unconditional_branch 3
 
 TEST_REACT_TO_BOOKSHELF
+    #step_set_player_locked 1
     #step_set_sprite_pos 1, 96, 152
     #step_set_sprite_direction 1, PLAYER_DIRECTION_UP
     #step_set_sprite_flags 1, $3a
@@ -240,6 +247,7 @@ TEST_REACT_TO_BOOKSHELF
     #step_move_sprite_x 64, 1, 1
     #step_set_sprite_flags 1, 0
     #step_set_sprite_direction 1, 0
+    #step_set_player_locked 0
 
 TEST_BOOK1
     #step_wait 1
@@ -264,7 +272,7 @@ TEST_BOOK3
     #step_hide_text_box
 
 OBJECT_SCRIPTS .word TEST_OBJECT_SCRIPT, TEST_HAIR_BLEACH, TEST_REACT_TO_BOOKSHELF, TEST_BOOK1, TEST_BOOK2, TEST_BOOK3
-OBJECT_SCRIPT_LENGTHS .word 3, 2, 21, 4, 4, 10
+OBJECT_SCRIPT_LENGTHS .word 3, 2, 23, 4, 4, 10
 
 load_sprite_byte_index .macro
     ; x = sprite_id * 2
@@ -285,6 +293,7 @@ script_operations
     .word op_set_variable
     .word op_branch_eq
     .word op_inc_variable
+    .word op_set_player_locked
 
 copy_ram_scripts
 .as
@@ -488,6 +497,7 @@ op_set_sprite_direction
     bne +
 
     stz sprites_animation_index, x
+    ; inc to idle frame
     inc sprites_animation_index, x
 
 +   sta sprites_direction, x
@@ -544,4 +554,14 @@ op_inc_variable
     asl
     tax
     inc script_storage, x
+    rts
+
+op_set_player_locked
+.as
+.xl
+    rep #$20
+    ldy #$4
+    lda (script_element_ptr), y
+    sta player_locked
+
     rts
