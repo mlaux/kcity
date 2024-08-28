@@ -24,7 +24,7 @@
 ; $9: set variable
 ; $a: branch if equal
 ; $b: increment variable
-; $c: 
+; $c: lock/unlock player
 ; - change sprite movement to use same direction system as player
 ; - variable length steps using table of lengths?
 

@@ -26,18 +26,20 @@
 .dsection header
 .section header
 ZERO
-    .fill 16,0
-    .text "K****** walled city"
+    ; reference: section 1-2-14 of SNES Development Manual, Book 1
+    ; "Software Submission Requirements: ROM Registration Data Specification"
+    .fill 16, 0  ; extended data, not using it
+    .text "K****** walled city" ; game title
     .fill $ffd5 - *, $20 ; pad title with space
-    .byte $20   ; Mapping
-    .byte $00   ; Rom
-    .byte $07   ; 128K
-    .byte $00   ; 0 SRAM
-    .byte $00   ; NTSC-J
-    .byte $33   ; Version 3
+    .byte $20   ; mapping mode 20, normal speed
+    .byte $02   ; ROM + SRAM + battery
+    .byte $07   ; 2 << 7 = 128 KB (1 megabit) ROM size
+    .byte $01   ; 2 << 1 = 2 KB (16 kilobits) SRAM size
+    .byte $01   ; destination code = north america
+    .byte $33   ; "fixed value"
     .byte $00   ; rom version 0
-    .word $FFFF ; complement
-    .word $0000 ; CRC
+    .word $ffff ; checksum complement
+    .word $0000 ; checksum
 .endsection
 
 ; 65816 vectors
