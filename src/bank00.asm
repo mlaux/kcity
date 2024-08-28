@@ -8,6 +8,7 @@
 .include "effect.asm"
 .include "player.asm"
 .include "script.asm"
+.include "save.asm"
 .endsection
 
 .dsection data

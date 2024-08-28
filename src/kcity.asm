@@ -134,6 +134,9 @@ text_box_width .word ?
 text_box_num_lines .word ?
 
 target_warp_map .word ?
+target_player_x .word ?
+target_player_y .word ?
+current_map_id .word ?
 location_name_script .fill DISPLAY_LOCATION_NAME_LENGTH
 
 NUM_OAM_ENTRIES = 16
@@ -143,6 +146,14 @@ oam_data_main .fill OAM_MAIN_LENGTH
 oam_data_aux .fill OAM_AUX_LENGTH
 
 .warn "lowram end: ", *
+
+* = $700000
+
+sram_map_id .word ?
+sram_player_x .word ?
+sram_player_y .word ?
+
+.warn "sram end: ", *
 
 * = $0
 

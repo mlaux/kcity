@@ -25,43 +25,51 @@ tileset_init
     rts
 
 map_set_warp
-    php
-    sep #$20
+.al
+.xl
     sta target_warp_map
+    inc player_locked
     lda #EFFECT_FADE_OUT
     sta effect_id
     lda #$1
     sta effect_speed
-    inc player_locked
-    plp
+    lda #$f
+    sta effect_level
     rts
 
 ; i can't tell if this is janky or good
 map_run_warp
-.as
+.al
 .xl
+    php
+    rep #$20
+    
     lda target_warp_map
     bne +
+    plp
     rts
 
 +   lda effect_id
     beq +
     ; still fading out
+    plp
     rts
 
     ; turn the screen off
-+   lda #$80
++   sep #$20
+    lda #$80
     sta INIDISP
 
     ; if HDMA is enabled it'll interfere with normal DMA on the same channel
     stz HDMAEN
 
-    rep #$30
+    rep #$20
     lda #DMAMODE_PPUDATA
     sta DMAMODE
 
     ; get x set up with offset of this map's data in each array
     lda target_warp_map
+    sta current_map_id
     stz target_warp_map
     and #$ff
     asl
@@ -104,7 +112,6 @@ map_run_warp
     lda #DMAMODE_CGDATA
     sta DMAMODE
 
-    stz player_locked
     lda COLLISION_MAPS - 2, x
     sta collision_map_ptr
 
@@ -127,18 +134,20 @@ map_run_warp
     lda #1
     sta MDMAEN
 
-    ; set initial player coordinates
-    lda START_X - 2, x
-    sta player_x
-    lda START_Y - 2, x
-    sta player_y
+    jsr player_set_initial_position
 
     ; start fade in effect
     lda #EFFECT_FADE_IN
     sta effect_id
+    lda #$1
+    sta effect_speed
+    stz effect_level
 
     ; disable force blank but still 0 brightness
     lda #$0
     sta INIDISP
 
+    stz player_locked
+
+    plp
     rts

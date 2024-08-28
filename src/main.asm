@@ -55,16 +55,6 @@ RESET
     jsr player_init
     jsr copy_ram_scripts
 
-    ; hardcoded load of initial map. don't call map_set_warp because it'll
-    ; initiate a fade-out and lock the player's position, which i don't want
-    lda #2
-    sta target_warp_map
-    jsr map_run_warp
-
-    ; disable force blank, brightness still 0
-    lda #$0
-    sta INIDISP
-
     ; init audio
     jsl Tad_Init
     lda #$1
@@ -74,16 +64,18 @@ RESET
 
     jsr vwf_reset_tiles
 
-    lda #EFFECT_FADE_IN
-    sta effect_id
-    lda #$1
-    sta effect_speed
+    ; hardcoded load of initial map. don't call map_set_warp because it'll
+    ; initiate a fade-out and lock the player's position, which i don't want
+    lda #2
+    sta target_warp_map
+
+    ; this will also disable force blank and set up the fade-in effect
+    jsr map_run_warp
 
     ; initialization done, enable interrupts and auto joypad reading
     sep #$20
     lda #$81
     sta NMITIMEN
-    rep #$20
 
     ; fall through to main loop
 main

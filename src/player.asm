@@ -38,6 +38,38 @@ player_init
 
     rts
 
+; if target_player_x/y are set, sets the position to that
+; otherwise sets to the initial position for the map
+; parameters: X = offset of this map's data in map data arrays (map id << 1)
+player_set_initial_position
+.al
+.xl
+    php
+    rep #$20
+
+    lda target_player_x
+    beq +
+    sta player_x
+    stz target_player_x
+    bra _y
+
++   lda START_X - 2, x
+    sta player_x
+
+_y
+    lda target_player_y
+    beq +
+    sta player_y
+    stz target_player_y
+    bra _done
+
++   lda START_Y - 2, x
+    sta player_y
+
+_done
+    plp
+    rts
+
 ; returns: A = 1 if walking to the tile at the given coordinates is permitted, 0 otherwise
 ; parameters: X = player X in pixel coordinates, Y = player Y (top left corner)
 ; assumes: AXY 16

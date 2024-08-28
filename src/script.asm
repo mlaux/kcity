@@ -193,6 +193,7 @@ DISPLAY_LOCATION_NAME_TEMPLATE
 DISPLAY_LOCATION_NAME_LENGTH = * - DISPLAY_LOCATION_NAME_TEMPLATE
 
 EMPTY_STRING .byte $ff
+MESSAGE_SAVED .text "Saved", 255
 OBJECT_DESC .text "What could be down here?", 255
 OBJECT_DESC2_1 .text "It's a standard 55-gallon drum.", 255
 OBJECT_DESC2_2 .text "'AMMONIUM PERSULFATE NET WT 412 KG'", 255
@@ -207,6 +208,10 @@ BOOK_REACTION2 .text "Darker than usual... I should see where everyone is.", 255
 
 BOOKSHELF_MESSAGE1 .text "Hey!", 255
 BOOKSHELF_MESSAGE2 .text "Don't look in there.", 255
+
+SCRIPT_MESSAGE_SAVED
+    #step_text_box $40, 1, 1, 5, 1, MESSAGE_SAVED, 0, 0, 0
+    #step_hide_text_box
 
 TEST_OBJECT_SCRIPT
     ; bug: if the script was triggered by pressing A, that A press would
