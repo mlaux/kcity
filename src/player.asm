@@ -15,7 +15,8 @@ SPRITE_BASE_IDS .word 0, $40
 ; OAM sprite ids for each direction
 ; the first in a group is left foot forward, then idle, then right foot forward, then idle again
 ;                      |     right     |     down      |     left      |        up       |
-WALK_CYCLE_TABLE .byte $0, $2, $4, $2, $6, $8, $a, $8, $c, $e, $20, $e, $22, $24, $26, $24
+WALK_CYCLE_TABLE .byte $20, $22, $24, $22, $26, $28, $2a, $28, $2c, $2e, $60, $2e, $62, $64, $66, $64
+WALK_CYCLE_TABLE_HEAD .byte $0, $2, $4, $2, $6, $8, $a, $8, $c, $e, $40, $e, $42, $44, $46, $44
 
 MOVEMENT_JUMP_TABLE .word go_right, go_down, go_left, go_up
 
@@ -26,7 +27,7 @@ player_init
     lda #$62
     sta OBJSEL
 
-    lda #$2
+    lda #$28
     sta player_sprite_id
     lda #$38
     sta player_visibility_flags
