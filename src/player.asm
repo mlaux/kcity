@@ -10,13 +10,13 @@ PLAYER_DIRECTION_UP = 4
 PLAYER_SIZE = 16
 
 ; hardcoding for each slot for now
-SPRITE_BASE_IDS .word 0, $40
+SPRITE_BASE_IDS_HEAD .word $0, $0
+SPRITE_BASE_IDS .word $20, $0
 
 ; OAM sprite ids for each direction
 ; the first in a group is left foot forward, then idle, then right foot forward, then idle again
-;                      |     right     |     down      |     left      |        up       |
-WALK_CYCLE_TABLE .byte $20, $22, $24, $22, $26, $28, $2a, $28, $2c, $2e, $60, $2e, $62, $64, $66, $64
-WALK_CYCLE_TABLE_HEAD .byte $0, $2, $4, $2, $6, $8, $a, $8, $c, $e, $40, $e, $42, $44, $46, $44
+;                     |       right       |       down        |       left        |        up        |
+WALK_CYCLE_TABLE .byte $00, $02, $04, $02, $06, $08, $0a, $08, $0c, $0e, $40, $0e, $42, $44, $46, $44
 
 MOVEMENT_JUMP_TABLE .word go_right, go_down, go_left, go_up
 
@@ -174,6 +174,8 @@ move_player
     tax
     inx ; frame 1 in each animation group is idle
     lda WALK_CYCLE_TABLE - 2, x
+    clc
+    adc SPRITE_BASE_IDS ; [0]
     and #$ff
     sta player_sprite_id
     lda #$1
@@ -190,6 +192,8 @@ _starting_to_move
     asl
     tax
     lda WALK_CYCLE_TABLE - 2, x
+    clc
+    adc SPRITE_BASE_IDS ; [0]
     and #$ff
     sta player_sprite_id
     stz player_animation_index
@@ -282,6 +286,8 @@ animate_player
     adc player_animation_index
     tax
     lda WALK_CYCLE_TABLE, x
+    clc
+    adc SPRITE_BASE_IDS ; [0]
     and #$ff
     sta player_sprite_id
 
