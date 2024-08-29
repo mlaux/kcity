@@ -231,27 +231,27 @@ TEST_HAIR_BLEACH
 
 TEST_REACT_TO_BOOKSHELF
     #step_set_player_locked 1
-    #step_set_sprite_pos 1, 96, 152
-    #step_set_sprite_direction 1, PLAYER_DIRECTION_UP
-    #step_set_sprite_flags 1, $3a
-    #step_move_sprite_y 8, 1, $ff
-    #step_set_sprite_direction 1, 0
+    #step_set_sprite_pos 2, 96, 152
+    #step_set_sprite_direction 2, PLAYER_DIRECTION_UP
+    #step_set_sprite_flags 2, $3a
+    #step_move_sprite_y 8, 2, $ff
+    #step_set_sprite_direction 2, 0
     #step_text_box $20, 7, 18, 4, 1, BOOKSHELF_MESSAGE1, 0, 0, 0
-    #step_set_sprite_direction 1, PLAYER_DIRECTION_RIGHT
-    #step_move_sprite_x 24, 1, 1
-    #step_set_sprite_direction 1, 0
+    #step_set_sprite_direction 2, PLAYER_DIRECTION_RIGHT
+    #step_move_sprite_x 24, 2, 1
+    #step_set_sprite_direction 2, 0
     #step_hide_text_box
-    #step_set_sprite_direction 1, PLAYER_DIRECTION_UP
-    #step_move_sprite_y 48, 1, $ff
-    #step_set_sprite_direction 1, 0
+    #step_set_sprite_direction 2, PLAYER_DIRECTION_UP
+    #step_move_sprite_y 48, 2, $ff
+    #step_set_sprite_direction 2, 0
     #step_text_box $80, 1, 21, 30, 1, BOOKSHELF_MESSAGE2, 0, 0, 0
     #step_hide_text_box
-    #step_set_sprite_direction 1, PLAYER_DIRECTION_DOWN
-    #step_move_sprite_y 32, 1, 1
-    #step_set_sprite_direction 1, PLAYER_DIRECTION_RIGHT
-    #step_move_sprite_x 64, 1, 1
-    #step_set_sprite_flags 1, 0
-    #step_set_sprite_direction 1, 0
+    #step_set_sprite_direction 2, PLAYER_DIRECTION_DOWN
+    #step_move_sprite_y 32, 2, 1
+    #step_set_sprite_direction 2, PLAYER_DIRECTION_RIGHT
+    #step_move_sprite_x 64, 2, 1
+    #step_set_sprite_flags 2, 0
+    #step_set_sprite_direction 2, 0
     #step_set_player_locked 0
 
 TEST_BOOK1

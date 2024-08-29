@@ -114,14 +114,19 @@ sprites_animation_index .fill 2 * NUM_OAM_ENTRIES
 
 ; player is the first entry in the above tables
 player_x = sprites_x
+player_x_head = sprites_x + 2
 player_y = sprites_y
+player_y_head = sprites_y + 2
 player_sprite_id = sprites_id
+player_sprite_id_head = sprites_id + 2
 player_visibility_flags = sprites_flag
+player_visibility_flags_head = sprites_flag + 2
+
+; for calculating animation
 player_direction = sprites_direction
 player_previous_direction = sprites_previous_direction
 player_animation_index = sprites_animation_index
 
-; for calculating animation
 player_locked .word ?
 
 text_box_enabled .word ?

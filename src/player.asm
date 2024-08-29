@@ -10,8 +10,8 @@ PLAYER_DIRECTION_UP = 4
 PLAYER_SIZE = 16
 
 ; hardcoding for each slot for now
-SPRITE_BASE_IDS_HEAD .word $0, $0
-SPRITE_BASE_IDS .word $20, $0
+SPRITE_BASE_IDS_FEET .word $20, 0, $a0
+SPRITE_BASE_IDS_HEAD .word $0
 
 ; OAM sprite ids for each direction
 ; the first in a group is left foot forward, then idle, then right foot forward, then idle again
@@ -27,13 +27,19 @@ player_init
     lda #$62
     sta OBJSEL
 
-    lda #$28
+    lda #8
+    clc
+    adc SPRITE_BASE_IDS_FEET
     sta player_sprite_id
+
+    lda #8
+    clc
+    adc SPRITE_BASE_IDS_HEAD
+    sta player_sprite_id_head
+
     lda #$38
     sta player_visibility_flags
-
-    lda #$64
-    sta sprites_id + 2
+    sta player_visibility_flags_head
 
     inc player_locked
 
@@ -51,21 +57,29 @@ player_set_initial_position
     lda target_player_x
     beq +
     sta player_x
+    sta player_x_head
     stz target_player_x
     bra _y
 
 +   lda START_X - 2, x
     sta player_x
+    sta player_x_head
 
 _y
     lda target_player_y
     beq +
     sta player_y
+    sec
+    sbc #$10
+    sta player_y_head
     stz target_player_y
     bra _done
 
 +   lda START_Y - 2, x
     sta player_y
+    sec
+    sbc #$10
+    sta player_y_head
 
 _done
     plp
@@ -174,10 +188,19 @@ move_player
     tax
     inx ; frame 1 in each animation group is idle
     lda WALK_CYCLE_TABLE - 2, x
+    pha
+
     clc
-    adc SPRITE_BASE_IDS ; [0]
+    adc SPRITE_BASE_IDS_FEET ; [0]
     and #$ff
     sta player_sprite_id
+
+    pla
+    clc
+    adc SPRITE_BASE_IDS_HEAD ; [0]
+    and #$ff
+    sta player_sprite_id_head
+
     lda #$1
     sta player_animation_index
 
@@ -192,10 +215,19 @@ _starting_to_move
     asl
     tax
     lda WALK_CYCLE_TABLE - 2, x
+    pha
+
     clc
-    adc SPRITE_BASE_IDS ; [0]
+    adc SPRITE_BASE_IDS_FEET ; [0]
     and #$ff
     sta player_sprite_id
+
+    pla
+    clc
+    adc SPRITE_BASE_IDS_HEAD ; [0]
+    and #$ff
+    sta player_sprite_id_head
+
     stz player_animation_index
 
 _process_movement
@@ -225,6 +257,7 @@ go_right
     beq +
 
     inc player_x
+    inc player_x_head
 +   bra animate_player
 
 go_down
@@ -240,6 +273,7 @@ go_down
     beq +
 
     inc player_y
+    inc player_y_head
 +   bra animate_player
 
 go_left
@@ -255,6 +289,7 @@ go_left
     beq +
 
     dec player_x
+    dec player_x_head
 +   bra animate_player
 
 go_up
@@ -269,6 +304,7 @@ go_up
     beq animate_player
 
     dec player_y
+    dec player_y_head
 
 animate_player
     ; if it's not time to go to the next frame, exit
@@ -286,10 +322,18 @@ animate_player
     adc player_animation_index
     tax
     lda WALK_CYCLE_TABLE, x
+    pha
+
     clc
-    adc SPRITE_BASE_IDS ; [0]
+    adc SPRITE_BASE_IDS_FEET ; [0]
     and #$ff
     sta player_sprite_id
+
+    pla
+    clc
+    adc SPRITE_BASE_IDS_HEAD ; [0]
+    and #$ff
+    sta player_sprite_id_head
 
     ; 0123 0123 0123 ...
     lda player_animation_index
@@ -303,7 +347,7 @@ animate_player
 animate_sprite
 .al
 .xl
-+   tya
+    tya
     asl
     tay
 
@@ -327,7 +371,7 @@ animate_sprite
     tax
     lda WALK_CYCLE_TABLE, x
     clc
-    adc SPRITE_BASE_IDS, y
+    adc SPRITE_BASE_IDS_FEET, y
     and #$ff
     sta sprites_id, y
 
@@ -354,7 +398,7 @@ animate_sprite
 animate_npcs
 .al
 .xl
-    ldy #1
+    ldy #2
     jmp animate_sprite
 
 ; send over the updated data calculated by move_player
