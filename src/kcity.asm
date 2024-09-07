@@ -9,6 +9,64 @@
 ; identity mapping for printable
 .cdef " ~", 0
 
+;when using macros without # or . you need to define them first so it knows what you are on about
+mva	.function value, target
+.proff
+	.if type(value) == list
+		.for i in range(len(value))
+.pron
+			lda value[i]
+			sta target[i]
+.proff
+		.next
+	.else
+.pron
+		lda value
+		sta target
+.proff
+	.endif
+;.endfunction
+.pron
+.endf
+
+mvx	.function value, target
+.proff
+	.if type(value) == list
+		.for i in range(len(value))
+.pron
+			ldx value[i]
+			stx target[i]
+.proff
+		.next
+	.else
+.pron
+		ldx value
+		stx target
+.proff
+	.endif
+;.endfunction
+.pron
+.endf
+
+mvy 	.function value, target
+.proff
+	.if type(value) == list
+		.for i in range(len(value))
+.pron
+			ldy value[i]
+			sty target[i]
+.proff
+		.next
+	.else
+.pron
+		ldy value
+		sty target
+.proff
+	.endif
+;.endfunction
+.pron
+.endf
+
 .include "ppu.asm"
 .include "cpu.asm"
 .include "dma.asm"

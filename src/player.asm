@@ -24,9 +24,7 @@ player_init
 .as
 .xl
     ; enable objs on top layer with base address of $4000
-    lda #$62
-    sta OBJSEL
-
+    mva #$62,OBJSEL
     lda #8
     clc
     adc SPRITE_BASE_IDS_FEET
@@ -37,9 +35,7 @@ player_init
     adc SPRITE_BASE_IDS_HEAD
     sta player_sprite_id_head
 
-    lda #$38
-    sta player_visibility_flags
-    sta player_visibility_flags_head
+    mva #$38,[player_visibility_flags,player_visibility_flags_head]
 
     inc player_locked
 
@@ -60,9 +56,7 @@ player_set_initial_position
     	sta player_x_head
     	stz target_player_x
     	bra _y
-+   lda START_X - 2,x
-    sta player_x
-    sta player_x_head
++   mva START_X - 2,x,[player_x,player_x_head]
 _y
     lda target_player_y
     beq +
@@ -70,10 +64,9 @@ _y
     	sec
     	sbc #$10
     	sta player_y_head
-    	stz target_player_y
+    	stz target_player_y ; ozi's note, this is a dup you can move the stz after the sta player_y then bne to the sec below
     	bra _done
-+   lda START_Y - 2,x
-    sta player_y
++   mva START_Y - 2,x,player_y
     sec
     sbc #$10
     sta player_y_head
@@ -135,8 +128,7 @@ move_player
     lda player_locked
     beq +
     	rts
-+   lda player_direction
-    sta player_previous_direction
++   mva player_direction,player_previous_direction
     stz player_direction
 
     lda joypad_current
@@ -146,29 +138,23 @@ move_player
 
     bit #RIGHT_BUTTON
     beq +
-    	ldx #PLAYER_DIRECTION_RIGHT
-    	stx player_direction
+    	mvx #PLAYER_DIRECTION_RIGHT,player_direction
 +   bit #DOWN_BUTTON
     beq +
-    	ldx #PLAYER_DIRECTION_DOWN
-    	stx player_direction
+    	mvx #PLAYER_DIRECTION_DOWN,player_direction
 +   bit #LEFT_BUTTON
     beq +
-    	ldx #PLAYER_DIRECTION_LEFT
-    	stx player_direction
+    	mvx #PLAYER_DIRECTION_LEFT,player_direction
 +   bit #UP_BUTTON
     beq +
-    	ldx #PLAYER_DIRECTION_UP
-    	stx player_direction
+    	mvx #PLAYER_DIRECTION_UP,player_direction
 +   lda player_direction
     eor player_previous_direction
     ; if same as before, just go straight to processing the input
     beq _process_movement
-
     	; different than before, need to jump to a specific animation frame
     	lda player_direction
     	bne _starting_to_move
-
 			; n -> 0
 			; not moving now but was moving before - skip to second animation frame (idle)
 			lda player_previous_direction
@@ -178,21 +164,17 @@ move_player
 			inx ; frame 1 in each animation group is idle
 			lda WALK_CYCLE_TABLE - 2,x
 			pha
-	  
 				clc
 				adc SPRITE_BASE_IDS_FEET ; [0]
 				and #$ff
 				sta player_sprite_id
-		  
 			pla
 			clc
 			adc SPRITE_BASE_IDS_HEAD ; [0]
 			and #$ff
 			sta player_sprite_id_head
 	  
-			lda #$1
-			sta player_animation_index
-	  
+			mva #$1,player_animation_index	  
 			; done
 			rts
 
@@ -382,33 +364,22 @@ vblank_oam_dma
     ldx #2 * NUM_OAM_ENTRIES - 2
     ; destination
     ldy #4 * NUM_OAM_ENTRIES - 1
--   lda sprites_flag,x
-    sta oam_data_main, y
+-   mva sprites_flag,x,oam_data_main,y
     dey
-    lda sprites_id,x
-    sta oam_data_main, y
+    mva sprites_id,x,oam_data_main,y
     dey
-    lda sprites_y,x
-    sta oam_data_main, y
+    mva sprites_y,x,oam_data_main,y
     dey
-    lda sprites_x,x
-    sta oam_data_main, y
+    mva sprites_x,x,oam_data_main,y
     dey
     dex
     dex
     bpl -
 
-    ldx #0
-    stx OAMADD
-    ldx #DMAMODE_OAMDATA
-    stx DMAMODE
-    ldx #<>oam_data_main
-    stx DMAADDR
-    lda #`oam_data_main
-    sta DMAADDRBANK
-    lda #OAM_MAIN_LENGTH
-    sta DMALEN
-    lda #1
-    sta MDMAEN
-    
+    mvx #0,OAMADD
+    mvx #DMAMODE_OAMDATA,DMAMODE
+    mvx #<>oam_data_main,DMAADDR
+    mva #`oam_data_main,DMAADDRBANK
+    mva #OAM_MAIN_LENGTH,DMALEN
+    mva #1,MDMAEN    
     rts
