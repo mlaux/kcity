@@ -19,7 +19,16 @@ SCREEN_HEIGHT = 224
 
 ; Zero page
 * = $0
+.dsection sZP
+.warn "zero page end: ", *
 
+; Work RAM variables
+; some of these are definitely redundant but made the algorithms easier
+* = $100
+.dsection sWorkRAM
+.warn "lowram end: ", *
+
+.section sZP
 zp0 .word ?
 zp1 .word ?
 ; used from both "main thread" and vblank, todo push if needed to avoid
@@ -27,55 +36,16 @@ zp1 .word ?
 zp2 .word ?
 zp3 .word ?
 
-; text source pointer for VWF routine
-vwf_src .word ?
-; base address of current tile
-vwf_dst .word ?
-; base address of next tile
-vwf_next .word ?
-; font byte currently being shifted/copied
-vwf_font_ptr .word ?
-
 script_ptr .word ?
 script_element_ptr .word ?
 text_box_lines .word ?
 collision_map_ptr .word ?
 facing_object_script .word ?
+.send ;sZP
 
-.warn "zero page end: ", *
 
-; Work RAM variables
-; some of these are definitely redundant but made the algorithms easier
-* = $100
 
-; $700 bytes is enough for 4 full lines of 24 'M's lol
-NUM_TILE_BYTES = $700
-vwf_tiles .fill NUM_TILE_BYTES
-
-; how many chars to draw
-vwf_count .word ?
-
-; the byte currently being processed
-vwf_cur_tile_byte .word ?
-; the character currently being processed, could maybe optimize this away
-vwf_ch .word ?
-
-; the horizontal pixel offset into the current tile
-vwf_offs .word ?
-vwf_remainder .word ?
-
-; return values for text rendering
-vwf_dmasrc .word ?
-vwf_dmasrcbank .word ?
-vwf_dmadst .word ?
-vwf_dmalen .word ?
-vwf_end_of_string .word ?
-
-; current tile pointer for currently rendered string
-vwf_tilemap_dst .word ?
-; current tile id
-; ($20 << 8) | (how many tiles have been written to the tilemap so far)
-vwf_tilemap_id .word ?
+.section sWorkRAM
 
 ; main vs. nmi flag, nmi is skipped if this is 0
 main_loop_done .word ?
@@ -149,8 +119,7 @@ OAM_MAIN_LENGTH = NUM_OAM_ENTRIES * 4
 OAM_AUX_LENGTH = NUM_OAM_ENTRIES / 4
 oam_data_main .fill OAM_MAIN_LENGTH
 oam_data_aux .fill OAM_AUX_LENGTH
-
-.warn "lowram end: ", *
+.send ;sWorkRAM
 
 * = $700000
 
@@ -174,7 +143,7 @@ sram_player_y .word ?
 .logical $18000
 .dsection bank01
 .section bank01
-.binary "spc700/kcity-audio.sfc", $1000, $8000
+;.binary "spc700/kcity-audio.sfc", $1000, $8000
 .endsection bank01
 .here
 
