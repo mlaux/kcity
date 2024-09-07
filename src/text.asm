@@ -17,11 +17,11 @@ vwf .block
 		; $700 bytes is enough for 4 full lines of 24 'M's lol
 		NUM_TILE_BYTES = $700
 		tiles 			.fill NUM_TILE_BYTES
-		count 			.word ? ; how many chars to draw
-		cur_tile_byte 	.word ? ; the byte currently being processed
-		ch 				.word ? ; the character currently being processed, could maybe optimize this away
+		count				.word ? ; how many chars to draw
+		cur_tile_byte	.word ? ; the byte currently being processed
+		ch					.word ? ; the character currently being processed, could maybe optimize this away
 		
-		offs 				.word ? ; the horizontal pixel offset into the current tile
+		offs				.word ? ; the horizontal pixel offset into the current tile
 		remainder 		.word ?
 		; return values for text rendering
 		dmasrc 			.word ?
