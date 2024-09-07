@@ -312,8 +312,8 @@ background_init
     sta CGWSEL
 
     ldx #size(TEXT_HDMA_TABLE) - 1
--   lda TEXT_HDMA_TABLE, x
-    sta text_box_hdma_table, x
+-   lda TEXT_HDMA_TABLE,x
+    sta text_box_hdma_table,x
     dex
     bpl -
 

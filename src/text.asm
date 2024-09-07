@@ -133,7 +133,7 @@ text_box_vblank
     ; based on height of text box
 _set_height
     ldx text_box_num_lines
-    lda TEXT_BOX_HEIGHTS, x
+    lda TEXT_BOX_HEIGHTS,x
     sta text_box_hdma_table + 4
 
     lda #$0
@@ -327,7 +327,7 @@ _done_shifting
 
     ; vwf_offs = (vwf_offs + CHAR_WIDTHS[vwf_ch]) % 8;
     ldx vwf_ch
-    lda CHAR_WIDTHS, x
+    lda CHAR_WIDTHS,x
     and #$ff
     clc
     adc vwf_offs

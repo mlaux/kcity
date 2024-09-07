@@ -34,8 +34,8 @@ read_input
     ldx facing_object_script
     beq +
 
-    lda OBJECT_SCRIPTS - 2, x
-    ldy OBJECT_SCRIPT_LENGTHS - 2, x
+    lda OBJECT_SCRIPTS - 2,x
+    ldy OBJECT_SCRIPT_LENGTHS - 2,x
     tax
     jsr set_script
 

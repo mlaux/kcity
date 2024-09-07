@@ -61,7 +61,7 @@ player_set_initial_position
     stz target_player_x
     bra _y
 
-+   lda START_X - 2, x
++   lda START_X - 2,x
     sta player_x
     sta player_x_head
 
@@ -75,7 +75,7 @@ _y
     stz target_player_y
     bra _done
 
-+   lda START_Y - 2, x
++   lda START_Y - 2,x
     sta player_y
     sec
     sbc #$10
@@ -187,7 +187,7 @@ move_player
     asl
     tax
     inx ; frame 1 in each animation group is idle
-    lda WALK_CYCLE_TABLE - 2, x
+    lda WALK_CYCLE_TABLE - 2,x
     pha
 
     clc
@@ -214,7 +214,7 @@ _starting_to_move
     asl
     asl
     tax
-    lda WALK_CYCLE_TABLE - 2, x
+    lda WALK_CYCLE_TABLE - 2,x
     pha
 
     clc
@@ -242,7 +242,7 @@ _process_movement
 +   asl
     tax
     ; MOVEMENT_JUMP_TABLE[(player_direction - 1) << 1]()
-    jmp (MOVEMENT_JUMP_TABLE - 2, x)
+    jmp (MOVEMENT_JUMP_TABLE - 2,x)
 
 go_right
     ldx player_x
@@ -321,7 +321,7 @@ animate_player
     clc
     adc player_animation_index
     tax
-    lda WALK_CYCLE_TABLE, x
+    lda WALK_CYCLE_TABLE,x
     pha
 
     clc
@@ -369,7 +369,7 @@ animate_sprite
     clc
     adc sprites_animation_index, y
     tax
-    lda WALK_CYCLE_TABLE, x
+    lda WALK_CYCLE_TABLE,x
     clc
     adc SPRITE_BASE_IDS_FEET, y
     and #$ff
@@ -404,7 +404,7 @@ animate_npcs
 ; send over the updated data calculated by move_player
 ; parameters: none
 ; returns: none
-; assumes: A8, XY16
+; assumes: A8,xY16
 vblank_oam_dma
 .as
 .xl
@@ -415,16 +415,16 @@ vblank_oam_dma
     ldx #2 * NUM_OAM_ENTRIES - 2
     ; destination
     ldy #4 * NUM_OAM_ENTRIES - 1
--   lda sprites_flag, x
+-   lda sprites_flag,x
     sta oam_data_main, y
     dey
-    lda sprites_id, x
+    lda sprites_id,x
     sta oam_data_main, y
     dey
-    lda sprites_y, x
+    lda sprites_y,x
     sta oam_data_main, y
     dey
-    lda sprites_x, x
+    lda sprites_x,x
     sta oam_data_main, y
     dey
     dex

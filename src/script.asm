@@ -304,8 +304,8 @@ copy_ram_scripts
 .as
 .xl
     ldx #DISPLAY_LOCATION_NAME_LENGTH - 1
--   lda DISPLAY_LOCATION_NAME_TEMPLATE, x
-    sta location_name_script, x
+-   lda DISPLAY_LOCATION_NAME_TEMPLATE,x
+    sta location_name_script,x
     dex
     bpl -
 
@@ -364,7 +364,7 @@ _run_step
     tax
     pea #_done_with_step - 1
     sep #$20
-    jmp (script_operations, x)
+    jmp (script_operations,x)
 
 _done_with_step
     rep #$20
@@ -443,7 +443,7 @@ op_set_sprite_flags
 
     ldy #$5
     lda (script_element_ptr), y
-    sta sprites_flag, x
+    sta sprites_flag,x
 
     rts
 
@@ -454,11 +454,11 @@ op_set_sprite_position
 
     ldy #$5
     lda (script_element_ptr), y
-    sta sprites_x, x
+    sta sprites_x,x
 
     ldy #$6
     lda (script_element_ptr), y
-    sta sprites_y, x
+    sta sprites_y,x
 
     rts
 
@@ -467,11 +467,11 @@ op_move_sprite_x
 .xl
     #load_sprite_byte_index
 
-    lda sprites_x, x
+    lda sprites_x,x
     ldy #$5
     clc
     adc (script_element_ptr), y
-    sta sprites_x, x
+    sta sprites_x,x
 
     rts
 
@@ -480,11 +480,11 @@ op_move_sprite_y
 .xl
     #load_sprite_byte_index
 
-    lda sprites_y, x
+    lda sprites_y,x
     ldy #$5
     clc
     adc (script_element_ptr), y
-    sta sprites_y, x
+    sta sprites_y,x
 
     rts
 
@@ -494,18 +494,18 @@ op_set_sprite_direction
     #load_sprite_byte_index
 
     rep #$20
-    lda sprites_direction, x
-    sta sprites_previous_direction, x
+    lda sprites_direction,x
+    sta sprites_previous_direction,x
     ldy #$5
     lda (script_element_ptr), y
     and #$ff
     bne +
 
-    stz sprites_animation_index, x
+    stz sprites_animation_index,x
     ; inc to idle frame
-    inc sprites_animation_index, x
+    inc sprites_animation_index,x
 
-+   sta sprites_direction, x
++   sta sprites_direction,x
 
     rts
 
@@ -529,7 +529,7 @@ op_set_variable
     tax
     ldy #$6
     lda (script_element_ptr), y
-    sta script_storage, x
+    sta script_storage,x
     rts
 
 op_branch_eq
@@ -542,7 +542,7 @@ op_branch_eq
     tax
     ldy #$6
     lda (script_element_ptr), y
-    cmp script_storage, x
+    cmp script_storage,x
     bne +
     ldy #$8
     lda (script_element_ptr), y
@@ -558,7 +558,7 @@ op_inc_variable
     lda (script_element_ptr), y
     asl
     tax
-    inc script_storage, x
+    inc script_storage,x
     rts
 
 op_set_player_locked

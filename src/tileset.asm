@@ -75,7 +75,7 @@ map_run_warp
     asl
     tax
 
-    lda ALL_TILEMAPS - 2, x
+    lda ALL_TILEMAPS - 2,x
     sta DMAADDR
     lda #TILEMAP_SIZE
     sta DMALEN
@@ -85,16 +85,16 @@ map_run_warp
     sep #$20
     lda #$80
     sta VMAIN
-    lda #`TEST_TILEMAP
+    lda #`TEST.TILEMAP
     sta DMAADDRBANK
 
     lda #1
     sta MDMAEN
     rep #$20
 
-    lda ALL_TILESETS - 2, x
+    lda ALL_TILESETS - 2,x
     sta DMAADDR
-    lda ALL_TILESET_LENGTHS - 2, x
+    lda ALL_TILESET_LENGTHS - 2,x
     sta DMALEN
 
     lda #$1000
@@ -105,19 +105,19 @@ map_run_warp
     sta MDMAEN
     rep #$20
 
-    lda ALL_PALETTES - 2, x
+    lda ALL_PALETTES - 2,x
     sta DMAADDR
     lda #PALETTE_SIZE
     sta DMALEN
     lda #DMAMODE_CGDATA
     sta DMAMODE
 
-    lda COLLISION_MAPS - 2, x
+    lda COLLISION_MAPS - 2,x
     sta collision_map_ptr
 
     ; patch script that displays location names in memory to have
     ; the new location's name and start the script
-    lda LOCATION_NAMES - 2, x
+    lda LOCATION_NAMES - 2,x
     sta location_name_script + 24
     phx
     ldx #location_name_script
