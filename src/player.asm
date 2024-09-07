@@ -56,31 +56,27 @@ player_set_initial_position
 
     lda target_player_x
     beq +
-    sta player_x
-    sta player_x_head
-    stz target_player_x
-    bra _y
-
+    	sta player_x
+    	sta player_x_head
+    	stz target_player_x
+    	bra _y
 +   lda START_X - 2,x
     sta player_x
     sta player_x_head
-
 _y
     lda target_player_y
     beq +
-    sta player_y
-    sec
-    sbc #$10
-    sta player_y_head
-    stz target_player_y
-    bra _done
-
+    	sta player_y
+    	sec
+    	sbc #$10
+    	sta player_y_head
+    	stz target_player_y
+    	bra _done
 +   lda START_Y - 2,x
     sta player_y
     sec
     sbc #$10
     sta player_y_head
-
 _done
     plp
     rts
@@ -115,17 +111,15 @@ check_tilemap_collision
     lda (collision_map_ptr), y
     bit #$80
     beq +
-    and #$7f
-    jmp map_set_warp
-
+    	and #$7f
+    	jmp map_set_warp
 +   bit #$40
     beq +
-    and #$3f
-    asl
-    sta facing_object_script
-    lda #0
-    rts
-
+    	and #$3f
+    	asl
+    	sta facing_object_script
+    	lda #0
+    	rts
 +   and #$ff
     stz facing_object_script
     rts
@@ -140,8 +134,7 @@ move_player
 .xl
     lda player_locked
     beq +
-    rts
-
+    	rts
 +   lda player_direction
     sta player_previous_direction
     stz player_direction
@@ -153,59 +146,55 @@ move_player
 
     bit #RIGHT_BUTTON
     beq +
-    ldx #PLAYER_DIRECTION_RIGHT
-    stx player_direction
-
+    	ldx #PLAYER_DIRECTION_RIGHT
+    	stx player_direction
 +   bit #DOWN_BUTTON
     beq +
-    ldx #PLAYER_DIRECTION_DOWN
-    stx player_direction
-
+    	ldx #PLAYER_DIRECTION_DOWN
+    	stx player_direction
 +   bit #LEFT_BUTTON
     beq +
-    ldx #PLAYER_DIRECTION_LEFT
-    stx player_direction
-
+    	ldx #PLAYER_DIRECTION_LEFT
+    	stx player_direction
 +   bit #UP_BUTTON
     beq +
-    ldx #PLAYER_DIRECTION_UP
-    stx player_direction
-
+    	ldx #PLAYER_DIRECTION_UP
+    	stx player_direction
 +   lda player_direction
     eor player_previous_direction
     ; if same as before, just go straight to processing the input
     beq _process_movement
 
-    ; different than before, need to jump to a specific animation frame
-    lda player_direction
-    bne _starting_to_move
+    	; different than before, need to jump to a specific animation frame
+    	lda player_direction
+    	bne _starting_to_move
 
-    ; n -> 0
-    ; not moving now but was moving before - skip to second animation frame (idle)
-    lda player_previous_direction
-    asl
-    asl
-    tax
-    inx ; frame 1 in each animation group is idle
-    lda WALK_CYCLE_TABLE - 2,x
-    pha
-
-    clc
-    adc SPRITE_BASE_IDS_FEET ; [0]
-    and #$ff
-    sta player_sprite_id
-
-    pla
-    clc
-    adc SPRITE_BASE_IDS_HEAD ; [0]
-    and #$ff
-    sta player_sprite_id_head
-
-    lda #$1
-    sta player_animation_index
-
-    ; done
-    rts
+			; n -> 0
+			; not moving now but was moving before - skip to second animation frame (idle)
+			lda player_previous_direction
+			asl
+			asl
+			tax
+			inx ; frame 1 in each animation group is idle
+			lda WALK_CYCLE_TABLE - 2,x
+			pha
+	  
+				clc
+				adc SPRITE_BASE_IDS_FEET ; [0]
+				and #$ff
+				sta player_sprite_id
+		  
+			pla
+			clc
+			adc SPRITE_BASE_IDS_HEAD ; [0]
+			and #$ff
+			sta player_sprite_id_head
+	  
+			lda #$1
+			sta player_animation_index
+	  
+			; done
+			rts
 
     ; 0 -> n, n -> m
     ; was not moving before, but is now, or changed direction
@@ -216,12 +205,10 @@ _starting_to_move
     tax
     lda WALK_CYCLE_TABLE - 2,x
     pha
-
-    clc
-    adc SPRITE_BASE_IDS_FEET ; [0]
-    and #$ff
-    sta player_sprite_id
-
+	    clc
+	    adc SPRITE_BASE_IDS_FEET ; [0]
+	    and #$ff
+	    sta player_sprite_id
     pla
     clc
     adc SPRITE_BASE_IDS_HEAD ; [0]
@@ -233,10 +220,9 @@ _starting_to_move
 _process_movement
     lda player_direction
     bne +
-    ; not moving now, not moving before, done
-    ; 0 -> 0
-    rts
-
+ 	    ; not moving now, not moving before, done
+	    ; 0 -> 0
+	    rts
     ; continue moving in same direction
     ; n -> n
 +   asl
@@ -248,99 +234,87 @@ go_right
     ldx player_x
     cpx #SCREEN_WIDTH - PLAYER_SIZE
     bne +
-    bra animate_player
-
+   	bra animate_player
     ; check tile at (x + 1, y)
 +   inx
     ldy player_y
     jsr check_tilemap_collision
     beq +
-
-    inc player_x
-    inc player_x_head
+	    inc player_x
+	    inc player_x_head
 +   bra animate_player
 
 go_down
     ldy player_y
     cpy #SCREEN_HEIGHT - PLAYER_SIZE
     bne +
-    bra animate_player
-
+	    bra animate_player
     ; check tile at (x, y + 1)
 +   iny
     ldx player_x
     jsr check_tilemap_collision
     beq +
-
-    inc player_y
-    inc player_y_head
+	    inc player_y
+	    inc player_y_head
 +   bra animate_player
 
 go_left
     ; check left edge of screen
     ldx player_x
     bne +
-    bra animate_player
-
+	    bra animate_player
     ; check tile at (x - 1, y)
 +   dex
     ldy player_y
     jsr check_tilemap_collision
     beq +
-
-    dec player_x
-    dec player_x_head
+	    dec player_x
+	    dec player_x_head
 +   bra animate_player
 
 go_up
     ldy player_y
     bne +
-    bra animate_player
-
+	    bra animate_player
     ; check tile at (x, y - 1)
 +   dey
     ldx player_x
     jsr check_tilemap_collision
     beq animate_player
-
-    dec player_y
-    dec player_y_head
-
+	    dec player_y
+	    dec player_y_head
+		 ; falls through
 animate_player
     ; if it's not time to go to the next frame, exit
     lda frame_counter
     and #PLAYER_ANIMATION_SPEED
     bne +
+	    ; player_sprite_id = WALK_CYCLE_TABLE[(player_direction - 1) << 2 + player_animation_index]
+	   lda player_direction
+	   and #$ff
+	   dec a
+   	asl
+    	asl
+    	clc
+    	adc player_animation_index
+    	tax
+    	lda WALK_CYCLE_TABLE,x
+    	pha
+   	 	clc
+    		adc SPRITE_BASE_IDS_FEET ; [0]
+    		and #$ff
+    		sta player_sprite_id
+    	pla
+    	clc
+    	adc SPRITE_BASE_IDS_HEAD ; [0]
+    	and #$ff
+    	sta player_sprite_id_head
 
-    ; player_sprite_id = WALK_CYCLE_TABLE[(player_direction - 1) << 2 + player_animation_index]
-    lda player_direction
-    and #$ff
-    dec a
-    asl
-    asl
-    clc
-    adc player_animation_index
-    tax
-    lda WALK_CYCLE_TABLE,x
-    pha
-
-    clc
-    adc SPRITE_BASE_IDS_FEET ; [0]
-    and #$ff
-    sta player_sprite_id
-
-    pla
-    clc
-    adc SPRITE_BASE_IDS_HEAD ; [0]
-    and #$ff
-    sta player_sprite_id_head
-
-    ; 0123 0123 0123 ...
-    lda player_animation_index
-    inc a
-    and #$3
-    sta player_animation_index
-
+    	; 0123 0123 0123 ...
+    	lda player_animation_index
+    	inc a
+    	and #$3
+    	sta player_animation_index
 +   rts
 
 
@@ -350,19 +324,16 @@ animate_sprite
     tya
     asl
     tay
-
     ; cycle_index = (sprites_direction[y] - 1) << 2 + sprites_animation_index[y]
     ; sprites_id[y] = SPRITE_BASE_IDS[y] + WALK_CYCLE_TABLE[cycle_index]
     lda sprites_direction, y
     and #$ff
     bne +
-    
-    ; if direction = 0 try previous direction so it can set a final idle frame
-    lda sprites_previous_direction, y
-    and #$ff
-    bne +
-    rts
-
+ 	    ; if direction = 0 try previous direction so it can set a final idle frame
+ 	   lda sprites_previous_direction, y
+ 	   and #$ff
+ 	   bne +
+		    rts
 +   dec a
     asl
     asl
@@ -374,25 +345,21 @@ animate_sprite
     adc SPRITE_BASE_IDS_FEET, y
     and #$ff
     sta sprites_id, y
-
     ; if current direction is 0, done
     lda sprites_direction, y
     and #$ff
     bne +
-    rts
-
+ 	   rts
     ; if it's not time to go to the next frame, done
 +   lda frame_counter
     and #PLAYER_ANIMATION_SPEED
     beq +
-    rts
-
+ 	   rts
     ; 0123 0123 0123 ...
 +   lda sprites_animation_index, y
     inc a
     and #$3
     sta sprites_animation_index, y
-
     rts
 
 animate_npcs
