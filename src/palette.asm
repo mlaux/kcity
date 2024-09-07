@@ -8,7 +8,7 @@ palette_init
     stz CGADD
 
     #dma_ppu_data GENEVA_PALETTE
-    #dma_ppu_data TEST_PALETTE
+    #dma_ppu_data TEST.PALETTE
     #dma_ppu_data FILLER_PALETTES
     #dma_ppu_data PLAYER_PALETTE
     #dma_ppu_data NPC_PALETTE
