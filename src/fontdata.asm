@@ -1,6 +1,5 @@
 
 GENEVA_CHARS .binary "../font/geneva.tiles"
-GENEVA_PALETTE .binary "../font/geneva.palette"
 CHAR_WIDTHS .binary "../font/charwidths.bin"
 
 ; heights for 1, 2, 3, 4 lines

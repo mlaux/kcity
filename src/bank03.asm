@@ -1,7 +1,10 @@
-TEST_PALETTE .binary "../experimental_gfx/maptest.palette"
+.dsection map_graphics
+.section map_graphics
+MAP_GRAPHICS_BANK = `*
+
 TEST_TILESET .binary "../experimental_gfx/maptest.tiles"
 TEST_TILEMAP .binary "../experimental_gfx/maptest.map"
 
-BEDROOM_PALETTE .binary "../experimental_gfx/bedroom.palette"
 BEDROOM_TILESET .binary "../experimental_gfx/bedroom.tiles"
 BEDROOM_TILEMAP .binary "../experimental_gfx/bedroom.map"
+.endsection

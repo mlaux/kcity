@@ -182,19 +182,31 @@ sram_player_y .word ?
 .cerror * > $10000, "bank00 too long"
 .here
 
+* = $8000
 .logical $18000
 .dsection bank01
 .section bank01
-.binary "spc700/kcity-audio.sfc", $1000, $8000
+.include "bank01.asm"
 .endsection bank01
+.cerror * > $20000, "bank01 too long"
 .here
 
+* = $10000
 .logical $28000
 .dsection bank02
 .section bank02
 .include "bank02.asm"
 .endsection bank02
 .cerror * > $30000, "bank02 too long"
+.here
+
+* = $18000
+.logical $38000
+.dsection bank03
+.section bank03
+.include "bank03.asm"
+.endsection bank03
+.cerror * > $40000, "bank03 too long"
 .here
 
 ; 128k minus one byte

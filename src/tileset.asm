@@ -42,7 +42,7 @@ dma_queue_add
     lda #DMAMODE_PPUDATA
     sta dma_queue_entry_mode, x
     sta dma_queue_entry_mode + 2, x
-    lda #`PLAYER_TILESET
+    lda #PLAYER_GRAPHICS_BANK
     sta dma_queue_entry_addr_bank, x
     sta dma_queue_entry_addr_bank + 2, x
     lda #$80
@@ -142,6 +142,11 @@ map_run_warp
     lda #$80
     sta INIDISP
 
+    ; still $80
+    sta VMAIN
+    lda #MAP_GRAPHICS_BANK
+    sta DMAADDRBANK
+
     ; if HDMA is enabled it'll interfere with normal DMA on the same channel
     stz HDMAEN
 
@@ -165,11 +170,6 @@ map_run_warp
     stz VMADD
 
     sep #$20
-    lda #$80
-    sta VMAIN
-    lda #`TEST_TILEMAP
-    sta DMAADDRBANK
-
     lda #1
     sta MDMAEN
     rep #$20
@@ -187,7 +187,7 @@ map_run_warp
     sta MDMAEN
     rep #$20
 
-    lda ALL_PALETTES - 2, x
+    lda ALL_MAP_PALETTES - 2, x
     sta DMAADDR
     lda #PALETTE_SIZE
     sta DMALEN
@@ -209,6 +209,8 @@ map_run_warp
 
     sep #$20
 
+    lda #PALETTE_BANK
+    sta DMAADDRBANK
     ; write the palette
     lda #PALETTE_OFFSET
     sta CGADD
