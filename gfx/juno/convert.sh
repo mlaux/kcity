@@ -13,12 +13,23 @@ montage right-split-0.png right-split-1.png \
   -background none \
   -tile x1 \
   -geometry +0+0 \
-  png8:juno-tiles.png
+  png8:juno-idle.png
 
 ../../../SuperFamiconv/build/release/superfamiconv \
   --verbose \
-  --in-image juno-tiles.png \
-  --out-palette juno.palette \
-  --out-tiles juno.tiles \
-  --out-tiles-image juno-tiles-out.png \
+  --in-image juno-idle.png \
+  --out-palette juno-idle.palette \
+  --out-tiles juno-idle.tiles \
   --sprite-mode
+
+cat juno-idle.tiles \
+      juno-idle.tiles \
+      juno-idle.tiles \
+      juno-idle.tiles \
+      juno-idle.tiles \
+      juno-idle.tiles \
+      juno-idle.tiles \
+      juno-idle.tiles \
+  > juno.tiles
+
+rm *split*.png

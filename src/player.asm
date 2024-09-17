@@ -10,13 +10,8 @@ PLAYER_DIRECTION_UP = 4
 PLAYER_SIZE = 16
 
 ; hardcoding for each slot for now
-SPRITE_BASE_IDS_FEET .word $20, 0, $a0
-SPRITE_BASE_IDS_HEAD .word $0
-
-; OAM sprite ids for each direction
-; the first in a group is left foot forward, then idle, then right foot forward, then idle again
-;                     |       right       |       down        |       left        |        up        |
-WALK_CYCLE_TABLE .byte $00, $02, $04, $02, $06, $08, $0a, $08, $0c, $0e, $40, $0e, $42, $44, $46, $44
+SPRITE_BASE_IDS_FEET .word $2, $6
+SPRITE_BASE_IDS_HEAD .word $0, $4
 
 MOVEMENT_JUMP_TABLE .word go_right, go_down, go_left, go_up
 
@@ -27,14 +22,10 @@ player_init
     lda #$62
     sta OBJSEL
 
-    lda #8
-    clc
-    adc SPRITE_BASE_IDS_FEET
+    lda SPRITE_BASE_IDS_FEET
     sta player_sprite_id
 
-    lda #8
-    clc
-    adc SPRITE_BASE_IDS_HEAD
+    lda SPRITE_BASE_IDS_HEAD
     sta player_sprite_id_head
 
     lda #$38
@@ -181,65 +172,43 @@ move_player
     bne _starting_to_move
 
     ; n -> 0
-    ; not moving now but was moving before - skip to second animation frame (idle)
+    ; not moving now but was moving before - skip to first animation frame (idle)
     lda player_previous_direction
 
-    ; for testing
-    pha
-    phx
-    phy
+    ; (direction - 1) << 7 = offset in tile data for frame 0
     dec a
+    asl
+    asl
+    asl
+    asl
+    asl
+    asl
+    asl
     jsr dma_queue_add
-    ply
-    plx
-    pla
-
-    asl
-    asl
-    tax
-    inx ; frame 1 in each animation group is idle
-    lda WALK_CYCLE_TABLE - 2, x
-    pha
-
-    clc
-    adc SPRITE_BASE_IDS_FEET ; [0]
-    and #$ff
-    sta player_sprite_id
-
-    pla
-    clc
-    adc SPRITE_BASE_IDS_HEAD ; [0]
-    and #$ff
-    sta player_sprite_id_head
-
-    lda #$1
-    sta player_animation_index
+    stz player_animation_index
 
     ; done
     rts
 
     ; 0 -> n, n -> m
     ; was not moving before, but is now, or changed direction
-    ; skip to first animation frame (stepping forward)
+    ; skip to second animation frame (stepping forward)
 _starting_to_move
+    dec a
     asl
     asl
-    tax
-    lda WALK_CYCLE_TABLE - 2, x
-    pha
-
+    asl
+    asl
+    asl
+    asl
+    asl
+    ; same as above but add $400 to skip to first frame
     clc
-    adc SPRITE_BASE_IDS_FEET ; [0]
-    and #$ff
-    sta player_sprite_id
+    adc #$400
+    jsr dma_queue_add
 
-    pla
-    clc
-    adc SPRITE_BASE_IDS_HEAD ; [0]
-    and #$ff
-    sta player_sprite_id_head
-
-    stz player_animation_index
+    lda #$1
+    sta player_animation_index
 
 _process_movement
     lda player_direction
@@ -323,28 +292,35 @@ animate_player
     and #PLAYER_ANIMATION_SPEED
     bne +
 
-    ; player_sprite_id = WALK_CYCLE_TABLE[(player_direction - 1) << 2 + player_animation_index]
+    ; (anim index + 1) * 0x400 + (direction - 1) * 0x80
+    ; could have a player_sprite_data_off that increases by $400 in parallel
+    ; with the animation index instead of recalculating this every time.
+    lda player_animation_index
+    inc a
+    asl
+    asl
+    asl
+    asl
+    asl
+    asl
+    asl
+    asl
+    asl
+    asl
+    sta zp2
+
     lda player_direction
-    and #$ff
     dec a
     asl
     asl
+    asl
+    asl
+    asl
+    asl
+    asl
     clc
-    adc player_animation_index
-    tax
-    lda WALK_CYCLE_TABLE, x
-    pha
-
-    clc
-    adc SPRITE_BASE_IDS_FEET ; [0]
-    and #$ff
-    sta player_sprite_id
-
-    pla
-    clc
-    adc SPRITE_BASE_IDS_HEAD ; [0]
-    and #$ff
-    sta player_sprite_id_head
+    adc zp2
+    jsr dma_queue_add
 
     ; 0123 0123 0123 ...
     lda player_animation_index
@@ -353,7 +329,6 @@ animate_player
     sta player_animation_index
 
 +   rts
-
 
 animate_sprite
 .al
@@ -377,14 +352,12 @@ animate_sprite
 +   dec a
     asl
     asl
-    clc
-    adc sprites_animation_index, y
-    tax
-    lda WALK_CYCLE_TABLE, x
-    clc
-    adc SPRITE_BASE_IDS_FEET, y
-    and #$ff
-    sta sprites_id, y
+    asl
+    asl
+    asl
+    asl
+    asl
+    ; jsr dma_queue_add
 
     ; if current direction is 0, done
     lda sprites_direction, y

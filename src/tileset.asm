@@ -28,6 +28,10 @@ tileset_init
 ; no idea what i'm doing but i need to implement this or i'll run out of
 ; tile IDs with just a few characters on screen
 ; input: a - tile id
+
+; when I reintegrate animation support, it's
+; (frame * 0x400) + (direction * 0x80) for the top half of the sprite
+; and that plus 0x200 for the bottom half
 dma_queue_add
 .al
 .xl
@@ -49,19 +53,12 @@ dma_queue_add
     sta dma_queue_entry_length, x
     sta dma_queue_entry_length + 2, x
 
-    lda #$5000 ; 5020, 5100, 5120
+    lda #$4000 ; 4020, 4100, 4120
     sta dma_queue_entry_vmadd, x
-    lda #$5100
+    lda #$4100
     sta dma_queue_entry_vmadd + 2, x
 
     pla
-    asl ; 128 bytes - upper four 8x8 tiles
-    asl
-    asl
-    asl
-    asl
-    asl
-    asl
     clc
     adc #<>PLAYER_TILESET
     sta dma_queue_entry_addr, x
