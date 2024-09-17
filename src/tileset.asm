@@ -24,6 +24,109 @@ tileset_init
 
     rts
 
+; copies 16x32 sprite in tileset to video ram 
+; no idea what i'm doing but i need to implement this or i'll run out of
+; tile IDs with just a few characters on screen
+; input: a - tile id
+dma_queue_add
+.al
+.xl
+    pha
+    lda dma_queue_length
+    asl
+    tax
+
+    lda #DMAMODE_PPUDATA
+    sta dma_queue_entry_mode, x
+    sta dma_queue_entry_mode + 2, x
+    sta dma_queue_entry_mode + 4, x
+    sta dma_queue_entry_mode + 6, x
+    lda #`PLAYER_TILESET
+    sta dma_queue_entry_addr_bank, x
+    sta dma_queue_entry_addr_bank + 2, x
+    sta dma_queue_entry_addr_bank + 4, x
+    sta dma_queue_entry_addr_bank + 6, x
+    lda #$80
+    sta dma_queue_entry_vmain, x
+    sta dma_queue_entry_vmain + 2, x
+    sta dma_queue_entry_vmain + 4, x
+    sta dma_queue_entry_vmain + 6, x
+    lda #$40
+    sta dma_queue_entry_length, x
+    sta dma_queue_entry_length + 2, x
+    sta dma_queue_entry_length + 4, x
+    sta dma_queue_entry_length + 6, x
+
+    lda #$5000 ; 5020, 5100, 5120
+    sta dma_queue_entry_vmadd, x
+    lda #$5020
+    sta dma_queue_entry_vmadd + 2, x
+    lda #$5100
+    sta dma_queue_entry_vmadd + 4, x
+    lda #$5120
+    sta dma_queue_entry_vmadd + 6, x
+
+    pla
+    asl ; 64 bytes - upper two 8x8 tiles
+    asl
+    asl
+    asl
+    asl
+    asl
+    clc
+    adc #<>PLAYER_TILESET
+    sta dma_queue_entry_addr, x
+    adc #$200
+    sta dma_queue_entry_addr + 4, x
+    adc #$200
+    sta dma_queue_entry_addr + 2, x
+    adc #$200
+    sta dma_queue_entry_addr + 6, x
+
+    inc dma_queue_length
+    inc dma_queue_length
+    inc dma_queue_length
+    inc dma_queue_length
+    rts
+
+dma_queue_run_vblank
+.al
+.xl
+    php
+    rep #$20
+    lda dma_queue_length
+    beq _done
+    dec a
+    asl
+    tax
+
+-   lda dma_queue_entry_mode, x
+    sta DMAMODE
+    lda dma_queue_entry_addr, x
+    sta DMAADDR
+    lda dma_queue_entry_length, x
+    sta DMALEN
+    lda dma_queue_entry_vmadd, x
+    sta VMADD
+
+    sep #$20
+    lda dma_queue_entry_addr_bank, x
+    sta DMAADDRBANK
+    lda dma_queue_entry_vmain, x
+    sta VMAIN
+    lda #$1
+    sta MDMAEN
+    rep #$20
+
+    dec dma_queue_length
+    dex
+    dex
+    bpl -
+
+_done
+    plp
+    rts
+
 map_set_warp
 .al
 .xl

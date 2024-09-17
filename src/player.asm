@@ -183,6 +183,21 @@ move_player
     ; n -> 0
     ; not moving now but was moving before - skip to second animation frame (idle)
     lda player_previous_direction
+
+    ; for testing
+    pha
+    phx
+    phy
+    dec a
+    asl
+    clc
+    adc player_previous_direction
+    dec a
+    jsr dma_queue_add
+    ply
+    plx
+    pla
+
     asl
     asl
     tax

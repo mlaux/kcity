@@ -150,6 +150,15 @@ OAM_AUX_LENGTH = NUM_OAM_ENTRIES / 4
 oam_data_main .fill OAM_MAIN_LENGTH
 oam_data_aux .fill OAM_AUX_LENGTH
 
+MAX_DMA_QUEUE_ENTRIES = 16
+dma_queue_length .word ?
+dma_queue_entry_mode .fill 2 * MAX_DMA_QUEUE_ENTRIES
+dma_queue_entry_addr .fill 2 * MAX_DMA_QUEUE_ENTRIES
+dma_queue_entry_addr_bank .fill 2 * MAX_DMA_QUEUE_ENTRIES
+dma_queue_entry_length .fill 2 * MAX_DMA_QUEUE_ENTRIES
+dma_queue_entry_vmadd .fill 2 * MAX_DMA_QUEUE_ENTRIES
+dma_queue_entry_vmain .fill 2 * MAX_DMA_QUEUE_ENTRIES
+
 .warn "lowram end: ", *
 
 * = $700000

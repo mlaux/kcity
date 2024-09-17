@@ -147,6 +147,9 @@ NMI_ISR
     ; move player and send updated position to OAM
     jsr vblank_oam_dma
 
+    ; send over any new vram tiles
+    jsr dma_queue_run_vblank
+
     ; DMA generated text tiles if needed, or reset tilemap if turning off text box
     ; send HDMA table for text box overlay if needed
     jsr text_box_vblank
