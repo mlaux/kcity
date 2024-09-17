@@ -501,9 +501,9 @@ op_set_sprite_direction
     and #$ff
     bne +
 
-    stz sprites_animation_index, x
+    ; stz sprites_animation_index, x
     ; inc to idle frame
-    inc sprites_animation_index, x
+    ; inc sprites_animation_index, x
 
 +   sta sprites_direction, x
 

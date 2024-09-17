@@ -1,5 +1,5 @@
 ; ANDed with the frame counter to decide whether to go to the next frame, should be 2^n - 1
-PLAYER_ANIMATION_SPEED = 7
+PLAYER_ANIMATION_SPEED = 15
 
 PLAYER_DIRECTION_NONE = 0
 PLAYER_DIRECTION_RIGHT = 1
@@ -12,12 +12,19 @@ PLAYER_SIZE = 16
 ; hardcoding for each slot for now
 SPRITE_BASE_IDS_FEET .word $2, $6
 SPRITE_BASE_IDS_HEAD .word $0, $4
+SPRITE_ID_TO_DATA .word $0, $2000
 
 MOVEMENT_JUMP_TABLE .word go_right, go_down, go_left, go_up
 
 player_init
 .as
 .xl
+    ; send first frame's tile data
+    rep #$20
+    lda #0
+    jsr dma_queue_add
+    sep #$20
+
     ; enable objs on top layer with base address of $4000
     lda #$62
     sta OBJSEL
@@ -177,15 +184,9 @@ move_player
 
     ; (direction - 1) << 7 = offset in tile data for frame 0
     dec a
-    asl
-    asl
-    asl
-    asl
-    asl
-    asl
-    asl
+    sln 7
     jsr dma_queue_add
-    stz player_animation_index
+    stz player_anim_offset
 
     ; done
     rts
@@ -195,20 +196,14 @@ move_player
     ; skip to second animation frame (stepping forward)
 _starting_to_move
     dec a
-    asl
-    asl
-    asl
-    asl
-    asl
-    asl
-    asl
+    sln 7
     ; same as above but add $400 to skip to first frame
     clc
     adc #$400
     jsr dma_queue_add
 
-    lda #$1
-    sta player_animation_index
+    lda #$400
+    sta player_anim_offset
 
 _process_movement
     lda player_direction
@@ -288,101 +283,96 @@ go_up
 
 animate_player
     ; if it's not time to go to the next frame, exit
-    lda frame_counter
-    and #PLAYER_ANIMATION_SPEED
-    bne +
+    inc player_anim_timer
+    lda player_anim_timer
+    cmp #PLAYER_ANIMATION_SPEED
+    beq +
+    rts
 
-    ; (anim index + 1) * 0x400 + (direction - 1) * 0x80
-    ; could have a player_sprite_data_off that increases by $400 in parallel
-    ; with the animation index instead of recalculating this every time.
-    lda player_animation_index
-    inc a
-    asl
-    asl
-    asl
-    asl
-    asl
-    asl
-    asl
-    asl
-    asl
-    asl
-    sta zp2
+    ; $400, $800, $c00, $1000, $1400, $1800, reset
++   stz player_anim_timer
+    lda player_anim_offset
+    clc
+    adc #$400
+    cmp #$1c00
+    beq +
+    sta player_anim_offset
+    bra _go
 
++   lda #$400
+    sta player_anim_offset
+
+_go
     lda player_direction
     dec a
-    asl
-    asl
-    asl
-    asl
-    asl
-    asl
-    asl
+    sln 7
     clc
-    adc zp2
-    jsr dma_queue_add
-
-    ; 0123 0123 0123 ...
-    lda player_animation_index
-    inc a
-    and #$3
-    sta player_animation_index
-
-+   rts
+    adc player_anim_offset
+    jmp dma_queue_add
 
 animate_sprite
 .al
 .xl
-    tya
-    asl
-    tay
+;     txa
+;     asl
+;     tax
 
-    ; cycle_index = (sprites_direction[y] - 1) << 2 + sprites_animation_index[y]
-    ; sprites_id[y] = SPRITE_BASE_IDS[y] + WALK_CYCLE_TABLE[cycle_index]
-    lda sprites_direction, y
-    and #$ff
-    bne +
+;     lda sprites_direction, x
+;     and #$ff
+;     bne +
     
-    ; if direction = 0 try previous direction so it can set a final idle frame
-    lda sprites_previous_direction, y
-    and #$ff
-    bne +
-    rts
+;     ; if direction = 0 try previous direction so it can set a final idle frame
+;     lda sprites_previous_direction, x
+;     and #$ff
+;     bne +
+;     rts
 
-+   dec a
-    asl
-    asl
-    asl
-    asl
-    asl
-    asl
-    asl
-    ; jsr dma_queue_add
+;     ; if it's not time to go to the next frame, exit
+; +   inc sprites_anim_timer, x
+;     lda sprites_anim_timer, y
+;     cmp #PLAYER_ANIMATION_SPEED
+;     beq +
+;     rts
 
-    ; if current direction is 0, done
-    lda sprites_direction, y
-    and #$ff
-    bne +
-    rts
+;     ; $400, $800, $c00, $1000, $1400, $1800, reset
+; +   stz sprites_anim_timer, x
+;     lda player_anim_offset
+;     clc
+;     adc #$400
+;     cmp #$1c00
+;     beq +
+;     sta player_anim_offset
+;     bra _go
 
-    ; if it's not time to go to the next frame, done
-+   lda frame_counter
-    and #PLAYER_ANIMATION_SPEED
-    beq +
-    rts
 
-    ; 0123 0123 0123 ...
-+   lda sprites_animation_index, y
-    inc a
-    and #$3
-    sta sprites_animation_index, y
+; +   dec a
+;     sln 7
+;     ; jsr dma_queue_add
+
+;     ; if current direction is 0, done
+;     lda sprites_direction, y
+;     and #$ff
+;     bne +
+;     rts
+
+;     ; if it's not time to go to the next frame, done
+; +   lda frame_counter
+;     and #PLAYER_ANIMATION_SPEED
+;     beq +
+;     rts
+
+;     ; 0123 0123 0123 ...
+; +   ;lda sprites_animation_index, y
+;     inc a
+;     and #$3
+;     ;sta sprites_animation_index, y
 
     rts
 
 animate_npcs
 .al
 .xl
-    ldy #2
+    ldx #2
     jmp animate_sprite
 
 ; send over the updated data calculated by move_player

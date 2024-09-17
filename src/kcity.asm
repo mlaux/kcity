@@ -103,6 +103,12 @@ script_step_time_remaining .word ?
 
 script_storage .fill $20
 
+NUM_OAM_ENTRIES = 16
+OAM_MAIN_LENGTH = NUM_OAM_ENTRIES * 4
+OAM_AUX_LENGTH = NUM_OAM_ENTRIES / 4
+oam_data_main .fill OAM_MAIN_LENGTH
+oam_data_aux .fill OAM_AUX_LENGTH
+
 ; for all sprites including player
 sprites_x .fill 2 * NUM_OAM_ENTRIES
 sprites_y .fill 2 * NUM_OAM_ENTRIES
@@ -110,7 +116,8 @@ sprites_id .fill 2 * NUM_OAM_ENTRIES
 sprites_flag .fill 2 * NUM_OAM_ENTRIES
 sprites_direction .fill 2 * NUM_OAM_ENTRIES
 sprites_previous_direction .fill 2 * NUM_OAM_ENTRIES
-sprites_animation_index .fill 2 * NUM_OAM_ENTRIES
+sprites_anim_offset .fill 2 * NUM_OAM_ENTRIES
+sprites_anim_timer .fill 2 * NUM_OAM_ENTRIES
 
 ; player is the first entry in the above tables
 player_x = sprites_x
@@ -125,7 +132,8 @@ player_visibility_flags_head = sprites_flag + 2
 ; for calculating animation
 player_direction = sprites_direction
 player_previous_direction = sprites_previous_direction
-player_animation_index = sprites_animation_index
+player_anim_offset = sprites_anim_offset
+player_anim_timer = sprites_anim_timer
 
 player_locked .word ?
 
@@ -143,12 +151,6 @@ target_player_x .word ?
 target_player_y .word ?
 current_map_id .word ?
 location_name_script .fill DISPLAY_LOCATION_NAME_LENGTH
-
-NUM_OAM_ENTRIES = 16
-OAM_MAIN_LENGTH = NUM_OAM_ENTRIES * 4
-OAM_AUX_LENGTH = NUM_OAM_ENTRIES / 4
-oam_data_main .fill OAM_MAIN_LENGTH
-oam_data_aux .fill OAM_AUX_LENGTH
 
 MAX_DMA_QUEUE_ENTRIES = 16
 dma_queue_length .word ?

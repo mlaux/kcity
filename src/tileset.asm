@@ -19,7 +19,6 @@ tileset_init
     ldx #$4000
     stx VMADD
 
-    #dma_ppu_data PLAYER_TILESET
     #dma_ppu_data NPC_TILESET
 
     rts
@@ -28,8 +27,8 @@ tileset_init
 ; no idea what i'm doing but i need to implement this or i'll run out of
 ; tile IDs with just a few characters on screen
 ; input: a - tile id
+; AXY 16
 
-; when I reintegrate animation support, it's
 ; (frame * 0x400) + (direction * 0x80) for the top half of the sprite
 ; and that plus 0x200 for the bottom half
 dma_queue_add

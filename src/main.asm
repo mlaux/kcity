@@ -1,3 +1,15 @@
+sln .macro
+    .rept \1
+    asl
+    .endrept
+.endmacro
+
+srn .macro
+    .rept \1
+    lsr
+    .endrept
+.endmacro
+
 RESET
     ; enter 65816 mode
     sei

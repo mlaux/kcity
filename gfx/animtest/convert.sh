@@ -4,15 +4,11 @@ python3 generate.py
 
 for k in $(seq 0 7)
 do
-  magick R$k.png -crop 1x2@ +repage R$k-split.png
-  magick F$k.png -crop 1x2@ +repage F$k-split.png
-  magick L$k.png -crop 1x2@ +repage L$k-split.png
-  magick B$k.png -crop 1x2@ +repage B$k-split.png
 
-  montage R$k-split-0.png R$k-split-1.png \
-    F$k-split-0.png F$k-split-1.png \
-    L$k-split-0.png L$k-split-1.png \
-    B$k-split-0.png B$k-split-1.png \
+  montage r$k-top.png r$k-bottom.png \
+     f$k-top.png f$k-bottom.png \
+     l$k-top.png l$k-bottom.png \
+     b$k-top.png b$k-bottom.png \
     -background none \
     -tile x1 \
     -geometry +0+0 \
