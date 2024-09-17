@@ -39,35 +39,24 @@ dma_queue_add
     lda #DMAMODE_PPUDATA
     sta dma_queue_entry_mode, x
     sta dma_queue_entry_mode + 2, x
-    sta dma_queue_entry_mode + 4, x
-    sta dma_queue_entry_mode + 6, x
     lda #`PLAYER_TILESET
     sta dma_queue_entry_addr_bank, x
     sta dma_queue_entry_addr_bank + 2, x
-    sta dma_queue_entry_addr_bank + 4, x
-    sta dma_queue_entry_addr_bank + 6, x
     lda #$80
     sta dma_queue_entry_vmain, x
     sta dma_queue_entry_vmain + 2, x
-    sta dma_queue_entry_vmain + 4, x
-    sta dma_queue_entry_vmain + 6, x
-    lda #$40
+    ; lda #$80
     sta dma_queue_entry_length, x
     sta dma_queue_entry_length + 2, x
-    sta dma_queue_entry_length + 4, x
-    sta dma_queue_entry_length + 6, x
 
     lda #$5000 ; 5020, 5100, 5120
     sta dma_queue_entry_vmadd, x
-    lda #$5020
-    sta dma_queue_entry_vmadd + 2, x
     lda #$5100
-    sta dma_queue_entry_vmadd + 4, x
-    lda #$5120
-    sta dma_queue_entry_vmadd + 6, x
+    sta dma_queue_entry_vmadd + 2, x
 
     pla
-    asl ; 64 bytes - upper two 8x8 tiles
+    asl ; 128 bytes - upper four 8x8 tiles
+    asl
     asl
     asl
     asl
@@ -77,14 +66,8 @@ dma_queue_add
     adc #<>PLAYER_TILESET
     sta dma_queue_entry_addr, x
     adc #$200
-    sta dma_queue_entry_addr + 4, x
-    adc #$200
     sta dma_queue_entry_addr + 2, x
-    adc #$200
-    sta dma_queue_entry_addr + 6, x
 
-    inc dma_queue_length
-    inc dma_queue_length
     inc dma_queue_length
     inc dma_queue_length
     rts

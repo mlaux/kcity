@@ -189,10 +189,6 @@ move_player
     phx
     phy
     dec a
-    asl
-    clc
-    adc player_previous_direction
-    dec a
     jsr dma_queue_add
     ply
     plx
