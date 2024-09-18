@@ -2,6 +2,14 @@
 set -ex
 python3 generate.py
 
+cp ../juno/l*.png .
+for k in $(seq 1 6)
+do
+  magick convert l$k.png -crop 1x2@ +repage l$k.png
+  mv l$k-0.png l$k-top.png
+  mv l$k-1.png l$k-bottom.png
+done
+
 for k in $(seq 0 7)
 do
 
@@ -23,6 +31,8 @@ do
 
 done
 
+cp ../juno/juno-idle.tiles frame0.tiles
+
 cat frame0.tiles \
       frame1.tiles \
       frame2.tiles \
@@ -34,4 +44,3 @@ cat frame0.tiles \
   > animtest.tiles
 
 rm *.png
-rm frame*.tiles

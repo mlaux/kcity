@@ -19,7 +19,7 @@ BEDROOM_PALETTE .binary "../experimental_gfx/bedroom.palette"
 GENEVA_PALETTE .binary "../font/geneva.palette"
 
 ; sprite palettes
-PLAYER_PALETTE .binary "../gfx/animtest/animtest.palette"
+PLAYER_PALETTE .binary "../gfx/juno/juno-idle.palette"
 NPC_PALETTE .binary "../gfx/animtest/animtest.palette"
 
 ; 256 reserved bytes

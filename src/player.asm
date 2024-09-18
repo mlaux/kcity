@@ -1,5 +1,5 @@
 ; ANDed with the frame counter to decide whether to go to the next frame, should be 2^n - 1
-PLAYER_ANIMATION_SPEED = 15
+PLAYER_ANIMATION_SPEED = 7
 
 PLAYER_DIRECTION_NONE = 0
 PLAYER_DIRECTION_RIGHT = 1
