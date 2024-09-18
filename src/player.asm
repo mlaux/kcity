@@ -309,7 +309,7 @@ animate_player
     inc player_anim_timer
     lda player_anim_timer
     cmp #PLAYER_ANIMATION_SPEED
-    beq +
+    bpl +
     rts
 
     ; $400, $800, $c00, $1000, $1400, $1800, reset
@@ -367,7 +367,7 @@ _moving
     inc sprites_anim_timer, x
     lda sprites_anim_timer, x
     cmp #PLAYER_ANIMATION_SPEED
-    beq +
+    bpl +
     rts
 
 ;     ; $400, $800, $c00, $1000, $1400, $1800, reset
@@ -381,7 +381,7 @@ _moving
     bra _go
 
 +   lda #$400
-    sta player_anim_offset
+    sta sprites_anim_offset, x
 
 _go
     lda sprites_direction, x
