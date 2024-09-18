@@ -12,35 +12,54 @@ PLAYER_SIZE = 16
 ; hardcoding for each slot for now
 SPRITE_BASE_IDS_FEET .word $2, $6
 SPRITE_BASE_IDS_HEAD .word $0, $4
+SPRITE_INITIAL_FLAGS .word $38, $0
 SPRITE_ID_TO_DATA .word $0, $2000
 
 MOVEMENT_JUMP_TABLE .word go_right, go_down, go_left, go_up
 
 player_init
-.as
+.al
 .xl
     ; send first frame's tile data
-    rep #$20
     lda #0
+    ldx #0
     jsr dma_queue_add
-    sep #$20
 
-    ; enable objs on top layer with base address of $4000
-    lda #$62
-    sta OBJSEL
-
-    lda SPRITE_BASE_IDS_FEET
-    sta player_sprite_id
-
-    lda SPRITE_BASE_IDS_HEAD
-    sta player_sprite_id_head
-
-    lda #$38
-    sta player_visibility_flags
-    sta player_visibility_flags_head
+    lda #0
+    jsr set_sprite_id_16x32
+    lda #1
+    jsr set_sprite_id_16x32
 
     inc player_locked
 
+    ; enable objs on top layer with base address of $4000
+    sep #$20
+    lda #$62
+    sta OBJSEL
+    rep #$20
+
+    rts
+
+; sets OAM slots [a, a+1] to sprite ids [SPRITE_BASE_IDS_FEET[a], SPRITE_BASE_IDS_HEAD[a]]
+; sets palette and visibility
+set_sprite_id_16x32
+.al
+.xl
+    asl ; to byte offset in sprite base ids table
+    tax
+    asl
+    tay ; to dest offset in sprites_id array
+
+    lda SPRITE_BASE_IDS_FEET, x
+    sta sprites_id, y
+    lda SPRITE_INITIAL_FLAGS, x
+    sta sprites_flag, y
+    iny
+    iny
+    lda SPRITE_BASE_IDS_HEAD, x
+    sta sprites_id, y
+    lda SPRITE_INITIAL_FLAGS, x
+    sta sprites_flag, y
     rts
 
 ; if target_player_x/y are set, sets the position to that
@@ -185,8 +204,10 @@ move_player
     ; (direction - 1) << 7 = offset in tile data for frame 0
     dec a
     sln 7
+    ldx #0
     jsr dma_queue_add
     stz player_anim_offset
+    stz player_anim_timer
 
     ; done
     rts
@@ -200,10 +221,12 @@ _starting_to_move
     ; same as above but add $400 to skip to first frame
     clc
     adc #$400
+    ldx #0
     jsr dma_queue_add
 
     lda #$400
     sta player_anim_offset
+    stz player_anim_timer
 
 _process_movement
     lda player_direction
@@ -308,72 +331,72 @@ _go
     sln 7
     clc
     adc player_anim_offset
+    ldx #0
     jmp dma_queue_add
 
-animate_sprite
+animate_sprite_v2
 .al
 .xl
-;     txa
-;     asl
-;     tax
+    txa
+    asl
+    tax
 
-;     lda sprites_direction, x
-;     and #$ff
-;     bne +
-    
-;     ; if direction = 0 try previous direction so it can set a final idle frame
-;     lda sprites_previous_direction, x
-;     and #$ff
-;     bne +
-;     rts
+    lda sprites_direction, x
+    and #$ff
+    bne _moving
 
-;     ; if it's not time to go to the next frame, exit
-; +   inc sprites_anim_timer, x
-;     lda sprites_anim_timer, y
-;     cmp #PLAYER_ANIMATION_SPEED
-;     beq +
-;     rts
+    ; if direction = 0 try previous direction so it can set a final idle frame
+    lda sprites_previous_direction, x
+    and #$ff
+    bne _stopped
+
+    ; current and prev direction both 0, nothing to do
+    rts
+
+_stopped
+    stz sprites_previous_direction, x
+    ; set frame 0 for previous direction
+    dec a
+    sln 7
+    clc
+    adc SPRITE_ID_TO_DATA, x
+    jmp dma_queue_add
+
+_moving
+    ; if it's not time to go to the next frame, exit
+    inc sprites_anim_timer, x
+    lda sprites_anim_timer, x
+    cmp #PLAYER_ANIMATION_SPEED
+    beq +
+    rts
 
 ;     ; $400, $800, $c00, $1000, $1400, $1800, reset
-; +   stz sprites_anim_timer, x
-;     lda player_anim_offset
-;     clc
-;     adc #$400
-;     cmp #$1c00
-;     beq +
-;     sta player_anim_offset
-;     bra _go
++   stz sprites_anim_timer, x
+    lda sprites_anim_offset, x
+    clc
+    adc #$400
+    cmp #$1c00
+    beq +
+    sta sprites_anim_offset, x
+    bra _go
 
++   lda #$400
+    sta player_anim_offset
 
-; +   dec a
-;     sln 7
-;     ; jsr dma_queue_add
-
-;     ; if current direction is 0, done
-;     lda sprites_direction, y
-;     and #$ff
-;     bne +
-;     rts
-
-;     ; if it's not time to go to the next frame, done
-; +   lda frame_counter
-;     and #PLAYER_ANIMATION_SPEED
-;     beq +
-;     rts
-
-;     ; 0123 0123 0123 ...
-; +   ;lda sprites_animation_index, y
-;     inc a
-;     and #$3
-;     ;sta sprites_animation_index, y
-
-    rts
+_go
+    lda sprites_direction, x
+    dec a
+    sln 7
+    clc
+    adc sprites_anim_offset, x
+    adc SPRITE_ID_TO_DATA, x
+    jmp dma_queue_add
 
 animate_npcs
 .al
 .xl
-    ldx #2
-    jmp animate_sprite
+    ldx #1
+    jmp animate_sprite_v2
 
 ; send over the updated data calculated by move_player
 ; parameters: none

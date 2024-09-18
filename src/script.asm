@@ -231,27 +231,27 @@ TEST_HAIR_BLEACH
 
 TEST_REACT_TO_BOOKSHELF
     #step_set_player_locked 1
-    #step_set_sprite_pos 2, 96, 152
-    #step_set_sprite_direction 2, PLAYER_DIRECTION_UP
-    #step_set_sprite_flags 2, $3a
-    #step_move_sprite_y 8, 2, $ff
-    #step_set_sprite_direction 2, 0
+    #step_set_sprite_pos 1, 96, 152
+    #step_set_sprite_direction 1, PLAYER_DIRECTION_UP
+    #step_set_sprite_flags 1, $3a
+    #step_move_sprite_y 8, 1, $ff
+    #step_set_sprite_direction 1, 0
     #step_text_box $20, 7, 18, 4, 1, BOOKSHELF_MESSAGE1, 0, 0, 0
-    #step_set_sprite_direction 2, PLAYER_DIRECTION_RIGHT
-    #step_move_sprite_x 24, 2, 1
-    #step_set_sprite_direction 2, 0
+    #step_set_sprite_direction 1, PLAYER_DIRECTION_RIGHT
+    #step_move_sprite_x 24, 1, 1
+    #step_set_sprite_direction 1, 0
     #step_hide_text_box
-    #step_set_sprite_direction 2, PLAYER_DIRECTION_UP
-    #step_move_sprite_y 48, 2, $ff
-    #step_set_sprite_direction 2, 0
+    #step_set_sprite_direction 1, PLAYER_DIRECTION_UP
+    #step_move_sprite_y 48, 1, $ff
+    #step_set_sprite_direction 1, 0
     #step_text_box $80, 1, 21, 30, 1, BOOKSHELF_MESSAGE2, 0, 0, 0
     #step_hide_text_box
-    #step_set_sprite_direction 2, PLAYER_DIRECTION_DOWN
-    #step_move_sprite_y 32, 2, 1
-    #step_set_sprite_direction 2, PLAYER_DIRECTION_RIGHT
-    #step_move_sprite_x 64, 2, 1
-    #step_set_sprite_flags 2, 0
-    #step_set_sprite_direction 2, 0
+    #step_set_sprite_direction 1, PLAYER_DIRECTION_DOWN
+    #step_move_sprite_y 32, 1, 1
+    #step_set_sprite_direction 1, PLAYER_DIRECTION_RIGHT
+    #step_move_sprite_x 64, 1, 1
+    #step_set_sprite_flags 1, 0
+    #step_set_sprite_direction 1, 0
     #step_set_player_locked 0
 
 TEST_BOOK1
@@ -283,6 +283,15 @@ load_sprite_byte_index .macro
     ; x = sprite_id * 2
     ldy #$4
     lda (script_element_ptr), y
+    asl
+    tax
+.endm
+
+load_double_sprite_byte_index .macro
+    ; x = sprite_id * 4
+    ldy #$4
+    lda (script_element_ptr), y
+    asl
     asl
     tax
 .endm
@@ -439,10 +448,13 @@ op_hide_text_box
 op_set_sprite_flags
 .as
 .xl
-    #load_sprite_byte_index
+    #load_double_sprite_byte_index
 
     ldy #$5
     lda (script_element_ptr), y
+    sta sprites_flag, x
+    inx
+    inx
     sta sprites_flag, x
 
     rts
@@ -450,14 +462,24 @@ op_set_sprite_flags
 op_set_sprite_position
 .as
 .xl
-    #load_sprite_byte_index
+    #load_double_sprite_byte_index
 
     ldy #$5
     lda (script_element_ptr), y
     sta sprites_x, x
+    inx
+    inx
+    sta sprites_x, x
+
+    #load_double_sprite_byte_index
 
     ldy #$6
     lda (script_element_ptr), y
+    sta sprites_y, x
+    sec
+    sbc #$10
+    inx
+    inx
     sta sprites_y, x
 
     rts
@@ -465,12 +487,15 @@ op_set_sprite_position
 op_move_sprite_x
 .as
 .xl
-    #load_sprite_byte_index
+    #load_double_sprite_byte_index
 
     lda sprites_x, x
     ldy #$5
     clc
     adc (script_element_ptr), y
+    sta sprites_x, x
+    inx
+    inx
     sta sprites_x, x
 
     rts
@@ -478,12 +503,17 @@ op_move_sprite_x
 op_move_sprite_y
 .as
 .xl
-    #load_sprite_byte_index
+    #load_double_sprite_byte_index
 
     lda sprites_y, x
     ldy #$5
     clc
     adc (script_element_ptr), y
+    sta sprites_y, x
+    sec
+    sbc #$10
+    inx
+    inx
     sta sprites_y, x
 
     rts
@@ -501,9 +531,8 @@ op_set_sprite_direction
     and #$ff
     bne +
 
-    ; stz sprites_animation_index, x
-    ; inc to idle frame
-    ; inc sprites_animation_index, x
+    ; direction 0 -> go to standing pose
+    stz sprites_anim_offset, x
 
 +   sta sprites_direction, x
 

@@ -26,7 +26,8 @@ tileset_init
 ; copies 16x32 sprite in tileset to video ram 
 ; no idea what i'm doing but i need to implement this or i'll run out of
 ; tile IDs with just a few characters on screen
-; input: a - tile id
+; input: a - base address of 16x32 sprite data
+;        x - dest 16x32 sprite id
 ; AXY 16
 
 ; (frame * 0x400) + (direction * 0x80) for the top half of the sprite
@@ -37,32 +38,35 @@ dma_queue_add
     pha
     lda dma_queue_length
     asl
-    tax
+    tay
 
     lda #DMAMODE_PPUDATA
-    sta dma_queue_entry_mode, x
-    sta dma_queue_entry_mode + 2, x
+    sta dma_queue_entry_mode, y
+    sta dma_queue_entry_mode + 2, y
     lda #PLAYER_GRAPHICS_BANK
-    sta dma_queue_entry_addr_bank, x
-    sta dma_queue_entry_addr_bank + 2, x
+    sta dma_queue_entry_addr_bank, y
+    sta dma_queue_entry_addr_bank + 2, y
     lda #$80
-    sta dma_queue_entry_vmain, x
-    sta dma_queue_entry_vmain + 2, x
+    sta dma_queue_entry_vmain, y
+    sta dma_queue_entry_vmain + 2, y
     ; lda #$80
-    sta dma_queue_entry_length, x
-    sta dma_queue_entry_length + 2, x
+    sta dma_queue_entry_length, y
+    sta dma_queue_entry_length + 2, y
 
-    lda #$4000 ; 4020, 4100, 4120
-    sta dma_queue_entry_vmadd, x
-    lda #$4100
-    sta dma_queue_entry_vmadd + 2, x
+    txa
+    sln 5
+    clc
+    adc #$4000
+    sta dma_queue_entry_vmadd, y
+    adc #$100
+    sta dma_queue_entry_vmadd + 2, y
 
     pla
     clc
     adc #<>PLAYER_TILESET
-    sta dma_queue_entry_addr, x
+    sta dma_queue_entry_addr, y
     adc #$200
-    sta dma_queue_entry_addr + 2, x
+    sta dma_queue_entry_addr + 2, y
 
     inc dma_queue_length
     inc dma_queue_length

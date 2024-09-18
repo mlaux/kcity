@@ -110,16 +110,13 @@ oam_data_main .fill OAM_MAIN_LENGTH
 oam_data_aux .fill OAM_AUX_LENGTH
 
 ; for all sprites including player
+; 16x16 are one entry, 16x32 are two entries
 sprites_x .fill 2 * NUM_OAM_ENTRIES
 sprites_y .fill 2 * NUM_OAM_ENTRIES
 sprites_id .fill 2 * NUM_OAM_ENTRIES
 sprites_flag .fill 2 * NUM_OAM_ENTRIES
-sprites_direction .fill 2 * NUM_OAM_ENTRIES
-sprites_previous_direction .fill 2 * NUM_OAM_ENTRIES
-sprites_anim_offset .fill 2 * NUM_OAM_ENTRIES
-sprites_anim_timer .fill 2 * NUM_OAM_ENTRIES
 
-; player is the first entry in the above tables
+; player is the first two entries in the above tables
 player_x = sprites_x
 player_x_head = sprites_x + 2
 player_y = sprites_y
@@ -130,6 +127,12 @@ player_visibility_flags = sprites_flag
 player_visibility_flags_head = sprites_flag + 2
 
 ; for calculating animation
+; one entry no matter the sprite size
+sprites_direction .fill 2 * NUM_OAM_ENTRIES
+sprites_previous_direction .fill 2 * NUM_OAM_ENTRIES
+sprites_anim_offset .fill 2 * NUM_OAM_ENTRIES
+sprites_anim_timer .fill 2 * NUM_OAM_ENTRIES
+
 player_direction = sprites_direction
 player_previous_direction = sprites_previous_direction
 player_anim_offset = sprites_anim_offset

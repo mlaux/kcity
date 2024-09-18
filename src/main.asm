@@ -64,7 +64,6 @@ RESET
     jsr palette_init
     jsr tileset_init ; for font and player tiles only
     jsr background_init
-    jsr player_init
     jsr copy_ram_scripts
 
     ; init audio
@@ -74,6 +73,7 @@ RESET
 
     rep #$20
 
+    jsr player_init
     jsr vwf_reset_tiles
 
     ; hardcoded load of initial map. don't call map_set_warp because it'll
