@@ -5,6 +5,6 @@ MAP_GRAPHICS_BANK = `*
 TEST_TILESET .binary "../experimental_gfx/maptest.tiles"
 TEST_TILEMAP .binary "../experimental_gfx/maptest.map"
 
-BEDROOM_TILESET .binary "../experimental_gfx/bedroom.tiles"
-BEDROOM_TILEMAP .binary "../experimental_gfx/bedroom.map"
+BEDROOM_TILESET .binary "../experimental_gfx/livingroom.tiles"
+BEDROOM_TILEMAP .binary "../experimental_gfx/livingroom.map"
 .endsection

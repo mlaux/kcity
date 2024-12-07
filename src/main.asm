@@ -10,6 +10,8 @@ srn .macro
     .endrept
 .endmacro
 
+STATES .word state_gameplay, state_journal
+
 RESET
     ; enter 65816 mode
     sei
@@ -106,6 +108,13 @@ main
 
     rep #$20
 
+    lda game_state
+    asl
+    tax
+    jsr (STATES, x)
+    jmp main
+
+state_gameplay
     jsr read_input
     jsr move_player
     jsr run_script_v2
@@ -133,7 +142,7 @@ main
 -   wai
     lda main_loop_done
     bne -
-    jmp main
+    rts
 
 NMI_ISR
 .al

@@ -2,6 +2,7 @@
 .section code
 .include "main.asm"
 .include "input.asm"
+.include "journal.asm"
 .include "text.asm"
 .include "tileset.asm"
 .include "palette.asm"

@@ -77,6 +77,8 @@ vwf_tilemap_dst .word ?
 ; ($20 << 8) | (how many tiles have been written to the tilemap so far)
 vwf_tilemap_id .word ?
 
+game_state .word ?
+
 ; main vs. nmi flag, nmi is skipped if this is 0
 main_loop_done .word ?
 frame_counter .word ?

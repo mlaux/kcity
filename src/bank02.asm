@@ -13,7 +13,7 @@ PALETTE_BANK = `*
 
 ; background palettes
 TEST_PALETTE .binary "../experimental_gfx/maptest.palette"
-BEDROOM_PALETTE .binary "../experimental_gfx/bedroom.palette"
+BEDROOM_PALETTE .binary "../experimental_gfx/livingroom.palette"
 
 ; text palettes
 GENEVA_PALETTE .binary "../font/geneva.palette"

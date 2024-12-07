@@ -256,9 +256,12 @@ TEST_REACT_TO_BOOKSHELF
 
 TEST_BOOK1
     #step_wait 1
+    #step_set_player_locked 1
     #step_text_box -1, 1, 21, 30, 1, BOOK_TITLE1, 0, 0, 0
     #step_hide_text_box
     #step_inc_variable 0
+    #step_set_player_locked 0
+
 TEST_BOOK2
     #step_wait 1
     #step_text_box -1, 1, 21, 30, 3, BOOK_TITLE2, EMPTY_STRING, BOOK_TITLE2_2, 0
@@ -277,7 +280,7 @@ TEST_BOOK3
     #step_hide_text_box
 
 OBJECT_SCRIPTS .word TEST_OBJECT_SCRIPT, TEST_HAIR_BLEACH, TEST_REACT_TO_BOOKSHELF, TEST_BOOK1, TEST_BOOK2, TEST_BOOK3
-OBJECT_SCRIPT_LENGTHS .word 3, 2, 23, 4, 4, 10
+OBJECT_SCRIPT_LENGTHS .word 3, 2, 23, 6, 4, 10
 
 load_sprite_byte_index .macro
     ; x = sprite_id * 2
