@@ -54,12 +54,16 @@ set_sprite_id_16x32
     sta sprites_id, y
     lda SPRITE_INITIAL_FLAGS, x
     sta sprites_flag, y
+    lda #$e0
+    sta sprites_y, y
     iny
     iny
     lda SPRITE_BASE_IDS_HEAD, x
     sta sprites_id, y
     lda SPRITE_INITIAL_FLAGS, x
     sta sprites_flag, y
+    lda #$e0
+    sta sprites_y, y
     rts
 
 ; if target_player_x/y are set, sets the position to that

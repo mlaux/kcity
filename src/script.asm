@@ -187,7 +187,7 @@ step_set_player_locked .macro
 DISPLAY_LOCATION_NAME_TEMPLATE
     #step_wait 8
     ; first line pointer is modified
-    #step_text_box $80, 1, 1, 15, 1, $DEAD, 0, 0, 0
+    #step_text_box $80, 1, 1, 24, 1, $DEAD, 0, 0, 0
     #step_hide_text_box
 
 DISPLAY_LOCATION_NAME_LENGTH = * - DISPLAY_LOCATION_NAME_TEMPLATE
