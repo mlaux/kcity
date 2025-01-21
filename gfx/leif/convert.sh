@@ -8,13 +8,13 @@ montage right.png right.png right.png \
   -background none \
   -tile 8x \
   -geometry +0+0 \
-  png8:leif-tiles.png
+  png8:tiles.png
 
 ../../../SuperFamiconv/build/release/superfamiconv \
   --verbose \
-  --in-image leif-tiles.png \
-  --out-palette leif.palette \
-  --out-palette-image leif-palette.png \
-  --out-tiles leif.tiles \
+  --in-image tiles.png \
+  --out-palette leif.pal \
+  --out-palette-image palette.png \
+  --out-tiles leif.4bp \
   --sprite-mode \
   --no-remap

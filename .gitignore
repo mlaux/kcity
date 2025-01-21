@@ -2,7 +2,6 @@
 out.*
 *.tiled-session
 *.o
-*.bin
 *.dbg
 *-map.txt
 *.sfc

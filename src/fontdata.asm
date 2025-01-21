@@ -1,6 +1,6 @@
 
-GENEVA_CHARS .binary "../font/geneva.tiles"
-CHAR_WIDTHS .binary "../font/charwidths.bin"
+GENEVA_CHARS .binary "../font/geneva.2bp"
+CHAR_WIDTHS .binary "../font/chwidths.bin"
 
 ; heights for 1, 2, 3, 4 lines
 TEXT_BOX_HEIGHTS .byte 0, $18, $20, $28, $30

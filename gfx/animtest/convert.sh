@@ -25,22 +25,22 @@ do
   ../../../SuperFamiconv/build/release/superfamiconv \
     --verbose \
     --in-image frame$k.png \
-    --out-palette animtest.palette \
-    --out-tiles frame$k.tiles \
+    --out-palette animtest.pal \
+    --out-tiles frame$k.4bp \
     --sprite-mode
 
 done
 
-cp ../juno/juno-idle.tiles frame0.tiles
+cp ../juno/idle.4bp frame0.4bp
 
-cat frame0.tiles \
-      frame1.tiles \
-      frame2.tiles \
-      frame3.tiles \
-      frame4.tiles \
-      frame5.tiles \
-      frame6.tiles \
-      frame7.tiles \
-  > animtest.tiles
+cat frame0.4bp \
+      frame1.4bp \
+      frame2.4bp \
+      frame3.4bp \
+      frame4.4bp \
+      frame5.4bp \
+      frame6.4bp \
+      frame7.4bp \
+  > animtest.4bp
 
 rm *.png
