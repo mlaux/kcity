@@ -69,9 +69,19 @@ RESET
     jsr copy_ram_scripts
 
     ; init audio
-    jsl Tad_Init
-    lda #$1
-    jsr Tad_LoadSong
+    ;jsl Tad_Init
+    ;lda #$1
+    ;jsr Tad_LoadSong
+
+    jsr BootSPC
+    jsr SPX_Transfer_LFT
+    lda #`music_town
+    ldy #<>music_town
+    jsr SPX_Transfer_XMS
+    jsr SPXM_BuildDir
+    jsr SPXM_Reset
+    jsr SPX_Flush
+    jsr SPXM_Play
 
     rep #$20
 
@@ -99,12 +109,14 @@ main
     bit STAT78
     sta zp0
 
-    lda #$7e
-    pha
-    plb
-    jsl Tad_Process
-    phk
-    plb
+    jsr SPX_Routine
+
+    ;lda #$7e
+    ;pha
+    ;plb
+    ;jsl Tad_Process
+    ;phk
+    ;plb
 
     rep #$20
 
@@ -341,4 +353,7 @@ background_init
     dex
     bpl -
 
+    rts
+
+spc_message_received
     rts

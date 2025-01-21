@@ -22,73 +22,41 @@
 ; SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ;-----------------------------------------------------------------------------------
 
-.equ REG_APUI00	$2140
-.equ REG_APUI01	$2141
-.equ REG_APUI02	$2142
-.equ REG_APUI03	$2143
+REG_APUI00 = $2140
+REG_APUI01 = $2141
+REG_APUI02 = $2142
+REG_APUI03 = $2143
 
-.include "memmap.inc"		; replace with your memory definitions
-
-.MACRO SPX_RECEIVE_MESSAGE
+SPX_RECEIVE_MESSAGE .macro
 	sta spx_message
 	and #15
-	jsl MessageReceived		; SET THIS TO YOUR MESSAGE HANDLER
-.ENDM
+	jsr spc_message_received
+.endm
 
-.define SPX_STACK_SIZE		$10		; increase stack size if neccesary
+SPX_STACK_SIZE = $10		; increase stack size if neccesary
+SPX_XMSOFFSET = $2100
 
-.define SPX_XMSOFFSET		$2100
-
-.MACRO SPX_SYNC
+SPX_SYNC .macro
 	lda spx_validation		; load validation
 -	cmp REG_APUI03			; sync
 	bne -
-.ENDM
+.endm
 
-.ramsection "spx_var" BANK 0 SLOT 1
-spx_spvar:			db
-spx_validation:		db
-spx_package_adr:	dsb 3
-
-spx_stack:			dsb SPX_STACK_SIZE*4	; FIFO stack
-spx_stack_r:		dw						; stack read position
-spx_stack_w:		dw						; stack write position
-
-spx_var1:			dw
-spx_var2:			dw
-spx_var3:			dw
-spx_var4:			dw
-
-spx_message:		db
-
-ddd:				db
-
-.ends
-
-.bank 0
-.SECTION "SPX_SNES"
-
-spx_binary:
-.incbin "spx_binaries\spx_core.bin"
-spx_lft:
-.incbin "spx_binaries\spx_lft.bin"
-spx_aft:
-.incbin "spx_binaries\spx_aft.bin"
-spx_aftf:
-.incbin "spx_binaries\spx_aftf.bin"
-
-.INDEX 16
+spx_binary .binary "spx_core.bin"
+spx_lft .binary "spx_lft.bin"
 	
 ;----------------------------------------------------------------------------------------------------
-BootSPC:
-	ldx #spx_binary
-	lda #:spx_binary
+BootSPC
+.as
+.xl
+	ldx #<>spx_binary
+	lda #`spx_binary
 
 	; x = source address	(word)	16-BIT INDEX
 	; a = bank				(byte)	8-BIT AKKU
-	
+
 	sei						; disable interrupts during upload
-	
+
 	stx spx_var1			; store source address in var1
 	sta spx_var1+2			; store bank
 
@@ -138,7 +106,7 @@ BootSPC:
 	dex						; prepare loop
 	xba						; swap counter/data
 	
-scr_data_loop:
+_scr_data_loop
 	lda [spx_var1], y		; load byte
 	iny						; inc pointer
 	xba						; swap to counter
@@ -154,7 +122,7 @@ scr_data_loop:
 	xba						; swap to data
 	
 	dex						; decrease loop counter
-	bne scr_data_loop		; loop
+	bne _scr_data_loop		; loop
 	
 	xba						; swap to counter
 	
@@ -173,7 +141,7 @@ scr_data_loop:
 	iny						; increase data pointer
 	iny						;
 	cpx #0					; load another block? (if block size is 0, then no)
-	beq scr_terminate		; ...
+	beq _scr_terminate		; ...
 	
 	REP #$20			; yes..
 	pha					; preserve
@@ -196,9 +164,9 @@ scr_data_loop:
 
 -	cmp REG_APUI00		; wait for SPC reply
 	bne -				;
-	bra scr_data_loop	; jump to data loop
-	
-scr_terminate:				; no...
+	bra _scr_data_loop	; jump to data loop
+
+_scr_terminate				; no...
 	stz REG_APUI01			; port1 = 0
 	REP #$20				; 16-bit akku
 	pha						; preserve
@@ -206,7 +174,7 @@ scr_terminate:				; no...
 	tax						; transfer to X
 	pla						; restore
 	SEP #$20				; 8-bit akku
-	
+
 	stx REG_APUI02			; port2/3 = program start address
 	xba						; swap to counter
 	ina						; counter += 2, != 0
@@ -221,7 +189,9 @@ scr_terminate:				; no...
 
 	jmp SPX_Init			; Initialize
 ;-----------------------------------------------------------------------------------------------------
-SPX_Init:
+SPX_Init
+.as
+.xl
 	lda #0					; reset validation
 	sta spx_validation
 	sta spx_stack_w			; reset stack read/write
@@ -232,15 +202,16 @@ SPX_Init:
 -	cmp REG_APUI00			;
 	bne -
 	SEP #$20
-	RTL
+	rts
 
 ;-----------------------------------------------------------------------------------------------------
-SPX_Transfer_XMS:
+SPX_Transfer_XMS
+.as
+.xl
 	; ayy = 24-bit address
 	sty spx_var1			; save address
 	sta spx_var2
-	rep #$20				; 16bit everything
-	rep #$10
+	rep #$30				; 16bit everything
 	lda [spx_var1]			; load length
 	tax						; x = length/3
 	ldy #SPX_XMSOFFSET
@@ -248,66 +219,41 @@ SPX_Transfer_XMS:
 	pha
 	sep #$20
 	lda spx_var2
-	jsl SPX_Transfer
+	jsr SPX_Transfer
 
 	ply
-	rtl
+	rts
 ;-----------------------------------------------------------------------------------------------------
-.accu 8
-SPX_Transfer_LFT:
+SPX_Transfer_LFT
+.as
+.xl
 	sep		#$20				; 8-bit akku
 	rep		#$10				; 16-bit index
 	ldx		#(768/3)			; set transfer length (bytes/3)
-	ldy		#(spx_lft & 65535)	; load snes offset
+	ldy		#<>spx_lft	; load snes offset
 	phy							; push
 	ldy		#$300				; $300-$5FF = linear frequency LUT
-	lda		#:spx_lft			; get bank#
+	lda		#`spx_lft			; get bank#
 
-	JSL		SPX_Transfer		; transfer data
+	jsr		SPX_Transfer		; transfer data
 
 	ply							; free stack
 
-	lda.b	#$1C				; set table
+	lda	#$1C				; set table
 	sta		REG_APUI02			;
 	stz		REG_APUI01			;
-	JSL		SPX_SEND			;
+	jsr		SPX_SEND			;
 	
-	RTL							; return
+	rts							; return
 
 ;-----------------------------------------------------------------------------------------------------
-SPX_Transfer_AFT:
-	sep		#$20				; 8-bit akku
-	rep		#$10				; 16-bit index
-	ldx		#(768/3)			; set transfer length (bytes/3)
-	ldy		#(spx_aft & 65535)	; load snes offset
-	phy							; push
-	ldy		#$300				; $300-$5FF = amiga period LUT
-	lda		#:spx_aft			; get bank#
-	JSL		SPX_Transfer		; transfer data
-	ply							; free stack
-	
-	ldx		#1365				; 4096/3, rounded down
-	ldy		#(spx_aftf & 65535)	; load snes offset
-	phy							; push
-	ldy		#$F000				; $F000-$FFFF = amiga->freq LUT
-	lda		#:spx_aftf			; get bank#
-	JSL		SPX_Transfer		; transfer data
-	ply							; free stack
-	lda		#$1C				; set table
-	sta		REG_APUI02			;
-	lda		#$01				;
-	sta		REG_APUI01			;
-	JSL		SPX_SEND			;
-	RTL							; return
-	
-;-----------------------------------------------------------------------------------------------------
-.INDEX 16
-.ACCU 8
+.as
+.xl
 
-.MACRO SPX_TRANSFER_INCPOINTER
+SPX_TRANSFER_INCPOINTER .macro 
 	iny					; increase pointer
 	iny					;
-	bpl ++				; check for overflow
+	bpl _end				; check for overflow
 	cpy #$8001			; check for an overflow reading
 	bne +				; fix data if so
 	dey					;
@@ -325,58 +271,62 @@ SPX_Transfer_AFT:
 +						; if not just increase bank#
 	inc spx_var1+2		; increase bank#
 	ldy #$0000			; reset counter
-++
-.ENDM
+_end
+.endm
 
-SPX_Transfer_SAMP:
+SPX_Transfer_SAMP
+.as
+.xl
 	sei					; $14 = SAMPLE TRANSFER
 	sta spx_var1+2		;
-	SPX_SYNC			;
+	#SPX_SYNC			;
 	lda #$14			;
 	jmp SPX_TRANSFER_MOD;
 
-SPX_Transfer:
-	; SPX_Transfer
-	; parameters:
-	; a = file bank			:8
-	; x = length/4			:16
-	; y = spc offset		:16
-	; stack:1 = snes_offset	:16
-	
-	; types
-	;  0 = xms
-	;  1 = freq table
-	
+
+; SPX_Transfer
+; parameters:
+; a = file bank			:8
+; x = length/4			:16
+; y = spc offset		:16
+; stack:1 = snes_offset	:16
+
+; types
+;  0 = xms
+;  1 = freq table
+SPX_Transfer
+.as
+.xl
 	sei						; disable interrupts
-	
+
 	sta spx_var1+2			; store bank#
-	
-	SPX_SYNC				; sync with spc
+
+	#SPX_SYNC				; sync with spc
 
 	lda #$1A				; $1A = GENERIC TRANSFER
-SPX_TRANSFER_MOD:
+SPX_TRANSFER_MOD
 	sta REG_APUI02			; set message type
-	
+
 	REP #$20				; set spc write position
 	tya						; 
 	SEP #$20				;
 	sta REG_APUI00			;
 	xba						;
 	sta REG_APUI01			;
-	
+
 	lda spx_validation		; validate data
 	eor #128				;
 	ora #1
 	sta REG_APUI03			;
 -	cmp REG_APUI03			; wait for spc to respond
 	bne -
-	
+
 ;	eor #128				; prepare transfer mode
-	
+
 	sta spx_validation		; save
 
 	REP #$20		; 16-bit akku
-	lda 4, S		; load file offset sp+4
+	lda 3, S		; load file offset sp+4
 
 	sec				; set carry
 	sbc #$8000		; subtract
@@ -387,17 +337,17 @@ SPX_TRANSFER_MOD:
 	sta spx_var1+1	;
 
 	REP #$20			; 16-bit akku
-	
-_stf_start:				; loop:
-	
+
+_stf_start				; loop:
+
 	lda [spx_var1], y	; load data
 	sta spx_var3		; save
-	
-	SPX_TRANSFER_INCPOINTER
-	
+
+	#SPX_TRANSFER_INCPOINTER
+
 	sep #$20
 	lda [spx_var1], y	; get third byte
-	
+
 	iny					; increase pointer
 	bpl +
 	ldy #$0000
@@ -411,7 +361,7 @@ _stf_start:				; loop:
 
 	phx					; preserve
 	ldx spx_spvar		; get ready
-	
+
 -	cmp REG_APUI03		; sync with spc
 	bne -				;
 
@@ -422,24 +372,25 @@ _stf_start:				; loop:
 	stx REG_APUI02		; store byte3/validation
 	plx					; restore
 	rep #$20
-	
+
 	dex					; decrease counter
 	bne _stf_start		; loop until finished
 
 	sep #$20
-	
+
 	stz REG_APUI03		; send 0
 	stz spx_validation
 	lda #0
 -	cmp REG_APUI03		; wait for reply
 	bne -
-	
+
 	cli					; enable interrupts
-	RTL					; return --make sure higher function frees stack space
+	rts					; return --make sure higher function frees stack space
 	
 ;--------------------------------------------------------------------------------------------------------
-.index 16
-SPX_Queue:
+SPX_Queue
+.as
+.xl
 	; a = $00/$01 message
 	; x = $02/$03 params
 	; accumulator can be 8 or 16 bit, do not read anything with it
@@ -456,26 +407,27 @@ SPX_Queue:
 	ldy #0
 +
 	sty spx_stack_w		; save stack position
-	rtl
+	rts
 
 ;---------------------------------------------------------------------------------------------------------
-.accu 8
-SPX_Routine:
+SPX_Routine
+.as
+.xl
 	; get messages
 	lda REG_APUI00		; check if port0 is different
 	cmp spx_message
 	beq +
-	SPX_RECEIVE_MESSAGE	; if so then a message was received
+	#SPX_RECEIVE_MESSAGE	; if so then a message was received
 +
 	lda spx_validation	; check if spc has processed last message
 	cmp REG_APUI03
 	beq +
-	rtl			; not ready
+	rts			; not ready
 +
 	ldy spx_stack_r		; load stack read position
 	cpy spx_stack_w		; exit function if it equals write position (no messages)
 	bne +
-	rtl
+	rts
 +
 	lda spx_stack, y	; load byte0
 	sta REG_APUI00		; store
@@ -502,41 +454,41 @@ SPX_Routine:
 +
 	sty spx_stack_r		; save
 
-	rtl
+	rts
 
-SPX_Flush:				; flushes queue
-	jsl SPX_Routine		; call routine
+SPX_Flush				; flushes queue
+	jsr SPX_Routine		; call routine
 	ldy spx_stack_r		; check for more messages
 	cpy spx_stack_w
 	bne SPX_Flush		; loop
-	rtl					; exit
+	rts					; exit
 	
-SPXM_Play:
+SPXM_Play
 	ldx #$1E			; $1E = play message
 	jmp SPX_Queue
 
-SPXM_BuildDir:
+SPXM_BuildDir
 	ldx #$1B				; $1B = build directory
 	jmp SPX_Queue
 
-SPXM_Reset:					; blocking function
+SPXM_Reset					; blocking function
 	ldx #$1D				; $1D = RESET XMS
 	jmp SPX_Queue
 
-SPXM_SetVol:
+SPXM_SetVol
 	; a = volume
 	ldx #$18				; $18 = set XM playback volume
 	jmp SPX_Queue
 
-SPX_SetVol:
+SPX_SetVol
 	; a = volume L } 16bit akku
 	; b = volume R } resets afterwards
 	ldx #$19				; $19 = change main volume
 	jmp SPX_Queue
 
-.accu 8
-.index 16
-SPXS_Play:
+SPXS_Play
+.as
+.xl
 	; a = volume [llllrrrr]
 	; x = sample#/priority/frequency [0ccfffffssssssss]
 
@@ -555,11 +507,11 @@ SPXS_Play:
 	pla
 	rep #$20
 	
-	jsl SPX_Queue
+	jsr SPX_Queue
 	sep #$20
-	rtl
+	rts
 
-SPXS_SetParam:
+SPXS_SetParam
 	; a = index
 	; x = param
 	xba				; rearrange data
@@ -567,11 +519,11 @@ SPXS_SetParam:
 	xba
 	rep #$20
 	ldx #$21		; $21 = message
-	jsl SPX_Queue	; queue
+	jsr SPX_Queue	; queue
 	sep #$20
-	rtl
+	rts
 		
-SPX_SEND:					; blocking send
+SPX_SEND					; blocking send
 	lda spx_validation		; get validation
 	eor #128				; change
 	sta REG_APUI03			; set port data
@@ -579,16 +531,20 @@ SPX_SEND:					; blocking send
 -	cmp REG_APUI03			; wait for spc reply
 	bne -
 
-	RTL						; exit
+	rts						; exit
 
-SPXP_InstallPackage:
+SPXP_InstallPackage
+.as
+.xl
 	; x = address (16-bit)	;
 	; a = bank#
 	stx spx_package_adr		; store offset
 	sta spx_package_adr+2	; store bank
-	rtl
+	rts
 	
-SPXP_LoadSong:
+SPXP_LoadSong
+.as
+.xl
 	; x = index (16-bit)
 	
 	sep #$20						; 8bit akku
@@ -619,16 +575,16 @@ SPXP_LoadSong:
 	adc [spx_package_adr], y		; add song offset
 	ply								; restore address	
 	
-	jsl SPX_Transfer_XMS			; transfer song
+	jsr SPX_Transfer_XMS			; transfer song
 	
 	; transfer samples
 	
-	SPX_SYNC
+	#SPX_SYNC
 	
 	lda #$17						; ask for sample requests
 	sta REG_APUI02
-	jsl SPX_SEND
---
+	jsr SPX_SEND
+-
 	
 	; message received
 	lda REG_APUI02					; satisfy request
@@ -636,15 +592,17 @@ SPXP_LoadSong:
 	beq +
 	ldx REG_APUI00
 	ldy #0
-	jsl SPXP_LoadSample				; send sample
+	jsr SPXP_LoadSample				; send sample
 	
-	jsl SPX_SEND					; sync
+	jsr SPX_SEND					; sync
 	
-	jmp --
+	jmp -
 +
-	rtl
+	rts
 	
-SPXP_LoadSample:
+SPXP_LoadSample
+.as
+.xl
 	; x = index (16-bit)
 	; y = spc address, 0=use next available
 	
@@ -684,7 +642,7 @@ SPXP_LoadSample:
 	sep #$20						; 8-bit akku
 	lda spx_var2					; load bank#
 	
-	jsl SPX_Transfer_SAMP			; transfer data
+	jsr SPX_Transfer_SAMP			; transfer data
 	ply								; restore stack
 	
 	lda spx_validation				; get sample #
@@ -696,6 +654,4 @@ SPXP_LoadSample:
 	
 	lda REG_APUI00
 	
-	rtl								; return
-	
-.ENDS
+	rts								; return

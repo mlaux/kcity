@@ -12,17 +12,22 @@
 .include "save.asm"
 .endsection
 
+.dsection audiodriver
+.section audiodriver
+.include "xm2snes/spx_snes.asm"
+.endsection
+
 .dsection data
 .section data
 .include "mapdata.asm"
 .include "fontdata.asm"
 .endsection
 
-* = $f000
-.dsection audiodriver
-.section audiodriver
-.binary "spc700/kcity-audio.sfc", 0, $1000
-.endsection
+; * = $f000
+; .dsection audiodriver
+; .section audiodriver
+; .binary "spc700/kcity-audio.sfc", 0, $1000
+; .endsection
 
 * = $ffb0
 .dsection header

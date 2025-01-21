@@ -42,6 +42,21 @@ text_box_lines .word ?
 collision_map_ptr .word ?
 facing_object_script .word ?
 
+spx_spvar .byte ?
+spx_validation .byte ?
+spx_package_adr .fill 3
+
+spx_stack			.fill $10 * 4 ; FIFO stack
+spx_stack_r		.word ?        ; stack read position
+spx_stack_w		.word ?       ; stack write position
+
+spx_var1			.word ?
+spx_var2			.word ?
+spx_var3			.word ?
+spx_var4			.word ?
+
+spx_message		.byte ?
+
 .warn "zero page end: ", *
 
 ; Work RAM variables
