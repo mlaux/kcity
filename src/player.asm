@@ -106,6 +106,38 @@ _done
     plp
     rts
 
+BIT_POSITIONS .byte $80, $40, $20, $10, $8, $4, $2, $1
+
+check_collision_per_pixel
+.al
+.xl
+    txa
+    clc
+    ; zp2 = (playerX + 8) / 8
+    adc #PLAYER_SIZE >> 1
+    pha
+    srn 3
+    sta zp2
+    ; zp3 = (playerX + 8) % 8
+    pla
+    and #7
+    sta zp3
+
+    ; calculate byte offset into image. 32 bytes per row
+    ; idx = playerY * 32 + zp2
+    tya
+    sln 5
+    clc
+    adc zp2
+    tay
+    lda (collision_map_ptr), y
+    and #$ff
+    ldx zp3
+    ; x offset within that byte
+    and BIT_POSITIONS, x
+
+    rts
+
 ; returns: A = 1 if walking to the tile at the given coordinates is permitted, 0 otherwise
 ; parameters: X = player X in pixel coordinates, Y = player Y (top left corner)
 ; assumes: AXY 16
@@ -255,7 +287,7 @@ go_right
     ; check tile at (x + 1, y)
 +   inx
     ldy player_y
-    jsr check_tilemap_collision
+    jsr check_collision_per_pixel
     beq +
 
     inc player_x
@@ -271,7 +303,7 @@ go_down
     ; check tile at (x, y + 1)
 +   iny
     ldx player_x
-    jsr check_tilemap_collision
+    jsr check_collision_per_pixel
     beq +
 
     inc player_y
@@ -287,7 +319,7 @@ go_left
     ; check tile at (x - 1, y)
 +   dex
     ldy player_y
-    jsr check_tilemap_collision
+    jsr check_collision_per_pixel
     beq +
 
     dec player_x
@@ -302,7 +334,7 @@ go_up
     ; check tile at (x, y - 1)
 +   dey
     ldx player_x
-    jsr check_tilemap_collision
+    jsr check_collision_per_pixel
     beq animate_player
 
     dec player_y
