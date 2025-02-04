@@ -111,9 +111,9 @@ BIT_POSITIONS .byte $80, $40, $20, $10, $8, $4, $2, $1
 check_collision_per_pixel
 .al
 .xl
+    ; zp2 = (playerX + 8) / 8
     txa
     clc
-    ; zp2 = (playerX + 8) / 8
     adc #PLAYER_SIZE >> 1
     pha
     srn 3
@@ -124,8 +124,10 @@ check_collision_per_pixel
     sta zp3
 
     ; calculate byte offset into image. 32 bytes per row
-    ; idx = playerY * 32 + zp2
+    ; idx = (playerY + 8) * 32 + zp2
     tya
+    clc
+    adc #PLAYER_SIZE >> 1
     sln 5
     clc
     adc zp2
