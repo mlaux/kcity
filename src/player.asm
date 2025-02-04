@@ -140,10 +140,11 @@ check_collision_per_pixel
 
     rts
 
-; returns: A = 1 if walking to the tile at the given coordinates is permitted, 0 otherwise
+; sets facing_object_script if the player is facing a tile that activates a script
+; calls map_set_warp if the player is on a tile that warps
 ; parameters: X = player X in pixel coordinates, Y = player Y (top left corner)
 ; assumes: AXY 16
-check_tilemap_collision
+check_script_triggers
 .al
 .xl
     txa
@@ -167,7 +168,7 @@ check_tilemap_collision
     clc
     adc zp2
     tay
-    lda (collision_map_ptr), y
+    lda (script_trigger_map_ptr), y
     bit #$80
     beq +
     and #$7f
@@ -178,11 +179,9 @@ check_tilemap_collision
     and #$3f
     asl
     sta facing_object_script
-    lda #0
     rts
 
-+   and #$ff
-    stz facing_object_script
++   stz facing_object_script
     rts
 
 
@@ -289,6 +288,11 @@ go_right
     ; check tile at (x + 1, y)
 +   inx
     ldy player_y
+    phx
+    phy
+    jsr check_script_triggers
+    ply
+    plx
     jsr check_collision_per_pixel
     beq +
 
@@ -305,6 +309,11 @@ go_down
     ; check tile at (x, y + 1)
 +   iny
     ldx player_x
+    phx
+    phy
+    jsr check_script_triggers
+    ply
+    plx
     jsr check_collision_per_pixel
     beq +
 
@@ -321,6 +330,11 @@ go_left
     ; check tile at (x - 1, y)
 +   dex
     ldy player_y
+    phx
+    phy
+    jsr check_script_triggers
+    ply
+    plx
     jsr check_collision_per_pixel
     beq +
 
@@ -336,6 +350,11 @@ go_up
     ; check tile at (x, y - 1)
 +   dey
     ldx player_x
+    phx
+    phy
+    jsr check_script_triggers
+    ply
+    plx
     jsr check_collision_per_pixel
     beq animate_player
 

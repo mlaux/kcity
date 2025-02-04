@@ -200,6 +200,8 @@ map_run_warp
 
     lda COLLISION_MAPS - 2, x
     sta collision_map_ptr
+    lda SCRIPT_TRIGGER_MAPS - 2, x
+    sta script_trigger_map_ptr
 
     ; patch script that displays location names in memory to have
     ; the new location's name and start the script

@@ -1,8 +1,19 @@
+# macOS
 .DS_Store
+
+# output of assemble.sh
 out.*
+
 *.tiled-session
 *.o
 *.dbg
 *-map.txt
 *.sfc
+
+# output of export.sh
 kcity.zip
+
+# walkmap compression tool, input, and compressed walkmaps
+compress
+walkmap
+*.cwm

@@ -40,6 +40,7 @@ script_ptr .word ?
 script_element_ptr .word ?
 text_box_lines .word ?
 collision_map_ptr .word ?
+script_trigger_map_ptr .word ?
 facing_object_script .word ?
 
 spx_spvar .byte ?
