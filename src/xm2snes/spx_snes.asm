@@ -42,8 +42,14 @@ SPX_SYNC .macro
 	bne -
 .endm
 
+.dsection tables
+.section tables
 spx_binary .binary "spx_core.bin"
 spx_lft .binary "spx_lft.bin"
+.endsection
+
+.dsection code
+.section code
 	
 ;----------------------------------------------------------------------------------------------------
 BootSPC
@@ -655,3 +661,5 @@ SPXP_LoadSample
 	lda REG_APUI00
 	
 	rts								; return
+
+.endsection

@@ -75,8 +75,8 @@ RESET
 
     jsr BootSPC
     jsr SPX_Transfer_LFT
-    lda #`music_town
-    ldy #<>music_town
+    lda #`music_water
+    ldy #<>music_water
     jsr SPX_Transfer_XMS
     jsr SPXM_BuildDir
     jsr SPXM_Reset

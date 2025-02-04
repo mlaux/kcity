@@ -12,20 +12,25 @@
 .include "save.asm"
 .endsection
 
-.dsection audiodriver
-.section audiodriver
-.include "xm2snes/spx_snes.asm"
-.endsection
-
-.dsection data
-.section data
+.dsection map_data
+.section map_data
 .include "mapdata.asm"
+.endsection
+.dsection font_data
+.section font_data
 .include "fontdata.asm"
 .endsection
 
+.dsection x2s_driver
+.section x2s_driver
+.include "xm2snes/spx_snes.asm"
+.endsection
+
+.warn format("bank00 free space: $%04x", $ffb0 - *)
+
 ; * = $f000
-; .dsection audiodriver
-; .section audiodriver
+; .dsection tad_driver
+; .section tad_driver
 ; .binary "spc700/kcity-audio.sfc", 0, $1000
 ; .endsection
 

@@ -208,6 +208,7 @@ sram_player_y .word ?
 .section bank01
 .include "bank01.asm"
 .endsection bank01
+.warn format("bank01 free space: $%04x", $20000 - *)
 .cerror * > $20000, "bank01 too long"
 .here
 
@@ -217,6 +218,7 @@ sram_player_y .word ?
 .section bank02
 .include "bank02.asm"
 .endsection bank02
+.warn format("bank02 free space: $%04x", $30000 - *)
 .cerror * > $30000, "bank02 too long"
 .here
 
@@ -226,6 +228,7 @@ sram_player_y .word ?
 .section bank03
 .include "bank03.asm"
 .endsection bank03
+.warn format("bank03 free space: $%04x", $40000 - *)
 .cerror * > $40000, "bank03 too long"
 .here
 
