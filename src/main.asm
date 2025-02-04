@@ -129,6 +129,7 @@ main
 state_gameplay
     jsr read_input
     jsr move_player
+    jsr set_updated_player_pos
     jsr run_script_v2
     rep #$20
     jsr animate_npcs

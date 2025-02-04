@@ -1,13 +1,16 @@
-; ANDed with the frame counter to decide whether to go to the next frame, should be 2^n - 1
+
+PLAYER_SIZE = 16
+
 PLAYER_ANIMATION_SPEED = 7
+PLAYER_MOVEMENT_SPEED = 3 ; in half pixels per frame
+SCALED_MAX_PLAYER_X = (SCREEN_WIDTH - PLAYER_SIZE) << 1
+SCALED_MAX_PLAYER_Y = (SCREEN_HEIGHT - PLAYER_SIZE) << 1
 
 PLAYER_DIRECTION_NONE = 0
 PLAYER_DIRECTION_RIGHT = 1
 PLAYER_DIRECTION_DOWN = 2
 PLAYER_DIRECTION_LEFT = 3
 PLAYER_DIRECTION_UP = 4
-
-PLAYER_SIZE = 16
 
 ; hardcoding for each slot for now
 SPRITE_BASE_IDS_FEET .word $2, $6
@@ -78,29 +81,21 @@ player_set_initial_position
     lda target_player_x
     beq +
     sta player_x
-    sta player_x_head
     stz target_player_x
     bra _y
 
 +   lda START_X - 2, x
     sta player_x
-    sta player_x_head
 
 _y
     lda target_player_y
     beq +
     sta player_y
-    sec
-    sbc #$10
-    sta player_y_head
     stz target_player_y
     bra _done
 
 +   lda START_Y - 2, x
     sta player_y
-    sec
-    sbc #$10
-    sta player_y_head
 
 _done
     plp
@@ -280,14 +275,24 @@ _process_movement
     jmp (MOVEMENT_JUMP_TABLE - 2, x)
 
 go_right
-    ldx player_x
-    cpx #SCREEN_WIDTH - PLAYER_SIZE
-    bne +
-    bra animate_player
+    lda player_x
+    clc
+    adc #PLAYER_MOVEMENT_SPEED
+    ; would moving take you off the screen?
+    cmp #SCALED_MAX_PLAYER_X
+    bmi +
+    ; yep, clamp to max x
+    lda #SCALED_MAX_PLAYER_X
+    sta player_x
+    brl animate_player
 
-    ; check tile at (x + 1, y)
-+   inx
-    ldy player_y
+    ; drop half pixel to check map
+    ; check pixel at (x + speed, y)
++   lsr
+    tax
+    lda player_y
+    lsr
+    tay
     phx
     phy
     jsr check_script_triggers
@@ -296,19 +301,30 @@ go_right
     jsr check_collision_per_pixel
     beq +
 
-    inc player_x
-    inc player_x_head
-+   bra animate_player
+    lda player_x
+    clc
+    adc #PLAYER_MOVEMENT_SPEED
+    sta player_x
++   brl animate_player
 
 go_down
-    ldy player_y
-    cpy #SCREEN_HEIGHT - PLAYER_SIZE
-    bne +
-    bra animate_player
+    lda player_y
+    clc
+    adc #PLAYER_MOVEMENT_SPEED
+    ; would moving take you off the screen?
+    cmp #SCALED_MAX_PLAYER_Y
+    bmi +
+    ; clamp to max y
+    lda #SCALED_MAX_PLAYER_Y
+    sta player_y
+    brl animate_player
 
-    ; check tile at (x, y + 1)
-+   iny
-    ldx player_x
+    ; check pixel at (x, y + speed)
++   lsr
+    tay
+    lda player_x
+    lsr
+    tax
     phx
     phy
     jsr check_script_triggers
@@ -317,19 +333,29 @@ go_down
     jsr check_collision_per_pixel
     beq +
 
-    inc player_y
-    inc player_y_head
+    lda player_y
+    clc
+    adc #PLAYER_MOVEMENT_SPEED
+    sta player_y
+    ; inc player_y_head
 +   bra animate_player
 
 go_left
     ; check left edge of screen
-    ldx player_x
-    bne +
+    lda player_x
+    sec
+    sbc #PLAYER_MOVEMENT_SPEED
+    bpl +
+    lda #0
+    sta player_x
     bra animate_player
 
-    ; check tile at (x - 1, y)
-+   dex
-    ldy player_y
+    ; check pixel at (x - speed, y)
++   lsr
+    tax
+    lda player_y
+    lsr
+    tay
     phx
     phy
     jsr check_script_triggers
@@ -338,18 +364,28 @@ go_left
     jsr check_collision_per_pixel
     beq +
 
-    dec player_x
-    dec player_x_head
+    lda player_x
+    sec
+    sbc #PLAYER_MOVEMENT_SPEED
+    sta player_x
 +   bra animate_player
 
 go_up
-    ldy player_y
-    bne +
+    ; check top edge of screen
+    lda player_y
+    sec
+    sbc #PLAYER_MOVEMENT_SPEED
+    bpl +
+    lda #0
+    sta player_y
     bra animate_player
 
-    ; check tile at (x, y - 1)
-+   dey
-    ldx player_x
+    ; check pixel at (x, y - speed)
++   lsr
+    tay
+    lda player_x
+    lsr
+    tax
     phx
     phy
     jsr check_script_triggers
@@ -358,8 +394,10 @@ go_up
     jsr check_collision_per_pixel
     beq animate_player
 
-    dec player_y
-    dec player_y_head
+    lda player_y
+    sec
+    sbc #PLAYER_MOVEMENT_SPEED
+    sta player_y
 
 animate_player
     ; if it's not time to go to the next frame, exit
@@ -454,6 +492,21 @@ animate_npcs
 .xl
     ldx #1
     jmp animate_sprite_v2
+
+set_updated_player_pos
+.al
+.xl
+    lda player_x
+    lsr
+    sta player_x_sprite
+    sta player_x_head_sprite
+    lda player_y
+    lsr
+    sta player_y_sprite
+    sec
+    sbc #$10
+    sta player_y_head_sprite
+    rts
 
 ; send over the updated data calculated by move_player
 ; parameters: none

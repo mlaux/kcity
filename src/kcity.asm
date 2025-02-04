@@ -135,10 +135,10 @@ sprites_id .fill 2 * NUM_OAM_ENTRIES
 sprites_flag .fill 2 * NUM_OAM_ENTRIES
 
 ; player is the first two entries in the above tables
-player_x = sprites_x
-player_x_head = sprites_x + 2
-player_y = sprites_y
-player_y_head = sprites_y + 2
+player_x_sprite = sprites_x
+player_x_head_sprite = sprites_x + 2
+player_y_sprite = sprites_y
+player_y_head_sprite = sprites_y + 2
 player_sprite_id = sprites_id
 player_sprite_id_head = sprites_id + 2
 player_visibility_flags = sprites_flag
@@ -156,6 +156,8 @@ player_previous_direction = sprites_previous_direction
 player_anim_offset = sprites_anim_offset
 player_anim_timer = sprites_anim_timer
 
+player_x .word ?
+player_y .word ?
 player_locked .word ?
 
 text_box_enabled .word ?
