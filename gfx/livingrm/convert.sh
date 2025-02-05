@@ -2,7 +2,7 @@
 
 ../../../SuperFamiconv/build/release/superfamiconv \
   --verbose \
-  --in-image livingrm.png \
+  --in-image test.png \
   --out-palette livingrm.pal \
   --out-tiles livingrm.4bp \
   --out-map livingrm.map \
@@ -11,4 +11,4 @@
   --tile-width 8 \
   --tile-height 8 \
   --palette-base-offset 1 \
-  --color-zero ff0000
+  --color-zero 00000000
