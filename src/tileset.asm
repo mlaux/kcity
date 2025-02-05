@@ -247,6 +247,11 @@ map_run_warp
     plp
     rts
 
+; very basic RLE that only works well on 1-bit images with large areas of the
+; same color
+;     - 0x01 0x20 -> 0x20
+;     - 0x05 0xff -> 0xff 0xff 0xff 0xff 0xff
+;     - etc
 ; input: zp1 - address of compressed data
 ;        zp2 - length of compressed data
 ; uses: AXY, zp3

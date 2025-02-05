@@ -16,7 +16,7 @@ for caption in captions:
         '-size', '16x16',
         f'caption:{caption}t',
         '-monochrome',
-        f'{caption}-top.png'
+        f'{caption}-0.png'
     ]
 
     subprocess.run(command)
@@ -28,7 +28,7 @@ for caption in captions:
         '-size', '16x16',
         f'caption:{caption}b',
         '-monochrome',
-        f'{caption}-bottom.png'
+        f'{caption}-1.png'
     ]
 
     subprocess.run(command)

@@ -374,7 +374,7 @@ _run_step
     lda (script_element_ptr), y
     asl
     tax
-    pea #_done_with_step - 1
+    per _done_with_step - 1
     sep #$20
     jmp (script_operations, x)
 

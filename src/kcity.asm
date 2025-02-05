@@ -12,7 +12,6 @@
 .include "ppu.asm"
 .include "cpu.asm"
 .include "dma.asm"
-.include "tad-api.asm"
 
 SCREEN_WIDTH = 256
 SCREEN_HEIGHT = 224
@@ -42,20 +41,22 @@ text_box_lines .word ?
 script_trigger_map_ptr .word ?
 facing_object_script .word ?
 
+; --- start from xm2snes ---
 spx_spvar .byte ?
 spx_validation .byte ?
 spx_package_adr .fill 3
 
-spx_stack			.fill $10 * 4 ; FIFO stack
-spx_stack_r		.word ?        ; stack read position
-spx_stack_w		.word ?       ; stack write position
+spx_stack .fill $10 * 4
+spx_stack_r	.word ?
+spx_stack_w	.word ?
 
-spx_var1			.word ?
-spx_var2			.word ?
-spx_var3			.word ?
-spx_var4			.word ?
+spx_var1 .word ?
+spx_var2 .word ?
+spx_var3 .word ?
+spx_var4 .word ?
 
-spx_message		.byte ?
+spx_message	.byte ?
+; --- end from xm2snes ---
 
 .warn "zero page end: ", *
 
