@@ -134,6 +134,8 @@ state_gameplay
     rep #$20
     jsr animate_npcs
     jsr vwf_frame_loop
+    ; this might go into the next frame (but it's ok because it enables force blank)
+    jsr map_run_warp
 
     ; measure CPU time in scanlines
     sep #$20
@@ -190,10 +192,6 @@ NMI_ISR
 
     ; handle fade or mosaic effect if needed
     jsr run_effect
-
-    ; this might go into the next frame (but it's ok because it enables force blank)
-    ; but this means it needs to run last
-    jsr map_run_warp
 
     inc frame_counter
 
