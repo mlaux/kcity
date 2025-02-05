@@ -14,26 +14,33 @@ def get_palette(image):
 
 def snap_to_palette(image, palette, orig_palette, reference_image):
     """Converts an image to use the closest colors from the given palette."""
-    pixels = np.array(image.convert("RGB"))
+    pixels = np.array(image.convert("RGBA"))
+    transparent_mask = pixels[:, :, 3] == 0
+    opaque_pixels = pixels[:, :, :3]
 
     # Build a KDTree for fast nearest-neighbor lookup
     color_tree = KDTree(palette)
     
     # Map each pixel to the closest palette color
-    reshaped_pixels = pixels.reshape(-1, 3)
+    reshaped_pixels = opaque_pixels.reshape(-1, 3)
     _, nearest_indices = color_tree.query(reshaped_pixels)
     snapped_pixels = np.array([palette[i] for i in nearest_indices], dtype=np.uint8)
+    snapped_pixels = snapped_pixels.reshape(pixels.shape[:2] + (3,))
+    # Reintroduce transparency by setting fully transparent pixels to a placeholder color 255, 0, 255
+    snapped_pixels[transparent_mask] = (255, 0, 255)
 
     # Reshape back to original image size and convert to indexed mode
-    snapped_image = Image.fromarray(snapped_pixels.reshape(pixels.shape), mode="RGB")
+    snapped_image = Image.fromarray(snapped_pixels, mode="RGB")
 
     snapped_image = snapped_image.convert("P", palette=Image.Palette.ADAPTIVE)
+
+    # get where it put the magenta to set that as the transparent entry
+    # in the png - there is probably an easier way to do this
     pal = snapped_image.getpalette()
     cols = [tuple(pal[i:i+3]) for i in range(0, len(pal), 3)]
-    print(f"index: {cols.index((0, 0, 0))}")
-
-
-    snapped_image.info["transparency"] = cols.index((0, 0, 0))
+    magenta = cols.index((255, 0, 255))
+    print(f"index: {magenta}")
+    snapped_image.info["transparency"] = magenta
     return snapped_image
 
 def main():
@@ -44,12 +51,11 @@ def main():
     reference_image = Image.open(sys.argv[1])
     orig_palette = reference_image.getpalette()
     palette = get_palette(reference_image)
-    print(reference_image.info.get("transparency", None))
     
     for image_path in sys.argv[2:]:
         image = Image.open(image_path)
         snapped_image = snap_to_palette(image, palette, orig_palette, reference_image)
-        output_path = image_path.rsplit('.', 1)[0] + "_snapped.png"
+        output_path = image_path#.rsplit('.', 1)[0] + "_snapped.png"
         snapped_image.save(output_path, format="PNG")
         print(f"Saved: {output_path}")
 
