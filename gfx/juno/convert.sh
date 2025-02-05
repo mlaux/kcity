@@ -56,7 +56,7 @@ montage \
   --no-remap \
   --in-image animtest.png \
   --out-palette animtest.pal \
-  --out-palette-image animtest-palette.png.temp \
+  --out-palette-image animtest-palette.png \
   --out-tiles animtest.4bp \
   --sprite-mode
 
