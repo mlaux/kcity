@@ -312,6 +312,15 @@ clear_oam
     dex
     bpl -
 
+    lda #224
+    ldx #2 * NUM_OAM_ENTRIES
+-   sta sprites_y, x
+    stz sprites_x, x
+    stz sprites_id, x
+    stz sprites_flag, x
+    dex
+    bne -
+
     rts
 
 background_init

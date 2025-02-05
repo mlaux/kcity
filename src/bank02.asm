@@ -12,7 +12,7 @@ NPC_TILESET .binary "../gfx/juno/animtest.4bp"
 PALETTE_BANK = `*
 
 ; background palettes
-TEST_PALETTE .binary "../gfx/outside/maptest.pal"
+LAB_PALETTE .binary "../gfx/lab/lab.pal"
 BEDROOM_PALETTE .binary "../gfx/livingrm/livingrm.pal"
 
 ; text palettes
@@ -23,6 +23,6 @@ PLAYER_PALETTE .binary "../gfx/juno/animtest.pal"
 NPC_PALETTE .binary "../gfx/juno/animtest.pal"
 
 ; 256 reserved bytes
-FILLER_PALETTES .fill 256
+FILLER_PALETTES .fill 192
 
 .endsection
