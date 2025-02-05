@@ -2,8 +2,8 @@
 .section player_graphics
 PLAYER_GRAPHICS_BANK = `*
 
-PLAYER_TILESET .binary "../gfx/animtest/animtest.4bp"
-NPC_TILESET .binary "../gfx/animtest/animtest.4bp"
+PLAYER_TILESET .binary "../gfx/juno/animtest.4bp"
+NPC_TILESET .binary "../gfx/juno/animtest.4bp"
 
 .endsection
 
@@ -19,8 +19,8 @@ BEDROOM_PALETTE .binary "../gfx/livingrm/livingrm.pal"
 GENEVA_PALETTE .binary "../font/geneva.pal"
 
 ; sprite palettes
-PLAYER_PALETTE .binary "../gfx/animtest/animtest.pal"
-NPC_PALETTE .binary "../gfx/animtest/animtest.pal"
+PLAYER_PALETTE .binary "../gfx/juno/animtest.pal"
+NPC_PALETTE .binary "../gfx/juno/animtest.pal"
 
 ; 256 reserved bytes
 FILLER_PALETTES .fill 256

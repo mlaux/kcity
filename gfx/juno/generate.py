@@ -1,10 +1,10 @@
 import subprocess
 
-# Captions for each image
-captions = ['r' + str(i) for i in range(8)] + \
-           ['f' + str(i) for i in range(8)] + \
-           ['l' + str(i) for i in range(8)] + \
-           ['b' + str(i) for i in range(8)]
+captions = ['f' + str(i) for i in range(1, 8)] + \
+           ['b' + str(i) for i in range(1, 8)] + \
+           ['l7', 'r7']
+           # ['r' + str(i) for i in range(1, 8)] + \
+           # ['l' + str(i) for i in range(1, 8)]
 
 # Loop over the captions to generate the images
 for caption in captions:
