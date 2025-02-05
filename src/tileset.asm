@@ -198,8 +198,13 @@ map_run_warp
     lda #DMAMODE_CGDATA
     sta DMAMODE
 
+    phx
     lda COLLISION_MAPS - 2, x
-    sta collision_map_ptr
+    sta zp1
+    lda COLLISION_MAP_LENGTHS - 2, x
+    sta zp2
+    jsr decompress_collision_map
+    plx
     lda SCRIPT_TRIGGER_MAPS - 2, x
     sta script_trigger_map_ptr
 
@@ -240,4 +245,36 @@ map_run_warp
     stz player_locked
 
     plp
+    rts
+
+; input: zp1 - address of compressed data
+;        zp2 - length of compressed data
+; uses: AXY, zp3
+decompress_collision_map
+.al
+.xl
+    ; output pointer
+    ldx #0
+    ; input pointer
+    ldy #0
+
+_next_set
+    ; get number of times for this byte
+    lda (zp1), y
+    iny
+    and #$ff
+    sta zp3
+
+    ; get the byte to write
+    lda (zp1), y
+    iny
+    and #$ff
+
+-   sta @l collision_map, x
+    inx
+    dec zp3
+    bne -
+    cpy zp2
+    bne _next_set
+
     rts

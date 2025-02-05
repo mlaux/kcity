@@ -126,8 +126,8 @@ check_collision_per_pixel
     sln 5
     clc
     adc zp2
-    tay
-    lda (collision_map_ptr), y
+    tax
+    lda @l collision_map, x
     and #$ff
     ldx zp3
     ; x offset within that byte

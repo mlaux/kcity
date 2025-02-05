@@ -25,7 +25,7 @@ TEST_SCRIPT_TRIGGERS .byte 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1
 
 BEDROOM_NAME .text "Juno and Leif's living room", 255
 
-BEDROOM_COLLISION_MAP .binary "../gfx/livingrm/walkmap"
+BEDROOM_COLLISION_MAP .binary "../gfx/livingrm/walkmap.cwm"
 ; TODO: reimplement all of this with the per pixel walking
 BEDROOM_SCRIPT_TRIGGERS .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                         .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -56,5 +56,6 @@ ALL_TILEMAPS .word <>TEST_TILEMAP, <>BEDROOM_TILEMAP
 ALL_TILESET_LENGTHS .word size(TEST_TILESET), size(BEDROOM_TILESET)
 ; TODO generate test map collision as a .png
 COLLISION_MAPS .word BEDROOM_COLLISION_MAP, BEDROOM_COLLISION_MAP
+COLLISION_MAP_LENGTHS .word size(BEDROOM_COLLISION_MAP), size(BEDROOM_COLLISION_MAP)
 SCRIPT_TRIGGER_MAPS .word TEST_SCRIPT_TRIGGERS, BEDROOM_SCRIPT_TRIGGERS
 LOCATION_NAMES .word TEST_MAP_NAME, BEDROOM_NAME

@@ -39,7 +39,6 @@ vwf_font_ptr .word ?
 script_ptr .word ?
 script_element_ptr .word ?
 text_box_lines .word ?
-collision_map_ptr .word ?
 script_trigger_map_ptr .word ?
 facing_object_script .word ?
 
@@ -193,6 +192,12 @@ sram_player_x .word ?
 sram_player_y .word ?
 
 .warn "sram end: ", *
+
+* = $7e2000
+
+collision_map .fill $2000
+
+.warn "other ram end: ", *
 
 * = $0
 
