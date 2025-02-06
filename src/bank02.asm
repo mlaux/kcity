@@ -3,7 +3,7 @@
 PLAYER_GRAPHICS_BANK = `*
 
 PLAYER_TILESET .binary "../gfx/juno/animtest.4bp"
-NPC_TILESET .binary "../gfx/juno/animtest.4bp"
+NPC_TILESET .binary "../gfx/leif/leif.4bp"
 
 .endsection
 
@@ -20,9 +20,9 @@ GENEVA_PALETTE .binary "../font/geneva.pal"
 
 ; sprite palettes
 PLAYER_PALETTE .binary "../gfx/juno/animtest.pal"
-NPC_PALETTE .binary "../gfx/juno/animtest.pal"
+NPC_PALETTE .binary "../gfx/leif/leif.pal"
 
 ; 256 reserved bytes
-FILLER_PALETTES .fill 192
+FILLER_PALETTES .fill 224
 
 .endsection

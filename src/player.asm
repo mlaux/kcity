@@ -119,10 +119,10 @@ check_collision_per_pixel
     sta zp3
 
     ; calculate byte offset into image. 32 bytes per row
-    ; idx = (playerY + 8) * 32 + zp2
+    ; idx = (playerY + 15) * 32 + zp2
     tya
     clc
-    adc #PLAYER_SIZE >> 1
+    adc #PLAYER_SIZE - 1
     sln 5
     clc
     adc zp2

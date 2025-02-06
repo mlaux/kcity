@@ -16,5 +16,7 @@ montage right.png right.png right.png \
   --out-palette leif.pal \
   --out-palette-image palette.png \
   --out-tiles leif.4bp \
+  -W 16 \
+  -H 16 \
   --sprite-mode \
   --no-remap
