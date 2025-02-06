@@ -1,6 +1,6 @@
 TILEMAP_SIZE = $800
 PALETTE_OFFSET = $10
-PALETTE_SIZE = $f0
+PALETTE_SIZE = $e0
 
 tileset_init
 .as

@@ -22,7 +22,4 @@ GENEVA_PALETTE .binary "../font/geneva.pal"
 PLAYER_PALETTE .binary "../gfx/juno/animtest.pal"
 NPC_PALETTE .binary "../gfx/leif/leif.pal"
 
-; 256 reserved bytes
-FILLER_PALETTES .fill 224
-
 .endsection

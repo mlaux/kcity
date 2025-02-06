@@ -8,8 +8,8 @@ palette_init
     stz CGADD
 
     #dma_ppu_data GENEVA_PALETTE
-    #dma_ppu_data LAB_PALETTE
-    #dma_ppu_data FILLER_PALETTES
+    lda #$c0
+    sta CGADD
     #dma_ppu_data PLAYER_PALETTE
     #dma_ppu_data NPC_PALETTE
 
