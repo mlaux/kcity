@@ -46,7 +46,7 @@ montage \
   -background none \
   -tile 8x \
   -geometry +0+0 \
-  png8:animtest.png
+  png8:juno.png
 
 # convert to snes format
 ../../../SuperFamiconv/build/release/superfamiconv \
@@ -54,10 +54,10 @@ montage \
   -W 16 \
   -H 16 \
   --no-remap \
-  --in-image animtest.png \
-  --out-palette animtest.pal \
-  --out-palette-image animtest-palette.png \
-  --out-tiles animtest.4bp \
+  --in-image juno.png \
+  --out-palette juno.pal \
+  --out-palette-image juno-pal.png \
+  --out-tiles juno.4bp \
   --sprite-mode
 
 # clean up
