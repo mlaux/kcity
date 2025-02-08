@@ -313,13 +313,13 @@ clear_oam
     bpl -
 
     lda #224
-    ldx #2 * NUM_OAM_ENTRIES
+    ldx #(2 * NUM_OAM_ENTRIES) - 1
 -   sta sprites_y, x
     stz sprites_x, x
     stz sprites_id, x
     stz sprites_flag, x
     dex
-    bne -
+    bpl -
 
     rts
 
