@@ -22,4 +22,7 @@ GENEVA_PALETTE .binary "../font/geneva.pal"
 PLAYER_PALETTE .binary "../gfx/juno/juno.pal"
 NPC_PALETTE .binary "../gfx/leif/leif.pal"
 
+;TEST_PALETTE .binary "../../../crane/bucket/title-scene-1.pal"
+;TEST_TILES .binary "../../../crane/bucket/title-scene-1.4bp"
+
 .endsection

@@ -1,8 +1,11 @@
 .dsection code
 .section code
 .include "main.asm"
-.include "input.asm"
+.include "state.asm"
+.include "title.asm"
+.include "gameplay.asm"
 .include "journal.asm"
+.include "input.asm"
 .include "text.asm"
 .include "tileset.asm"
 .include "palette.asm"

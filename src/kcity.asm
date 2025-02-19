@@ -13,6 +13,18 @@
 .include "cpu.asm"
 .include "dma.asm"
 
+sln .macro
+    .rept \1
+    asl
+    .endrept
+.endmacro
+
+srn .macro
+    .rept \1
+    lsr
+    .endrept
+.endmacro
+
 SCREEN_WIDTH = 256
 SCREEN_HEIGHT = 224
 
@@ -94,6 +106,7 @@ vwf_tilemap_dst .word ?
 vwf_tilemap_id .word ?
 
 game_state .word ?
+state_init_finished .word ?
 
 ; main vs. nmi flag, nmi is skipped if this is 0
 main_loop_done .word ?

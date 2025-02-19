@@ -1,17 +1,3 @@
-sln .macro
-    .rept \1
-    asl
-    .endrept
-.endmacro
-
-srn .macro
-    .rept \1
-    lsr
-    .endrept
-.endmacro
-
-STATES .word state_gameplay, state_journal
-
 RESET
     ; enter 65816 mode
     sei
@@ -63,46 +49,16 @@ RESET
     jsr clear_ppu_ram
     jsr clear_oam
 
-    jsr palette_init
-    jsr tileset_init ; for font and player tiles only
-    jsr background_init
-    jsr copy_ram_scripts
-
     ; init audio
-    ;jsl Tad_Init
-    ;lda #$1
-    ;jsr Tad_LoadSong
-
     jsr BootSPC
     jsr SPX_Transfer_LFT
-    lda #`music_water
-    ldy #<>music_water
-    jsr SPX_Transfer_XMS
-    jsr SPXM_BuildDir
-    jsr SPXM_Reset
-    jsr SPX_Flush
-    jsr SPXM_Play
 
-    rep #$20
-
-    jsr player_init
-    jsr vwf_reset_tiles
-
-    ; hardcoded load of initial map. don't call map_set_warp because it'll
-    ; initiate a fade-out and lock the player's position, which i don't want
-    lda #2
-    sta target_warp_map
-
-    ; this will also disable force blank and set up the fade-in effect
-    jsr map_run_warp
-
-    ; initialization done, enable interrupts and auto joypad reading
-    sep #$20
-    lda #$81
-    sta NMITIMEN
+    lda #1
+    sta game_state
+    jsr run_state_init
 
     ; fall through to main loop
-main
+main_loop
     sep #$20
     bit SLHV
     lda OPVCT
@@ -111,53 +67,15 @@ main
 
     jsr SPX_Routine
 
-    ;lda #$7e
-    ;pha
-    ;plb
-    ;jsl Tad_Process
-    ;phk
-    ;plb
-
     rep #$20
+
+    jsr read_input
 
     lda game_state
     asl
     tax
     jsr (STATES, x)
-    jmp main
-
-state_gameplay
-    jsr read_input
-    jsr move_player
-    jsr set_updated_player_pos
-    jsr run_script_v2
-    rep #$20
-    jsr animate_npcs
-    jsr vwf_frame_loop
-    ; this might go into the next frame (but it's ok because it enables force blank)
-    jsr map_run_warp
-
-    ; measure CPU time in scanlines
-    sep #$20
-    bit SLHV
-    lda OPVCT
-    bit STAT78
-    sec
-    sbc zp0
-    sta zp0
-
-    ; update CPU high water mark
-    cmp zp1
-    bcc +
-    sta zp1
-+   rep #$20
-
-    lda #1
-    sta main_loop_done
--   wai
-    lda main_loop_done
-    bne -
-    rts
+    jmp main_loop
 
 NMI_ISR
 .al
@@ -176,19 +94,19 @@ NMI_ISR
     sep #$20
     bit RDNMI
 
+    rep #$20
+
     ; if main loop is still running, this is a lag frame, do not update ppu
     lda main_loop_done
     beq _skip_vblank
 
-    ; move player and send updated position to OAM
-    jsr vblank_oam_dma
+    ; run any state-specific vblank things
+    lda game_state
+    asl
+    tax
+    jsr (VBLANKS, x)
 
-    ; send over any new vram tiles
-    jsr dma_queue_run_vblank
-
-    ; DMA generated text tiles if needed, or reset tilemap if turning off text box
-    ; send HDMA table for text box overlay if needed
-    jsr text_box_vblank
+    sep #$20
 
     ; handle fade or mosaic effect if needed
     jsr run_effect
@@ -321,47 +239,4 @@ clear_oam
     dex
     bpl -
 
-    rts
-
-background_init
-.as
-.xl
-    ; set up screen addresses
-    stz BG1SC ; we want the screen at $0000 and size 32x32
-    lda #%00001000 ; layer 3 at $0800.w and size 32x32
-    sta BG3SC
-    lda #1
-    sta BG12NBA ; we want BG1 tile data to be $1000 which is the first 4K word step
-    lda #3
-    sta BG34NBA ; BG3 tile data at $3000
-    lda #$9
-    sta BGMODE ; 8x8 chars mode 1, BG3 priority
-
-    ; $3ff = -1 vertical scroll, since first line is not drawn
-    lda #$ff
-    sta BG1VOFS
-    lda #$03
-    sta BG1VOFS
-
-    ; enable bg1+bg3+obj on main screen
-    lda #$15
-    sta TM
-
-    ; enable window 1 for color
-    lda #$20
-    sta WOBJSEL
-
-    ; "Sub screen color window transparent region" = "outside color window"
-    lda #$10
-    sta CGWSEL
-
-    ldx #size(TEXT_HDMA_TABLE) - 1
--   lda TEXT_HDMA_TABLE, x
-    sta text_box_hdma_table, x
-    dex
-    bpl -
-
-    rts
-
-spc_message_received
     rts
