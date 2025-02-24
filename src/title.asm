@@ -47,18 +47,15 @@ state_title
 state_title_vblank
 .al
 .xl
+    sep #$20
     lda my_bghofs
-    sep #$20
     sta BG1HOFS
-    xba
+    lda my_bghofs + 1
     sta BG1HOFS
-    rep #$20
     lda my_bgvofs
-    sep #$20
     sta BG1VOFS
-    xba
+    lda my_bgvofs + 1
     sta BG1VOFS
-    rep #$20
 
     rts
 
