@@ -14,6 +14,7 @@ PALETTE_BANK = `*
 ; background palettes
 LAB_PALETTE .binary "../gfx/lab/lab.pal"
 BEDROOM_PALETTE .binary "../gfx/livingrm/livingrm.pal"
+TITLE_SCENE_PALETTE .binary "../gfx/title/title.pal"
 
 ; text palettes
 GENEVA_PALETTE .binary "../font/geneva.pal"
@@ -21,8 +22,5 @@ GENEVA_PALETTE .binary "../font/geneva.pal"
 ; sprite palettes
 PLAYER_PALETTE .binary "../gfx/juno/juno.pal"
 NPC_PALETTE .binary "../gfx/leif/leif.pal"
-
-;TEST_PALETTE .binary "../../../crane/bucket/title-scene-1.pal"
-;TEST_TILES .binary "../../../crane/bucket/title-scene-1.4bp"
 
 .endsection

@@ -134,6 +134,9 @@ script_step_time_remaining .word ?
 
 script_storage .fill $20
 
+my_bghofs .word ?
+my_bgvofs .word ?
+
 NUM_OAM_ENTRIES = 16
 OAM_MAIN_LENGTH = NUM_OAM_ENTRIES * 4
 OAM_AUX_LENGTH = NUM_OAM_ENTRIES / 4

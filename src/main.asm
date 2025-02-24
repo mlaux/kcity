@@ -53,7 +53,7 @@ RESET
     jsr BootSPC
     jsr SPX_Transfer_LFT
 
-    lda #1
+    lda #0
     sta game_state
     jsr run_state_init
 

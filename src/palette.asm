@@ -12,6 +12,5 @@ palette_init
     sta CGADD
     #dma_ppu_data PLAYER_PALETTE
     #dma_ppu_data NPC_PALETTE
-    ;#dma_ppu_data TEST_PALETTE
 
     rts

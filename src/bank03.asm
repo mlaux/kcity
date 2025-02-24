@@ -7,4 +7,5 @@ LAB_TILEMAP .binary "../gfx/lab/lab.map"
 
 BEDROOM_TILESET .binary "../gfx/livingrm/livingrm.4bp"
 BEDROOM_TILEMAP .binary "../gfx/livingrm/livingrm.map"
+
 .endsection

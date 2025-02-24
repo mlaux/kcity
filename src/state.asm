@@ -6,8 +6,9 @@ VBLANKS .word state_title_vblank, state_gameplay_vblank, state_journal_vblank
 run_state_init
 .as
 .xl
-    lda #0
+    lda #$80
     sta INIDISP
+    lda #0
     sta NMITIMEN
 
     rep #$20
