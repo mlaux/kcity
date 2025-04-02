@@ -34,6 +34,7 @@ state_gameplay_init
 state_gameplay
 .al
 .xl
+    jsr process_input
     jsr move_player
     jsr set_updated_player_pos
     jsr run_script_v2
@@ -106,6 +107,35 @@ background_init
     bpl -
 
     rts
+
+process_input
+.al
+.xl
+    lda joypad_new
+    ; if (A pressed && !script_ptr && facing_object_script)
+    bit #A_BUTTON
+    beq +
+    lda script_ptr
+    bne +
+    ldx facing_object_script
+    beq +
+
+    lda OBJECT_SCRIPTS - 2, x
+    ldy OBJECT_SCRIPT_LENGTHS - 2, x
+    tax
+    jsr set_script
+
++   lda joypad_new
+    bit #SELECT_BUTTON
+    beq +
+    jmp save_game
+
++   bit #START_BUTTON
+    beq +
+    jmp load_game
+
++   rts
+
 
 spc_message_received
     rts

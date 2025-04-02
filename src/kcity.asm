@@ -134,6 +134,8 @@ script_step_time_remaining .word ?
 
 script_storage .fill $20
 
+my_inidisp .word ?
+my_mosaic .word ?
 my_bghofs .word ?
 my_bgvofs .word ?
 

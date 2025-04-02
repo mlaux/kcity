@@ -31,7 +31,7 @@ run_fade_in
     bne +
     stz effect_id
 +   sta effect_level
-    sta INIDISP
+    sta my_inidisp
     rts
 
 run_fade_out
@@ -39,7 +39,7 @@ run_fade_out
     bne +
     stz effect_id
 +   sta effect_level
-    sta INIDISP
+    sta my_inidisp
     rts
 
 run_mosaic_on
@@ -53,14 +53,14 @@ run_mosaic_on
     asl
     asl
     ora #$f
-    sta MOSAIC
+    sta my_mosaic
     rts
 
 run_mosaic_off
     dec a
     bne +
     stz effect_id
-    stz MOSAIC
+    stz my_mosaic
     rts
 
 +   sta effect_level
@@ -69,7 +69,7 @@ run_mosaic_off
     asl
     asl
     ora #$f
-    sta MOSAIC
+    sta my_mosaic
 
     rts
 

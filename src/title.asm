@@ -25,7 +25,17 @@ state_title_init
 state_title
 .al
 .xl
-    lda effect_id
+    lda joypad_new
+    and #(A_BUTTON | START_BUTTON)
+    beq +
+
+    stz effect_id
+    lda #$f
+    sta my_inidisp
+    stz my_bghofs
+    stz my_bgvofs
+
++   lda effect_id
     bne +
 
     lda frame_counter
@@ -87,5 +97,5 @@ load_title_background
     #dma_ppu_data TITLE_SCENE_PALETTE
 
     lda #$f
-    sta INIDISP
+    sta my_inidisp
     rts

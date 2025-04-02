@@ -110,6 +110,10 @@ NMI_ISR
 
     ; handle fade or mosaic effect if needed
     jsr run_effect
+    lda my_inidisp
+    sta INIDISP
+    lda my_mosaic
+    sta MOSAIC
 
     inc frame_counter
 
