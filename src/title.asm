@@ -29,7 +29,7 @@ state_title
     and #(A_BUTTON | START_BUTTON)
     beq _animate
 
-    lda effect_id
+    lda my_bgvofs
     bne +
 
     lda #1
