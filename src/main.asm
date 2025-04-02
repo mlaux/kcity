@@ -53,13 +53,16 @@ RESET
     jsr BootSPC
     jsr SPX_Transfer_LFT
 
+    ; initialization done, enable interrupts and auto joypad reading
+    lda #$81
+    sta NMITIMEN
+
     lda #0
     sta game_state
     jsr run_state_init
 
     ; fall through to main loop
 main_loop
-    sep #$20
     bit SLHV
     lda OPVCT
     bit STAT78
@@ -75,6 +78,27 @@ main_loop
     asl
     tax
     jsr (STATES, x)
+
+    ; measure CPU time in scanlines
+    sep #$20
+    bit SLHV
+    lda OPVCT
+    bit STAT78
+    sec
+    sbc zp0
+    sta zp0
+
+    ; update CPU high water mark
+    cmp zp1
+    bcc +
+    sta zp1
+
++   lda #1
+    sta main_loop_done
+-   wai
+    lda main_loop_done
+    bne -
+
     jmp main_loop
 
 NMI_ISR
@@ -95,6 +119,8 @@ NMI_ISR
     bit RDNMI
 
     rep #$20
+    lda skip_nmi
+    bne _skip_vblank
 
     ; if main loop is still running, this is a lag frame, do not update ppu
     lda main_loop_done
@@ -110,6 +136,7 @@ NMI_ISR
 
     ; handle fade or mosaic effect if needed
     jsr run_effect
+    sep #$20
     lda my_inidisp
     sta INIDISP
     lda my_mosaic

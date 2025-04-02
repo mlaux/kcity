@@ -4,12 +4,13 @@ STATES .word state_title, state_gameplay, state_journal
 VBLANKS .word state_title_vblank, state_gameplay_vblank, state_journal_vblank
 
 run_state_init
-.as
+    php
+.al
 .xl
+    sep #$20
+    inc skip_nmi
     lda #$80
     sta INIDISP
-    lda #0
-    sta NMITIMEN
 
     rep #$20
 
@@ -18,9 +19,8 @@ run_state_init
     tax
     jsr (INITS, x)
 
-    ; initialization done, enable interrupts and auto joypad reading
     sep #$20
-    lda #$81
-    sta NMITIMEN
+    dec skip_nmi
 
+    plp
     rts

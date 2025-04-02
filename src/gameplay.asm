@@ -44,29 +44,7 @@ state_gameplay
     jsr animate_npcs
     jsr vwf_frame_loop
     ; this might go into the next frame (but it's ok because it enables force blank)
-    jsr map_run_warp
-
-    ; measure CPU time in scanlines
-    sep #$20
-    bit SLHV
-    lda OPVCT
-    bit STAT78
-    sec
-    sbc zp0
-    sta zp0
-
-    ; update CPU high water mark
-    cmp zp1
-    bcc +
-    sta zp1
-+   rep #$20
-
-    lda #1
-    sta main_loop_done
--   wai
-    lda main_loop_done
-    bne -
-    rts
+    jmp map_run_warp
 
 background_init
 .as

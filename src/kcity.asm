@@ -106,7 +106,7 @@ vwf_tilemap_dst .word ?
 vwf_tilemap_id .word ?
 
 game_state .word ?
-state_init_finished .word ?
+skip_nmi .word ?
 
 ; main vs. nmi flag, nmi is skipped if this is 0
 main_loop_done .word ?

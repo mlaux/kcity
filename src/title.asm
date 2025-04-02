@@ -27,15 +27,24 @@ state_title
 .xl
     lda joypad_new
     and #(A_BUTTON | START_BUTTON)
-    beq +
+    beq _animate
 
-    stz effect_id
+    lda effect_id
+    bne +
+
+    lda #1
+    sta game_state
+    jsr run_state_init
+    rts
+
++   stz effect_id
     lda #$f
     sta my_inidisp
     stz my_bghofs
     stz my_bgvofs
 
-+   lda effect_id
+_animate
+    lda effect_id
     bne +
 
     lda frame_counter
