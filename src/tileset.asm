@@ -143,7 +143,6 @@ map_run_warp
 
     ; turn the screen off
 +   sep #$20
-    inc skip_nmi
     lda #$80
     sta INIDISP
 
@@ -244,7 +243,6 @@ map_run_warp
     sta INIDISP
 
     stz player_locked
-    dec skip_nmi
 
     plp
     rts

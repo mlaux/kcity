@@ -2,6 +2,12 @@
 save_game
 .al
 .xl
+    lda #2
+    sta game_state
+    jmp run_state_init
+
+    ; ALL CODE IN COMMENTS HAS BEEN COMMENTED OUT
+
     php
     rep #$20
 

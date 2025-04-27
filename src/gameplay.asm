@@ -58,7 +58,7 @@ background_init
     lda #3
     sta BG34NBA ; BG3 tile data at $3000
     lda #$9
-    sta BGMODE ; 8x8 chars mode 1, BG3 priority
+    sta my_bgmode ; 8x8 chars mode 1, BG3 priority
 
     ; $3ff = -1 vertical scroll, since first line is not drawn
     lda #$ff

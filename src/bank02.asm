@@ -15,6 +15,7 @@ PALETTE_BANK = `*
 LAB_PALETTE .binary "../gfx/lab/lab.pal"
 BEDROOM_PALETTE .binary "../gfx/livingrm/livingrm.pal"
 TITLE_SCENE_PALETTE .binary "../gfx/title/title.pal"
+JOURNAL_PALETTE .binary "../gfx/journal/notepad.pal"
 
 ; text palettes
 GENEVA_PALETTE .binary "../font/geneva.pal"

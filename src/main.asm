@@ -119,8 +119,6 @@ NMI_ISR
     bit RDNMI
 
     rep #$20
-    lda skip_nmi
-    bne _skip_vblank
 
     ; if main loop is still running, this is a lag frame, do not update ppu
     lda main_loop_done
@@ -141,6 +139,18 @@ NMI_ISR
     sta INIDISP
     lda my_mosaic
     sta MOSAIC
+    lda my_bgmode
+    sta BGMODE
+    
+    lda my_bghofs
+    sta BG1HOFS
+    lda my_bghofs + 1
+    sta BG1HOFS
+    lda my_bgvofs
+    sta BG1VOFS
+    lda my_bgvofs + 1
+    sta BG1VOFS
+
 
     inc frame_counter
 

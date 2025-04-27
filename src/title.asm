@@ -8,7 +8,7 @@ state_title_init
     sep #$20
     jsr background_init
     lda #$19 ; 0x10 = 16x16 tile mode
-    sta BGMODE
+    sta my_bgmode
     jsr load_title_background
     rep #$20
     lda #$120
@@ -66,16 +66,6 @@ _animate
 state_title_vblank
 .al
 .xl
-    sep #$20
-    lda my_bghofs
-    sta BG1HOFS
-    lda my_bghofs + 1
-    sta BG1HOFS
-    lda my_bgvofs
-    sta BG1VOFS
-    lda my_bgvofs + 1
-    sta BG1VOFS
-
     rts
 
 load_title_background

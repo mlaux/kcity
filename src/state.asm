@@ -8,7 +8,6 @@ run_state_init
 .al
 .xl
     sep #$20
-    inc skip_nmi
     lda #$80
     sta INIDISP
 
@@ -20,7 +19,6 @@ run_state_init
     jsr (INITS, x)
 
     sep #$20
-    dec skip_nmi
 
     plp
     rts

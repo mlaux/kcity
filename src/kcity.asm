@@ -106,7 +106,6 @@ vwf_tilemap_dst .word ?
 vwf_tilemap_id .word ?
 
 game_state .word ?
-skip_nmi .word ?
 
 ; main vs. nmi flag, nmi is skipped if this is 0
 main_loop_done .word ?
@@ -135,6 +134,7 @@ script_step_time_remaining .word ?
 script_storage .fill $20
 
 my_inidisp .word ?
+my_bgmode .word ?
 my_mosaic .word ?
 my_bghofs .word ?
 my_bgvofs .word ?
