@@ -171,6 +171,15 @@ NMI_ISR
     lda my_bgvofs + 1
     sta BG1VOFS
 
+    lda my_bg2hofs
+    sta BG2HOFS
+    lda my_bg2hofs + 1
+    sta BG2HOFS
+    lda my_bg2vofs
+    sta BG2VOFS
+    lda my_bg2vofs + 1
+    sta BG2VOFS
+
     jsr draw_cpu_usage
 
     inc frame_counter

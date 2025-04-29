@@ -138,6 +138,8 @@ my_bgmode .word ?
 my_mosaic .word ?
 my_bghofs .word ?
 my_bgvofs .word ?
+my_bg2hofs .word ?
+my_bg2vofs .word ?
 vertical_counter .word ?
 vertical_counter_end .word ?
 vertical_counter_this_frame .word ?

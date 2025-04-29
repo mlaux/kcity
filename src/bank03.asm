@@ -11,4 +11,7 @@ BEDROOM_TILEMAP .binary "../gfx/livingrm/livingrm.map"
 JOURNAL_TILESET .binary "../gfx/journal/notepad.4bp"
 JOURNAL_TILEMAP .binary "../gfx/journal/notepad.map"
 
+PAPER_TILESET .binary "../gfx/paper/paper.4bp"
+PAPER_TILEMAP .binary "../gfx/paper/paper.map"
+
 .endsection

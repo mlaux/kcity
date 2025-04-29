@@ -51,12 +51,19 @@ background_init
 .xl
     ; set up screen addresses
     stz BG1SC ; we want the screen at $0000 and size 32x32
+    lda #%00000100 ; layer 2 at $0400.w and size 32x32
+    sta BG2SC
     lda #%00001000 ; layer 3 at $0800.w and size 32x32
     sta BG3SC
-    lda #1
-    sta BG12NBA ; we want BG1 tile data to be $1000 which is the first 4K word step
+
+    ; BG1 tile data at $1000 which is the first 4K word step
+    ; BG2 tile data at $2000
+    lda #$21
+    sta BG12NBA
+
     lda #3
     sta BG34NBA ; BG3 tile data at $3000
+
     lda #$9
     sta my_bgmode ; 8x8 chars mode 1, BG3 priority
 

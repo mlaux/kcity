@@ -21,8 +21,10 @@ state_journal_init
     lda effect_id
     bne -
 
-    lda #$19 ; 0x10 = 16x16 tile mode
+    lda #$39 ; 3 = 16x16 for layers 1 and 2. 9 = mode 1, bg3 priority on
     sta my_bgmode
+    lda #816
+    sta my_bgvofs
 
     ; swap backgrounds
     jsr load_journal_background
@@ -39,10 +41,10 @@ state_journal_init
     sta effect_level
 
     ; wait for mosaic to go away
--   lda effect_id
-    ldx #$1
+-   ldx #$1
     stx main_loop_done
-    lda effect_id
+    lda effect_level
+    cmp #$3
     bne -
 
     rts
@@ -50,10 +52,17 @@ state_journal_init
 state_journal
 .al
 .xl
-    dec my_bghofs
-    dec my_bgvofs
+    dec my_bg2hofs
+    dec my_bg2vofs
 
-    rts
+    lda my_bgvofs
+    beq +
+    clc
+    adc #8
+    and #$3ff
+    sta my_bgvofs
+
++   rts
 
 state_journal_vblank
 .al
@@ -73,7 +82,7 @@ load_journal_background
     sta INIDISP
 
     ; turn off sprites
-    lda #(BG1_ON | BG3_ON)
+    lda #(BG1_ON | BG2_ON | BG3_ON)
     sta TM
 
     ldx #DMAMODE_PPUDATA
@@ -85,12 +94,19 @@ load_journal_background
     ldx #0
     stx VMADD
 
+    #dma_ppu_data PAPER_TILEMAP
+    ; bg2 tilemap is right after bg1
     #dma_ppu_data JOURNAL_TILEMAP
+
+    ldx #$2000
+    stx VMADD
+
+    #dma_ppu_data JOURNAL_TILESET
 
     ldx #$1000
     stx VMADD
 
-    #dma_ppu_data JOURNAL_TILESET
+    #dma_ppu_data PAPER_TILESET
 
     ldx #DMAMODE_CGDATA
     stx DMAMODE
