@@ -67,7 +67,7 @@ background_init
     sta BG1VOFS
 
     ; enable bg1+bg3+obj on main screen
-    lda #$15
+    lda #(BG1_ON | BG3_ON | OBJ_ON)
     sta TM
 
     ; enable window 1 for color

@@ -339,6 +339,15 @@ set_script
     sta script_step_time_remaining
 +   rts
 
+clear_script
+.al
+.xl
+    stz script_ptr
+    stz script_element_ptr
+    stz script_step
+    stz script_length
+    rts
+
 set_script_step
 .al
 .xl
@@ -363,11 +372,7 @@ _check_script_end
     lda script_step
     cmp script_length
     bne _run_step
-    stz script_ptr
-    stz script_element_ptr
-    stz script_step
-    stz script_length
-    rts
+    jmp clear_script
 
 _run_step
     ldy #$2

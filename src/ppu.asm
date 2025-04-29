@@ -175,6 +175,12 @@ WOBJLOG = $212B
 ;    +------ Enable OBJ on main screen
 TM = $212C
 
+BG1_ON = $1
+BG2_ON = $2
+BG3_ON = $4
+BG4_ON = $8
+OBJ_ON = $10
+
 ; 7  bit  0
 ; ---- ----
 ; ...O 4321

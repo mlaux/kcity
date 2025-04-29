@@ -2,6 +2,11 @@
 state_journal_init
 .al
 .xl
+    ; make sure all of this is off
+    jsr clear_script
+    stz text_box_enabled
+
+    ; pixelate transition
     lda #EFFECT_MOSAIC_ON
     sta effect_id
     lda #$1
@@ -9,6 +14,7 @@ state_journal_init
     lda #0
     sta effect_level
 
+    ; wait for effect to be done
 -   lda effect_id
     ldx #$1
     stx main_loop_done
@@ -17,11 +23,13 @@ state_journal_init
 
     lda #$19 ; 0x10 = 16x16 tile mode
     sta my_bgmode
-    lda #$80
-    sta INIDISP
 
-    sep #$20
+    ; swap backgrounds
     jsr load_journal_background
+
+    ; turn screen back on at nearest convenience
+    lda #$f
+    sta my_inidisp
 
     lda #EFFECT_MOSAIC_OFF
     sta effect_id
@@ -30,6 +38,7 @@ state_journal_init
     lda #$f
     sta effect_level
 
+    ; wait for mosaic to go away
 -   lda effect_id
     ldx #$1
     stx main_loop_done
@@ -49,11 +58,24 @@ state_journal
 state_journal_vblank
 .al
 .xl
-    rts
+    sep #$20
+    jmp text_box_vblank
+    ;rts
 
 load_journal_background
 .as
 .xl
+    php
+    sep #$20
+
+    ; immediately turn off screen so DMA is possible
+    lda #$80
+    sta INIDISP
+
+    ; turn off sprites
+    lda #(BG1_ON | BG3_ON)
+    sta TM
+
     ldx #DMAMODE_PPUDATA
     stx DMAMODE
 
@@ -70,7 +92,6 @@ load_journal_background
 
     #dma_ppu_data JOURNAL_TILESET
 
-
     ldx #DMAMODE_CGDATA
     stx DMAMODE
 
@@ -78,6 +99,5 @@ load_journal_background
     sta CGADD
     #dma_ppu_data JOURNAL_PALETTE
 
-    lda #$f
-    sta my_inidisp
+    plp
     rts
