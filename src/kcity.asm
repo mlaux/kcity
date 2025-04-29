@@ -138,6 +138,9 @@ my_bgmode .word ?
 my_mosaic .word ?
 my_bghofs .word ?
 my_bgvofs .word ?
+vertical_counter .word ?
+vertical_counter_end .word ?
+vertical_counter_this_frame .word ?
 
 NUM_OAM_ENTRIES = 16
 OAM_MAIN_LENGTH = NUM_OAM_ENTRIES * 4

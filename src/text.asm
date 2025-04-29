@@ -1,8 +1,10 @@
 ; contains routines for rendering text in a variable-width font to WRAM,
 ; and copying those tiles to VRAM
 
-TILE_DESTINATION_START = $3010
-TILE_ID_START = $2002
+TILE_DESTINATION_START = $3800
+
+; $21 = priority on, tile ID high bits = 01 (256 + low byte)
+TILE_ID_START = $2100
 BYTES_PER_TILE = $10
 
 vwf_frame_loop
@@ -466,4 +468,57 @@ vwf_reset_map
     ldx #TILE_ID_START
     stx vwf_tilemap_id
 
+    rts
+
+static_char .macro
+    lda #($21a0 + \1)
+    sta VMDATA
+.endmacro
+
+draw_cpu_usage
+.al
+.xl
+    php
+    sep #$20
+    lda #$80
+    sta VMAIN
+    rep #$20
+
+    lda #$b62
+    sta VMADD
+
+    static_char 'c'
+    static_char 'p'
+    static_char 'u'
+    static_char ' '
+
+-   lda vertical_counter_this_frame
+    lsr
+    lsr
+    lsr
+    lsr
+    and #$f
+    cmp #$a
+    bcs +
+    adc #$10
+    bra _go
++   clc
+    adc #23 ; offset in font between beginning and 'A' excluding 0-9
+_go
+    adc #$21a0
+    sta VMDATA
+
+-   lda vertical_counter_this_frame
+    and #$f
+    cmp #$a
+    bcs +
+    adc #$10
+    bra _go2
++   clc
+    adc #23
+_go2
+    adc #$21a0
+    sta VMDATA
+
+    plp
     rts

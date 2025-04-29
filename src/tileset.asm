@@ -11,7 +11,8 @@ tileset_init
     lda #$80
     sta VMAIN
 
-    ldx #$2000
+    ; nice empty spot before the sprite data
+    ldx #$3d00
     stx VMADD
 
     #dma_ppu_data GENEVA_CHARS
@@ -240,7 +241,7 @@ map_run_warp
 
     ; disable force blank but still 0 brightness
     lda #$0
-    sta INIDISP
+    sta my_inidisp ; use shadow for proper interaction with fade effect
 
     stz player_locked
 

@@ -63,15 +63,20 @@ RESET
 
     ; fall through to main loop
 main_loop
+    ; set H/V counter latch to lock in vertical counter
     bit SLHV
+    ; load the actual vertical counter
     lda OPVCT
+    sta vertical_counter
+    lda OPVCT
+    and #1
+    sta vertical_counter + 1
+    ; reading this will reset the counter latch for next time
     bit STAT78
-    sta zp0
 
     jsr SPX_Routine
 
     rep #$20
-
     jsr read_input
 
     lda game_state
@@ -83,17 +88,26 @@ main_loop
     sep #$20
     bit SLHV
     lda OPVCT
+    sta vertical_counter_end
+    lda OPVCT
+    and #1
+    sta vertical_counter_end + 1
     bit STAT78
+
+    rep #$20
+    lda vertical_counter_end
     sec
-    sbc zp0
-    sta zp0
+    sbc vertical_counter
+    sta vertical_counter_this_frame
+    sep #$20
 
     ; update CPU high water mark
-    cmp zp1
-    bcc +
-    sta zp1
+    ; cmp zp1
+    ; bcc +
+    ; sta zp1
 
-+   lda #1
+; +
+    lda #1
     sta main_loop_done
 -   wai
     lda main_loop_done
@@ -118,23 +132,29 @@ NMI_ISR
     sep #$20
     bit RDNMI
 
-    rep #$20
-
     ; if main loop is still running, this is a lag frame, do not update ppu
     lda main_loop_done
     beq _skip_vblank
 
-    ; run any state-specific vblank things
+    ; run any state-specific vblank things. "api contract" (lol) is that all
+    ; registers will be long upon entry and the vblank routine can do whatever
+    ; it wants with them
+    rep #$30
+    php
     lda game_state
     asl
     tax
     jsr (VBLANKS, x)
+    plp
 
-    sep #$20
-
-    ; handle fade or mosaic effect if needed
+    ; handle fade or mosaic effect if needed. this is so during transitions, 
+    ; states can just busy wait for the effects to be done
     jsr run_effect
+    ; run_effect can end with either a16 or a8, nice
     sep #$20
+
+    ;transfer over ppu registers
+
     lda my_inidisp
     sta INIDISP
     lda my_mosaic
@@ -151,6 +171,7 @@ NMI_ISR
     lda my_bgvofs + 1
     sta BG1VOFS
 
+    jsr draw_cpu_usage
 
     inc frame_counter
 
