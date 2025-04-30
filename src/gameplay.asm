@@ -21,10 +21,10 @@ state_gameplay_init
     jsr player_init
     jsr vwf_reset_tiles
 
-    ; hardcoded load of initial map. don't call map_set_warp because it'll
-    ; initiate a fade-out and lock the player's position, which i don't want
-    lda #2
-    sta target_warp_map
+    jsr gameplay_restore_state
+
+    ; don't call map_set_warp because it'll initiate a fade-out and lock
+    ; the player's position, which i don't want
     jsr map_run_warp
     jmp start_fade_in
 
@@ -123,6 +123,11 @@ process_input
     beq +
     jmp load_game
 
++   bit #X_BUTTON
+    beq +
+    jsr gameplay_save_state
+    jmp open_journal
+
 +   rts
 
 
@@ -144,4 +149,36 @@ state_gameplay_vblank
     ; send HDMA table for text box overlay if needed
     jsr text_box_vblank
 
+    rts
+
+gameplay_save_state
+.al
+.xl
+    ; save player position
+    lda player_x
+    sta target_player_x
+    lda player_y
+    sta target_player_y
+
+    ; save scroll position
+    lda my_bghofs
+    sta saved_bghofs
+    lda my_bgvofs
+    sta saved_bgvofs
+    rts
+
+gameplay_restore_state
+.al
+.xl
+    lda current_map_id
+    sta target_warp_map
+
+    ; do not explicitly need to restore player position because map_set_warp calls
+    ; player_set_initial_position, which will do it
+
+    ; restore scroll position
+    lda saved_bghofs
+    sta my_bghofs
+    lda saved_bgvofs
+    sta my_bgvofs
     rts

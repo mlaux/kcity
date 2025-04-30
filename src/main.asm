@@ -57,6 +57,9 @@ RESET
     lda #$81
     sta NMITIMEN
 
+    lda #1
+    sta current_map_id
+
     lda #0
     sta game_state
     jsr run_state_init

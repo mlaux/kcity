@@ -198,6 +198,9 @@ target_player_y .word ?
 current_map_id .word ?
 location_name_script .fill DISPLAY_LOCATION_NAME_LENGTH
 
+saved_bghofs .word ?
+saved_bgvofs .word ?
+
 MAX_DMA_QUEUE_ENTRIES = 16
 dma_queue_length .word ?
 dma_queue_entry_mode .fill 2 * MAX_DMA_QUEUE_ENTRIES

@@ -1,4 +1,11 @@
 
+open_journal
+.al
+.xl
+    lda #2
+    sta game_state
+    jmp run_state_init
+
 state_journal_init
 .al
 .xl
@@ -59,7 +66,7 @@ state_journal
     sta my_bgvofs
 
 +   lda joypad_new
-    and #(B_BUTTON | SELECT_BUTTON)
+    and #(X_BUTTON | B_BUTTON)
     beq +
 
     ; pixelate transition

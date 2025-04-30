@@ -116,13 +116,7 @@ map_set_warp
 .xl
     sta target_warp_map
     inc player_locked
-    lda #EFFECT_FADE_OUT
-    sta effect_id
-    lda #$1
-    sta effect_speed
-    lda #$f
-    sta effect_level
-    rts
+    jmp start_fade_out
 
 ; i can't tell if this is janky or good
 map_run_warp
@@ -220,7 +214,6 @@ map_run_warp
     sta MDMAEN
 
     jsr player_set_initial_position
-
     stz player_locked
 
     plp
