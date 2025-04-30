@@ -32,8 +32,7 @@ state_title
     lda my_bgvofs
     bne +
 
-    lda #1
-    sta game_state
+    ldy #1
     jsr run_state_init
     rts
 

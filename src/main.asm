@@ -60,8 +60,7 @@ RESET
     lda #1
     sta current_map_id
 
-    lda #0
-    sta game_state
+    ldy #0
     jsr run_state_init
 
     ; fall through to main loop

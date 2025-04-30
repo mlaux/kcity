@@ -1,9 +1,7 @@
-
 open_journal
 .al
 .xl
-    lda #2
-    sta game_state
+    ldy #2
     jmp run_state_init
 
 state_journal_init
@@ -79,8 +77,7 @@ state_journal
 
     jsr wait_for_effect
 
-    lda #1
-    sta game_state
+    ldy #1
     jsr run_state_init
 
     lda #EFFECT_MOSAIC_OFF
