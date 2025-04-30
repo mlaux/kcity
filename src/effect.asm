@@ -74,3 +74,34 @@ run_mosaic_off
     rts
 
 EFFECTS .word run_fade_in, run_fade_out, run_mosaic_on, run_mosaic_off
+
+start_fade_in
+.al
+.xl
+    lda #EFFECT_FADE_IN
+    sta effect_id
+    lda #$1
+    sta effect_speed
+    stz effect_level
+    rts
+
+start_fade_out
+.al
+.xl
+    lda #EFFECT_FADE_OUT
+    sta effect_id
+    lda #$1
+    sta effect_speed
+    lda #$f
+    sta effect_level
+    rts
+
+wait_for_effect
+.al
+.xl
+-   ldx #$1
+    stx update_ppu
+    lda effect_id
+    bne -
+    stz update_ppu
+    rts

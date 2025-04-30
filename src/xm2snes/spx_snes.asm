@@ -22,6 +22,9 @@
 ; SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ;-----------------------------------------------------------------------------------
 
+; mlaux changes:
+; - remove disable/enable interrupts, this game does not use interrupts
+
 REG_APUI00 = $2140
 REG_APUI01 = $2141
 REG_APUI02 = $2142
@@ -61,7 +64,7 @@ BootSPC
 	; x = source address	(word)	16-BIT INDEX
 	; a = bank				(byte)	8-BIT AKKU
 
-	sei						; disable interrupts during upload
+	; sei						; disable interrupts during upload
 
 	stx spx_var1			; store source address in var1
 	sta spx_var1+2			; store bank
@@ -191,7 +194,7 @@ _scr_terminate				; no...
 -	cmp REG_APUI00			; wait for SPC reply
 	bne -					;
 							; TRANSFER COMPLETE.
-	cli						; enable interrupts
+	; cli						; enable interrupts
 
 	jmp SPX_Init			; Initialize
 ;-----------------------------------------------------------------------------------------------------
@@ -283,7 +286,7 @@ _end
 SPX_Transfer_SAMP
 .as
 .xl
-	sei					; $14 = SAMPLE TRANSFER
+	; sei					; $14 = SAMPLE TRANSFER
 	sta spx_var1+2		;
 	#SPX_SYNC			;
 	lda #$14			;
@@ -303,7 +306,7 @@ SPX_Transfer_SAMP
 SPX_Transfer
 .as
 .xl
-	sei						; disable interrupts
+	; sei						; disable interrupts
 
 	sta spx_var1+2			; store bank#
 
@@ -390,7 +393,7 @@ _stf_start				; loop:
 -	cmp REG_APUI03		; wait for reply
 	bne -
 
-	cli					; enable interrupts
+	; cli					; enable interrupts
 	rts					; return --make sure higher function frees stack space
 	
 ;--------------------------------------------------------------------------------------------------------

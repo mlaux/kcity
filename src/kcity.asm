@@ -108,7 +108,7 @@ vwf_tilemap_id .word ?
 game_state .word ?
 
 ; main vs. nmi flag, nmi is skipped if this is 0
-main_loop_done .word ?
+update_ppu .word ?
 frame_counter .word ?
 
 joypad_current .word ?

@@ -56,12 +56,7 @@ _animate
 
     dec my_bgvofs
 
-+   lda #1
-    sta main_loop_done
--   wai
-    lda main_loop_done
-    bne -
-    rts
++   rts
 
 state_title_vblank
 .al

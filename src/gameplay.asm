@@ -25,11 +25,8 @@ state_gameplay_init
     ; initiate a fade-out and lock the player's position, which i don't want
     lda #2
     sta target_warp_map
-
-    ; this will also disable force blank and set up the fade-in effect
     jsr map_run_warp
-
-    rts
+    jmp start_fade_in
 
 state_gameplay
 .al
@@ -43,8 +40,15 @@ state_gameplay
     rep #$20
     jsr animate_npcs
     jsr vwf_frame_loop
+
+    lda target_warp_map
+    beq +
+    jsr start_fade_out
+    jsr wait_for_effect
     ; this might go into the next frame (but it's ok because it enables force blank)
-    jmp map_run_warp
+    jsr map_run_warp
+    jmp start_fade_in
++   rts
 
 background_init
 .as

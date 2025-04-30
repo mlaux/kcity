@@ -129,21 +129,10 @@ map_run_warp
 .al
 .xl
     php
-    rep #$20
-    
-    lda target_warp_map
-    bne +
-    plp
-    rts
-
-+   lda effect_id
-    beq +
-    ; still fading out
-    plp
-    rts
+    ; stz update_ppu
 
     ; turn the screen off
-+   sep #$20
+    sep #$20
     lda #$80
     sta INIDISP
 
@@ -231,17 +220,6 @@ map_run_warp
     sta MDMAEN
 
     jsr player_set_initial_position
-
-    ; start fade in effect
-    lda #EFFECT_FADE_IN
-    sta effect_id
-    lda #$1
-    sta effect_speed
-    stz effect_level
-
-    ; disable force blank but still 0 brightness
-    lda #$0
-    sta my_inidisp ; use shadow for proper interaction with fade effect
 
     stz player_locked
 

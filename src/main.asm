@@ -106,12 +106,12 @@ main_loop
     ; bcc +
     ; sta zp1
 
-; +
+    ; signal that the NMI is good to go and busy wait
     lda #1
-    sta main_loop_done
--   wai
-    lda main_loop_done
+    sta update_ppu
+-   lda update_ppu
     bne -
+    ; once update_ppu is cleared it means that the NMI routine has run
 
     jmp main_loop
 
@@ -132,8 +132,10 @@ NMI_ISR
     sep #$20
     bit RDNMI
 
-    ; if main loop is still running, this is a lag frame, do not update ppu
-    lda main_loop_done
+    ; current conditions where this will be 0:
+    ;   - main loop is still running
+    ;   - explicitly disabled for things like uploading to VRAM
+    lda update_ppu
     beq _skip_vblank
 
     ; run any state-specific vblank things. "api contract" (lol) is that all
@@ -185,7 +187,7 @@ NMI_ISR
     inc frame_counter
 
     ; reset flag so main loop can continue
-    stz main_loop_done
+    stz update_ppu
 
 _skip_vblank
     rep #$30

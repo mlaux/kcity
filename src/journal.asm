@@ -14,12 +14,7 @@ state_journal_init
     lda #0
     sta effect_level
 
-    ; wait for effect to be done
--   lda effect_id
-    ldx #$1
-    stx main_loop_done
-    lda effect_id
-    bne -
+    jsr wait_for_effect
 
     lda #$39 ; 3 = 16x16 for layers 1 and 2. 9 = mode 1, bg3 priority on
     sta my_bgmode
@@ -40,12 +35,13 @@ state_journal_init
     lda #$f
     sta effect_level
 
-    ; wait for mosaic to go away
+    ; wait for mosaic to ALMOST go away
 -   ldx #$1
-    stx main_loop_done
+    stx update_ppu
     lda effect_level
     cmp #$3
     bne -
+    stz update_ppu
 
     rts
 
@@ -61,6 +57,38 @@ state_journal
     adc #8
     and #$3ff
     sta my_bgvofs
+
++   lda joypad_new
+    and #(B_BUTTON | SELECT_BUTTON)
+    beq +
+
+    ; pixelate transition
+    lda #EFFECT_MOSAIC_ON
+    sta effect_id
+    lda #$1
+    sta effect_speed
+    lda #0
+    sta effect_level
+
+    jsr wait_for_effect
+
+    lda #1
+    sta game_state
+    jsr run_state_init
+
+    lda #EFFECT_MOSAIC_OFF
+    sta effect_id
+    lda #$1
+    sta effect_speed
+    lda #$f
+    sta effect_level
+
+    ; wait for mosaic to go away
+-   ldx #$1
+    stx update_ppu
+    lda effect_id
+    bne -
+    stz update_ppu
 
 +   rts
 
