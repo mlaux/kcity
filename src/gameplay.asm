@@ -53,7 +53,7 @@ background_init
     stz BG1SC ; we want the screen at $0000 and size 32x32
     lda #%00000100 ; layer 2 at $0400.w and size 32x32
     sta BG2SC
-    lda #%00001000 ; layer 3 at $0800.w and size 32x32
+    lda #%00001010 ; layer 3 at $0800.w and size 32x64
     sta BG3SC
 
     ; BG1 tile data at $1000 which is the first 4K word step
