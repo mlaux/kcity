@@ -154,7 +154,9 @@ state_gameplay_vblank
 gameplay_save_state
 .al
 .xl
-    ; save player position
+    ; save player position. this is so that map_set_warp will use this
+    ; position when reloading the map when coming back to gameplay, instead
+    ; of the default start position for the map
     lda player_x
     sta target_player_x
     lda player_y

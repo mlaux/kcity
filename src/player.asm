@@ -21,8 +21,9 @@ SPRITE_ID_TO_DATA .word $0, $2000
 MOVEMENT_JUMP_TABLE .word go_right, go_down, go_left, go_up
 
 player_init
-.al
-.xl
+    php
+    rep #$20
+
     ; send first frame's tile data
     lda #0
     ldx #0
@@ -39,8 +40,8 @@ player_init
     sep #$20
     lda #$62
     sta OBJSEL
-    rep #$20
 
+    plp
     rts
 
 ; sets OAM slots [a, a+1] to sprite ids [SPRITE_BASE_IDS_FEET[a], SPRITE_BASE_IDS_HEAD[a]]
@@ -191,9 +192,9 @@ move_player
     beq +
     rts
 
-+   lda player_direction
-    sta player_previous_direction
-    stz player_direction
++   lda player_anim_direction
+    sta player_anim_previous_direction
+    stz player_anim_direction
 
     lda joypad_current
 
@@ -203,35 +204,35 @@ move_player
     bit #RIGHT_BUTTON
     beq +
     ldx #PLAYER_DIRECTION_RIGHT
-    stx player_direction
+    stx player_anim_direction
 
 +   bit #DOWN_BUTTON
     beq +
     ldx #PLAYER_DIRECTION_DOWN
-    stx player_direction
+    stx player_anim_direction
 
 +   bit #LEFT_BUTTON
     beq +
     ldx #PLAYER_DIRECTION_LEFT
-    stx player_direction
+    stx player_anim_direction
 
 +   bit #UP_BUTTON
     beq +
     ldx #PLAYER_DIRECTION_UP
-    stx player_direction
+    stx player_anim_direction
 
-+   lda player_direction
-    eor player_previous_direction
++   lda player_anim_direction
+    eor player_anim_previous_direction
     ; if same as before, just go straight to processing the input
     beq _process_movement
 
     ; different than before, need to jump to a specific animation frame
-    lda player_direction
+    lda player_anim_direction
     bne _starting_to_move
 
     ; n -> 0
     ; not moving now but was moving before - skip to first animation frame (idle)
-    lda player_previous_direction
+    lda player_anim_previous_direction
 
     ; (direction - 1) << 7 = offset in tile data for frame 0
     dec a
@@ -261,7 +262,7 @@ _starting_to_move
     stz player_anim_timer
 
 _process_movement
-    lda player_direction
+    lda player_anim_direction
     bne +
     ; not moving now, not moving before, done
     ; 0 -> 0
@@ -421,7 +422,7 @@ animate_player
     sta player_anim_offset
 
 _go
-    lda player_direction
+    lda player_anim_direction
     dec a
     sln 7
     clc
@@ -436,12 +437,12 @@ animate_sprite_v2
     asl
     tax
 
-    lda sprites_direction, x
+    lda sprites_anim_direction, x
     and #$ff
     bne _moving
 
     ; if direction = 0 try previous direction so it can set a final idle frame
-    lda sprites_previous_direction, x
+    lda sprites_anim_previous_direction, x
     and #$ff
     bne _stopped
 
@@ -449,7 +450,7 @@ animate_sprite_v2
     rts
 
 _stopped
-    stz sprites_previous_direction, x
+    stz sprites_anim_previous_direction, x
     ; set frame 0 for previous direction
     dec a
     sln 7
@@ -479,7 +480,7 @@ _moving
     sta sprites_anim_offset, x
 
 _go
-    lda sprites_direction, x
+    lda sprites_anim_direction, x
     dec a
     sln 7
     clc

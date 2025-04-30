@@ -532,8 +532,8 @@ op_set_sprite_direction
     #load_sprite_byte_index
 
     rep #$20
-    lda sprites_direction, x
-    sta sprites_previous_direction, x
+    lda sprites_anim_direction, x
+    sta sprites_anim_previous_direction, x
     ldy #$5
     lda (script_element_ptr), y
     and #$ff
@@ -542,7 +542,7 @@ op_set_sprite_direction
     ; direction 0 -> go to standing pose
     stz sprites_anim_offset, x
 
-+   sta sprites_direction, x
++   sta sprites_anim_direction, x
 
     rts
 

@@ -169,13 +169,13 @@ player_visibility_flags_head = sprites_flag + 2
 
 ; for calculating animation
 ; one entry no matter the sprite size
-sprites_direction .fill 2 * NUM_OAM_ENTRIES
-sprites_previous_direction .fill 2 * NUM_OAM_ENTRIES
+sprites_anim_direction .fill 2 * NUM_OAM_ENTRIES
+sprites_anim_previous_direction .fill 2 * NUM_OAM_ENTRIES
 sprites_anim_offset .fill 2 * NUM_OAM_ENTRIES
 sprites_anim_timer .fill 2 * NUM_OAM_ENTRIES
 
-player_direction = sprites_direction
-player_previous_direction = sprites_previous_direction
+player_anim_direction = sprites_anim_direction
+player_anim_previous_direction = sprites_anim_previous_direction
 player_anim_offset = sprites_anim_offset
 player_anim_timer = sprites_anim_timer
 
