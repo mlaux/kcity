@@ -150,22 +150,20 @@ OAM_AUX_LENGTH = NUM_OAM_ENTRIES / 4
 oam_data_main .fill OAM_MAIN_LENGTH
 oam_data_aux .fill OAM_AUX_LENGTH
 
-; for all sprites including player
-; 16x16 are one entry, 16x32 are two entries
-sprites_x .fill 2 * NUM_OAM_ENTRIES
-sprites_y .fill 2 * NUM_OAM_ENTRIES
-sprites_id .fill 2 * NUM_OAM_ENTRIES
-sprites_flag .fill 2 * NUM_OAM_ENTRIES
+oam_data_x = oam_data_main + 0
+oam_data_y = oam_data_main + 1
+oam_data_id = oam_data_main + 2
+oam_data_flag = oam_data_main + 3
 
 ; player is the first two entries in the above tables
-player_x_sprite = sprites_x
-player_x_head_sprite = sprites_x + 2
-player_y_sprite = sprites_y
-player_y_head_sprite = sprites_y + 2
-player_sprite_id = sprites_id
-player_sprite_id_head = sprites_id + 2
-player_visibility_flags = sprites_flag
-player_visibility_flags_head = sprites_flag + 2
+player_x_sprite = oam_data_x
+player_x_head_sprite = oam_data_x + 4
+player_y_sprite = oam_data_y
+player_y_head_sprite = oam_data_y + 4
+player_sprite_id = oam_data_id
+player_sprite_id_head = oam_data_id + 4
+player_visibility_flags = oam_data_flag
+player_visibility_flags_head = oam_data_flag + 4
 
 ; for calculating animation
 ; one entry no matter the sprite size

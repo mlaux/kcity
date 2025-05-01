@@ -47,27 +47,34 @@ player_init
 ; sets OAM slots [a, a+1] to sprite ids [SPRITE_BASE_IDS_FEET[a], SPRITE_BASE_IDS_HEAD[a]]
 ; sets palette and visibility
 set_sprite_id_16x32
-.al
 .xl
+    php
+    sep #$20
     asl ; to byte offset in sprite base ids table
     tax
+
     asl
-    tay ; to dest offset in sprites_id array
+    asl
+    tay ; *2 again for dest offset in oam array, *2 because two sprites stacked up
 
     lda SPRITE_BASE_IDS_FEET, x
-    sta sprites_id, y
+    sta oam_data_id, y
     lda SPRITE_INITIAL_FLAGS, x
-    sta sprites_flag, y
+    sta oam_data_flag, y
     lda #$e0
-    sta sprites_y, y
+    sta oam_data_y, y
+    iny
+    iny
     iny
     iny
     lda SPRITE_BASE_IDS_HEAD, x
-    sta sprites_id, y
+    sta oam_data_id, y
     lda SPRITE_INITIAL_FLAGS, x
-    sta sprites_flag, y
+    sta oam_data_flag, y
     lda #$e0
-    sta sprites_y, y
+    sta oam_data_y, y
+
+    plp
     rts
 
 ; if target_player_x/y are set, sets the position to that
@@ -499,14 +506,18 @@ set_updated_player_pos
 .xl
     lda player_x
     lsr
+    sep #$20
     sta player_x_sprite
     sta player_x_head_sprite
+    rep #$20
     lda player_y
     lsr
+    sep #$20
     sta player_y_sprite
     sec
     sbc #$10
     sta player_y_head_sprite
+    rep #$20
     rts
 
 ; send over the updated data calculated by move_player
@@ -516,29 +527,6 @@ set_updated_player_pos
 vblank_oam_dma
 .as
 .xl
-    ; this whole copy can go away once i change some 16-bit writes to 8-bit
-    ; then data can go directly into the oam_data_main instead_of the sprite_*
-
-    ; source
-    ldx #2 * NUM_OAM_ENTRIES - 2
-    ; destination
-    ldy #4 * NUM_OAM_ENTRIES - 1
--   lda sprites_flag, x
-    sta oam_data_main, y
-    dey
-    lda sprites_id, x
-    sta oam_data_main, y
-    dey
-    lda sprites_y, x
-    sta oam_data_main, y
-    dey
-    lda sprites_x, x
-    sta oam_data_main, y
-    dey
-    dex
-    dex
-    bpl -
-
     ldx #0
     stx OAMADD
     ldx #DMAMODE_OAMDATA

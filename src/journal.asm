@@ -1,3 +1,5 @@
+JOURNAL_ENTRIES .text "I should see what's going on outside.", 255
+
 open_journal
 .al
 .xl

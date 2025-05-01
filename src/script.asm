@@ -282,19 +282,20 @@ TEST_BOOK3
 OBJECT_SCRIPTS .word TEST_OBJECT_SCRIPT, TEST_HAIR_BLEACH, TEST_REACT_TO_BOOKSHELF, TEST_BOOK1, TEST_BOOK2, TEST_BOOK3
 OBJECT_SCRIPT_LENGTHS .word 3, 2, 23, 6, 4, 10
 
-load_sprite_byte_index .macro
-    ; x = sprite_id * 2
+load_oam_index_16x32 .macro
+    ; x = sprite_id * 8
     ldy #$4
     lda (script_element_ptr), y
+    asl
+    asl
     asl
     tax
 .endm
 
-load_double_sprite_byte_index .macro
-    ; x = sprite_id * 4
+load_anim_index .macro
+    ; x = sprite_id * 2
     ldy #$4
     lda (script_element_ptr), y
-    asl
     asl
     tax
 .endm
@@ -456,80 +457,90 @@ op_hide_text_box
 op_set_sprite_flags
 .as
 .xl
-    #load_double_sprite_byte_index
+    #load_oam_index_16x32
 
     ldy #$5
     lda (script_element_ptr), y
-    sta sprites_flag, x
+    sta oam_data_flag, x
     inx
     inx
-    sta sprites_flag, x
+    inx
+    inx
+    sta oam_data_flag, x
 
     rts
 
 op_set_sprite_position
 .as
 .xl
-    #load_double_sprite_byte_index
+    #load_oam_index_16x32
 
     ldy #$5
     lda (script_element_ptr), y
-    sta sprites_x, x
+    sta oam_data_x, x
     inx
     inx
-    sta sprites_x, x
+    inx
+    inx
+    sta oam_data_x, x
 
-    #load_double_sprite_byte_index
+    #load_oam_index_16x32
 
     ldy #$6
     lda (script_element_ptr), y
-    sta sprites_y, x
+    sta oam_data_y, x
     sec
     sbc #$10
     inx
     inx
-    sta sprites_y, x
+    inx
+    inx
+    sta oam_data_y, x
 
     rts
 
 op_move_sprite_x
 .as
 .xl
-    #load_double_sprite_byte_index
+    #load_oam_index_16x32
 
-    lda sprites_x, x
+    lda oam_data_x, x
     ldy #$5
     clc
     adc (script_element_ptr), y
-    sta sprites_x, x
+    sta oam_data_x, x
     inx
     inx
-    sta sprites_x, x
+    inx
+    inx
+    sta oam_data_x, x
 
     rts
 
 op_move_sprite_y
 .as
 .xl
-    #load_double_sprite_byte_index
+    #load_oam_index_16x32
 
-    lda sprites_y, x
+    lda oam_data_y, x
     ldy #$5
     clc
     adc (script_element_ptr), y
-    sta sprites_y, x
+    sta oam_data_y, x
     sec
     sbc #$10
     inx
     inx
-    sta sprites_y, x
+    inx
+    inx
+    sta oam_data_y, x
 
     rts
 
 op_set_sprite_direction
 .as
 .xl
-    #load_sprite_byte_index
+    #load_anim_index
 
     rep #$20
     lda sprites_anim_direction, x
