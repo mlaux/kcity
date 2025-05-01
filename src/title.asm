@@ -6,10 +6,14 @@ state_title_init
 .al
 .xl
     sep #$20
+    jsr enable_force_blank
     jsr background_init
     lda #$19 ; 0x10 = 16x16 tile mode
+    sta BGMODE
     sta my_bgmode
     jsr load_title_background
+    jsr disable_force_blank
+
     rep #$20
     lda #$120
     sta my_bgvofs
@@ -36,9 +40,10 @@ state_title
     jsr run_state_init
     jmp longjmp_main
 
-+   stz effect_id
-    lda #$f
++   lda #$f
+    sta effect_level
     sta my_inidisp
+    stz effect_id
     stz my_bghofs
     stz my_bgvofs
 

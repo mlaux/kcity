@@ -20,6 +20,9 @@ close_journal
 
     ldy #1
     jsr run_state_init
+    ; background was left turned off by loading the map
+    lda #$f
+    sta my_inidisp
 
     lda #EFFECT_MOSAIC_OFF
     sta effect_id
@@ -61,7 +64,9 @@ state_journal_init
     sta my_bgvofs
 
     ; swap backgrounds
+    jsr enable_force_blank
     jsr load_journal_background
+    jsr disable_force_blank
 
     ; turn screen back on at nearest convenience
     lda #$f

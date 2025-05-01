@@ -27,11 +27,6 @@ run_state_init
     php
     phy ; init function could use y
 
-    sep #$20
-    lda #$80
-    sta my_inidisp
-    sta INIDISP
-
     rep #$20
     tya
     asl

@@ -126,11 +126,9 @@ map_run_warp
 
     ; turn the screen off
     sep #$20
-    lda #$80
-    sta my_inidisp
-    sta INIDISP
+    jsr enable_force_blank
 
-    ; still $80
+    lda #$80
     sta VMAIN
     lda #MAP_GRAPHICS_BANK
     sta DMAADDRBANK

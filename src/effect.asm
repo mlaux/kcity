@@ -75,6 +75,25 @@ run_mosaic_off
 
 EFFECTS .word run_fade_in, run_fade_out, run_mosaic_on, run_mosaic_off
 
+; "Effect-aware" way to disable rendering immediately
+enable_force_blank
+    php
+    sep #$20
+    lda #$80
+    sta INIDISP
+    sta my_inidisp
+    plp
+    rts
+
+; leaves brightness at 0. set to something else separately if needed
+disable_force_blank
+    php
+    sep #$20
+    stz INIDISP
+    stz my_inidisp
+    plp
+    rts
+
 start_fade_in
 .al
 .xl

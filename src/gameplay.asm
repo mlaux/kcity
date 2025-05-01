@@ -2,6 +2,7 @@ state_gameplay_init
 .al
 .xl
     sep #$20
+    jsr enable_force_blank
 
     jsr palette_init
     jsr tileset_init ; for font and player tiles only
@@ -26,6 +27,7 @@ state_gameplay_init
     ; don't call map_set_warp because it'll initiate a fade-out and lock
     ; the player's position, which i don't want
     jsr map_run_warp
+    jsr disable_force_blank
     jmp start_fade_in
 
 state_gameplay
@@ -47,7 +49,8 @@ state_gameplay
     jsr wait_for_effect
     ; this might go into the next frame (but it's ok because it enables force blank)
     jsr map_run_warp
-    jmp start_fade_in
+    jsr start_fade_in
+    jmp disable_force_blank
 +   rts
 
 background_init
@@ -69,6 +72,7 @@ background_init
     sta BG34NBA ; BG3 tile data at $3000
 
     lda #$9
+    sta BGMODE
     sta my_bgmode ; 8x8 chars mode 1, BG3 priority
 
     ; $3ff = -1 vertical scroll, since first line is not drawn
