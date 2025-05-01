@@ -2,7 +2,7 @@ open_journal
 .al
 .xl
     ldy #2
-    jmp run_state_init
+    jsr run_state_init
     jmp longjmp_main
 
 close_journal
@@ -20,6 +20,7 @@ close_journal
 
     ldy #1
     jsr run_state_init
+
     ; background was left turned off by loading the map
     lda #$f
     sta my_inidisp
