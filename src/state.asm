@@ -1,16 +1,35 @@
 
-INITS .word state_title_init, state_gameplay_init, state_journal_init
-STATES .word state_title, state_gameplay, state_journal
-VBLANKS .word state_title_vblank, state_gameplay_vblank, state_journal_vblank
+; all functions will be called with AXY16 and should return with AXY16
+INITS
+    .word state_title_init
+    .word state_gameplay_init
+    .word state_journal_init
+STATES
+    .word state_title
+    .word state_gameplay
+    .word state_journal
+VBLANKS
+    .word state_title_vblank
+    .word state_gameplay_vblank
+    .word state_journal_vblank
 
-; y: state to switch to
+; turns rendering off and runs the state init function for the given state,
+; then sets the game_state to the new value. this does not immediately start
+; execution of the new state until the next time through the main loop -
+; this is so that the old state can do more cleanup or busy wait for a
+; transition animation to finish after the new state is ready to go.
+;   parameters:
+;     y: state to switch to
+;   assumes:
+;     X16
 run_state_init
 .xl
     php
-    phy
+    phy ; init function could use y
 
     sep #$20
     lda #$80
+    sta my_inidisp
     sta INIDISP
 
     rep #$20
@@ -25,10 +44,13 @@ run_state_init
     plp
     rts
 
-    ; plp
-    ; ldx #$1fff
-    ; txs
-    ; jmp main_loop
-    ; ; ldx #main_loop
-    ; ; phx
-    ; ; rts
+; discards the call stack and returns to the top of the main loop to start
+; execution of the new state. Inspired by "goto mode" from NESFab
+;   parameters: none
+;   assumes: X16
+longjmp_main
+.xl
+    ldx #$1fff
+    txs
+    sep #$20 ; expected by main_loop
+    jmp main_loop

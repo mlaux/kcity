@@ -34,7 +34,7 @@ state_title
 
     ldy #1
     jsr run_state_init
-    rts
+    jmp longjmp_main
 
 +   stz effect_id
     lda #$f

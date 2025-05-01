@@ -123,11 +123,11 @@ map_run_warp
 .al
 .xl
     php
-    ; stz update_ppu
 
     ; turn the screen off
     sep #$20
     lda #$80
+    sta my_inidisp
     sta INIDISP
 
     ; still $80

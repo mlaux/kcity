@@ -126,13 +126,7 @@ process_input
 +   bit #X_BUTTON
     beq +
     jsr gameplay_save_state
-    ; return from state_gameplay so there's not an extra frame of gameplay
-    ; processing, this fixes a bug where if you open the journal then on the 
-    ; same frame go to another map, you get a mixture of maps. TODO the real
-    ; way to solve this is something like NESFab's "goto mode" where changing
-    ; states discards the call stack
-    pla
-    jmp open_journal
+    jmp open_journal ; discards call stack
 
 +   rts
 

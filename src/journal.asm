@@ -3,6 +3,40 @@ open_journal
 .xl
     ldy #2
     jmp run_state_init
+    jmp longjmp_main
+
+close_journal
+.al
+.xl
+    ; pixelate transition
+    lda #EFFECT_MOSAIC_ON
+    sta effect_id
+    lda #$1
+    sta effect_speed
+    lda #0
+    sta effect_level
+
+    jsr wait_for_effect
+
+    ldy #1
+    jsr run_state_init
+
+    lda #EFFECT_MOSAIC_OFF
+    sta effect_id
+    lda #$1
+    sta effect_speed
+    lda #$f
+    sta effect_level
+
+    ; wait for mosaic to go away
+-   ldx #$1
+    stx update_ppu
+    lda effect_id
+    bne -
+    stz update_ppu
+
+    ; all the way out
+    jmp longjmp_main
 
 state_journal_init
 .al
@@ -66,34 +100,7 @@ state_journal
 +   lda joypad_new
     and #(X_BUTTON | B_BUTTON)
     beq +
-
-    ; pixelate transition
-    lda #EFFECT_MOSAIC_ON
-    sta effect_id
-    lda #$1
-    sta effect_speed
-    lda #0
-    sta effect_level
-
-    jsr wait_for_effect
-
-    ldy #1
-    jsr run_state_init
-
-    lda #EFFECT_MOSAIC_OFF
-    sta effect_id
-    lda #$1
-    sta effect_speed
-    lda #$f
-    sta effect_level
-
-    ; wait for mosaic to go away
--   ldx #$1
-    stx update_ppu
-    lda effect_id
-    bne -
-    stz update_ppu
-
+    jmp close_journal
 +   rts
 
 state_journal_vblank
