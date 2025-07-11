@@ -48,6 +48,7 @@ state_title
     stz effect_id
     stz my_bghofs
     stz my_bgvofs
+    jsr hide_newt
 
 _animate
     lda effect_id
@@ -175,7 +176,7 @@ move_newt
     php
     sep #$20
 
-+   ldy #NEWT_TILE_COUNT
+    ldy #NEWT_TILE_COUNT
     ldx #0
 -   lda oam_data_y, x
     cmp #$e0
@@ -187,5 +188,25 @@ move_newt
     inx
     dey
     bne -
+    plp
+    rts
+
+hide_newt
+.al
+.xl
+    php
+    sep #$20
+
+    lda #$e0
+    ldx #0
+    ldy #NEWT_TILE_COUNT
+-   sta oam_data_y, x
+    inx
+    inx
+    inx
+    inx
+    dey
+    bne -
+
     plp
     rts
