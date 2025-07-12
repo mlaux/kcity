@@ -352,7 +352,7 @@ _done_shifting
     beq +
     lda vwf_dst
     clc
-    adc #8
+    adc #8 ; could probably ora #8 instead bc there should never be a carry
     sta zp2
     lda #255
     sta (zp2)

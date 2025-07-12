@@ -1,6 +1,6 @@
 JOURNAL_ENTRY_1 .text "I should see what's going on outside.", 255
-JOURNAL_ENTRY_2 .text "I checked out Nim's Preserves.", 255
-JOURNAL_ENTRY_3 .text "I returned the bowls", 255
+JOURNAL_ENTRY_2 .text "Leif wants some jam from Nim's.", 255
+JOURNAL_ENTRY_3 .text "Mom asked me to return Kori's bowls.", 255
 JOURNAL_ENTRY_4 .text "String four", 255
 JOURNAL_ENTRY_5 .text "String five", 255
 JOURNAL_ENTRY_6 .text "String six", 255
@@ -12,7 +12,7 @@ JOURNAL_ENTRY_TABLE .word JOURNAL_ENTRY_1, JOURNAL_ENTRY_2, JOURNAL_ENTRY_3, JOU
 open_journal
 .al
 .xl
-    lda #8
+    lda #3
     sta game_progress
     ldy #2
     jsr run_state_init
@@ -198,16 +198,28 @@ draw_journal_text
 
     ; set message address and destination coordinates
 -   lda JOURNAL_ENTRY_TABLE, x
+    inx
+    inx
     phx
     ldx #9
     ldy zp1
     jsr vwf_init_string
 
+    ; cross out all strings except the last one
+    ; i don't like this lol
+    pla
+    pha ; still need it saved for the compare
+    cmp zp0
+    beq +
+    lda #1
+    sta zp3
+    bra _go
++   stz zp3
+
+_go
     ; draw entire string
     lda #-1
     sta vwf_count
-    lda #1
-    sta zp3
     jsr vwf_draw_string
 
     ; force blank is on so go ahead and transfer it over
@@ -218,11 +230,8 @@ draw_journal_text
     ; move to next line of notebook paper
     inc zp1
     inc zp1
-    ; move to next string
+    ; check for end
     plx
-    inx
-    inx
-
     cpx zp0
     bne -
 
