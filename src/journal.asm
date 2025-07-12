@@ -1,8 +1,19 @@
-JOURNAL_ENTRIES .text "I should see what's going on outside.", 255
+JOURNAL_ENTRY_1 .text "I should see what's going on outside.", 255
+JOURNAL_ENTRY_2 .text "I checked out Nim's Preserves.", 255
+JOURNAL_ENTRY_3 .text "I returned the bowls", 255
+JOURNAL_ENTRY_4 .text "String four", 255
+JOURNAL_ENTRY_5 .text "String five", 255
+JOURNAL_ENTRY_6 .text "String six", 255
+JOURNAL_ENTRY_7 .text "String seven", 255
+JOURNAL_ENTRY_8 .text "String eight", 255
+
+JOURNAL_ENTRY_TABLE .word JOURNAL_ENTRY_1, JOURNAL_ENTRY_2, JOURNAL_ENTRY_3, JOURNAL_ENTRY_4, JOURNAL_ENTRY_5, JOURNAL_ENTRY_6, JOURNAL_ENTRY_7, JOURNAL_ENTRY_8
 
 open_journal
 .al
 .xl
+    lda #8
+    sta game_progress
     ldy #2
     jsr run_state_init
     jmp longjmp_main
@@ -173,17 +184,44 @@ draw_journal_text
 .xl
     jsr vwf_reset_map
     jsr vwf_reset_tiles
-    lda #JOURNAL_ENTRIES
-    ldx #8
-    ldy #9
+
+    ; end = progress * 2
+    lda game_progress
+    asl
+    sta zp0
+
+    ; initial y coordinate of message
+    lda #9
+    sta zp1
+
+    ldx #0
+
+    ; set message address and destination coordinates
+-   lda JOURNAL_ENTRY_TABLE, x
+    phx
+    ldx #9
+    ldy zp1
     jsr vwf_init_string
+
+    ; draw entire string
     lda #-1
     sta vwf_count
     jsr vwf_draw_string
-    sep #$20
+
+    ; force blank is on so go ahead and transfer it over
     ldy vwf_dmalen
     jsr vwf_dma_tiles
     jsr vwf_transfer_map
-    rep #$20
+
+    ; move to next line of notebook paper
+    inc zp1
+    inc zp1
+    ; move to next string
+    plx
+    inx
+    inx
+
+    cpx zp0
+    bne -
 
     rts

@@ -359,8 +359,9 @@ _no_tile_increment
 
 ; input: y = number of bytes to transfer
 vwf_dma_tiles
-.as
 .xl
+    php
+    sep #$20
     sty DMALEN
     ldx #DMAMODE_PPUDATA
     stx DMAMODE
@@ -385,7 +386,7 @@ vwf_dma_tiles
     clc
     adc vwf_dmadst
     sta vwf_dmadst
-    sep #$20
+    plp
     rts
 
 ; sets the tilemap (increasing tile id from 1) starting at the position
