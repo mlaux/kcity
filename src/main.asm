@@ -140,6 +140,10 @@ NMI_ISR
     lda update_ppu
     beq _skip_vblank
 
+    ; do not run state specific vblank if transitioning between states
+    lda state_transitioning
+    bne +
+
     ; run any state-specific vblank things. "api contract" (lol) is that all
     ; registers will be long upon entry and the vblank routine can do whatever
     ; it wants with them
@@ -153,7 +157,7 @@ NMI_ISR
 
     ; handle fade or mosaic effect if needed. this is so during transitions, 
     ; states can just busy wait for the effects to be done
-    jsr run_effect
++   jsr run_effect
     ; run_effect can end with either a16 or a8, nice
     sep #$20
 
@@ -183,6 +187,15 @@ NMI_ISR
     sta BG2VOFS
     lda my_bg2vofs + 1
     sta BG2VOFS
+
+    lda my_bg3hofs
+    sta BG3HOFS
+    lda my_bg3hofs + 1
+    sta BG3HOFS
+    lda my_bg3vofs
+    sta BG3VOFS
+    lda my_bg3vofs + 1
+    sta BG3VOFS
 
     jsr draw_cpu_usage
 

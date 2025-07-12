@@ -11,6 +11,10 @@ save_game
     sta sram_player_x
     lda player_y
     sta sram_player_y
+    lda game_progress
+    sta sram_game_progress
+    lda progress_flags1
+    sta sram_progress_flags1
 
     ldx #SCRIPT_MESSAGE_SAVED
     ldy #2
@@ -33,6 +37,12 @@ load_game
 
     lda sram_player_y
     sta target_player_y
+
+    lda sram_game_progress
+    sta game_progress
+
+    lda sram_progress_flags1
+    sta progress_flags1
 
     plp
     rts

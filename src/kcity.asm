@@ -12,6 +12,7 @@
 .include "ppu.asm"
 .include "cpu.asm"
 .include "dma.asm"
+.include "progression.asm"
 
 sln .macro
     .rept \1
@@ -106,6 +107,7 @@ vwf_tilemap_dst .word ?
 vwf_tilemap_id .word ?
 
 game_state .word ?
+state_transitioning .word ?
 
 ; main vs. nmi flag, nmi is skipped if this is 0
 update_ppu .word ?
@@ -140,9 +142,14 @@ my_bghofs .word ?
 my_bgvofs .word ?
 my_bg2hofs .word ?
 my_bg2vofs .word ?
+my_bg3hofs .word ?
+my_bg3vofs .word ?
 vertical_counter .word ?
 vertical_counter_end .word ?
 vertical_counter_this_frame .word ?
+
+game_progress .word ?
+progress_flags1 .word ?
 
 NUM_OAM_ENTRIES = 16
 OAM_MAIN_LENGTH = NUM_OAM_ENTRIES * 4
@@ -215,6 +222,8 @@ dma_queue_entry_vmain .fill 2 * MAX_DMA_QUEUE_ENTRIES
 sram_map_id .word ?
 sram_player_x .word ?
 sram_player_y .word ?
+sram_game_progress .word ?
+sram_progress_flags1 .word ?
 
 .warn "sram end: ", *
 

@@ -27,6 +27,8 @@ run_state_init
     php
     phy ; init function could use y
 
+    inc state_transitioning
+
     rep #$20
     tya
     asl
@@ -35,6 +37,7 @@ run_state_init
 
     ply
     sty game_state
+    dec state_transitioning
 
     plp
     rts

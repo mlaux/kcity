@@ -20,6 +20,7 @@ state_gameplay_init
     rep #$20
 
     jsr player_init
+    jsr vwf_reset_map
     jsr vwf_reset_tiles
 
     jsr gameplay_restore_state

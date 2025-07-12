@@ -82,6 +82,7 @@ enable_force_blank
     lda #$80
     sta INIDISP
     sta my_inidisp
+    stz HDMAEN
     plp
     rts
 

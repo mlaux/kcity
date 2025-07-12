@@ -1,7 +1,4 @@
 
-TITLE_SCENE_TILESET .binary "../gfx/title/title.4bp"
-TITLE_SCENE_TILEMAP .binary "../gfx/title/title.map"
-
 state_title_init
 .al
 .xl
@@ -129,7 +126,7 @@ load_title_tiles
 
 NEWT_TILE_COUNT = 9
 NEWT_BASE_X = 80
-NEWT_BASE_Y = 180
+NEWT_BASE_Y = 176
 NEWT_TILES .byte 12, 0, 2, 10, 4, 6, 8, 32, 14
 NEWT_X_COORDS .byte $0, $10, $20, $30, $10, $20, $30, $10, $20
 NEWT_Y_COORDS .byte $0, $0, $0, $0, $10, $10, $10, $20, $20

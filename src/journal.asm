@@ -65,10 +65,12 @@ state_journal_init
     sta my_bgmode
     lda #816
     sta my_bgvofs
+    sta my_bg3vofs
 
     ; swap backgrounds
     jsr enable_force_blank
     jsr load_journal_background
+    jsr draw_journal_text
     jsr disable_force_blank
 
     ; turn screen back on at nearest convenience
@@ -104,6 +106,7 @@ state_journal
     adc #8
     and #$3ff
     sta my_bgvofs
+    sta my_bg3vofs
 
 +   lda joypad_new
     and #(X_BUTTON | B_BUTTON)
@@ -114,9 +117,9 @@ state_journal
 state_journal_vblank
 .al
 .xl
-    sep #$20
-    jmp text_box_vblank
-    ;rts
+    ;sep #$20
+    ;jmp text_box_vblank
+    rts
 
 load_journal_background
 .as
@@ -163,4 +166,24 @@ load_journal_background
     #dma_ppu_data JOURNAL_PALETTE
 
     plp
+    rts
+
+draw_journal_text
+.al
+.xl
+    jsr vwf_reset_map
+    jsr vwf_reset_tiles
+    lda #JOURNAL_ENTRIES
+    ldx #8
+    ldy #9
+    jsr vwf_init_string
+    lda #-1
+    sta vwf_count
+    jsr vwf_draw_string
+    sep #$20
+    ldy vwf_dmalen
+    jsr vwf_dma_tiles
+    jsr vwf_transfer_map
+    rep #$20
+
     rts

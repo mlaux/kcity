@@ -8,6 +8,14 @@ NEWT_TILESET .binary "../gfx/newt/newtrainbow.4bp"
 
 .endsection
 
+.dsection title_screen_graphics
+.section title_screen_graphics
+
+TITLE_SCENE_TILESET .binary "../gfx/title/title.4bp"
+TITLE_SCENE_TILEMAP .binary "../gfx/title/title.map"
+
+.endsection
+
 .dsection palettes
 .section palettes
 PALETTE_BANK = `*
