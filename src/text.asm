@@ -499,7 +499,6 @@ static_char .macro
 .endmacro
 
 draw_cpu_usage
-.al
 .xl
     php
     sep #$20

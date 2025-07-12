@@ -53,6 +53,8 @@ RESET
     jsr BootSPC
     jsr SPX_Transfer_LFT
 
+    jsr vwf_reset_tiles
+
     ; initialization done, enable interrupts and auto joypad reading
     lda #$81
     sta NMITIMEN
