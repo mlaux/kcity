@@ -206,6 +206,8 @@ draw_journal_text
     ; draw entire string
     lda #-1
     sta vwf_count
+    lda #1
+    sta zp3
     jsr vwf_draw_string
 
     ; force blank is on so go ahead and transfer it over

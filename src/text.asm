@@ -36,6 +36,7 @@ vwf_frame_loop
 _yes
     lda #1
     sta vwf_count
+    stz zp3
     jmp vwf_draw_string
 
     ; no, anything to draw?
@@ -229,9 +230,11 @@ vwf_init_string
 ; vwf_dst points to the first byte of the current tile (in WRAM).
 ; input: vwf_src = address of string
 ;        vwf_count = count of characters to draw (-1 for everything)
+;        zp3 = if 1, cross out text (for journal)
 ; returns: vwf_dmasrc = base address of rendered text to send to VRAM
 ;          vwf_dmadst = destination address for VRAM DMA
 ;          vwf_dmalen = number of tiles to send to VRAM
+; uses: zp2 = temp address variable if crossing out text
 ; assumes: AXY 16
 vwf_draw_string
 .al
@@ -337,13 +340,24 @@ _done_shifting
     adc vwf_offs
     sta vwf_offs
 
-    ; if vwf_offs < 8 move to next tile
+    ; if vwf_offs < 8 move to next char
     cmp #8
     bmi _no_tile_increment
+    ; was >= 8, so need to move to next dest tile
     and #7
     sta vwf_offs
 
-    lda vwf_next
+    ; crossing out
+    lda zp3
+    beq +
+    lda vwf_dst
+    clc
+    adc #8
+    sta zp2
+    lda #255
+    sta (zp2)
+
++   lda vwf_next
     sta vwf_dst
     clc
     adc #BYTES_PER_TILE
