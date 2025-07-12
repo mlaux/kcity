@@ -188,4 +188,8 @@ gameplay_restore_state
     sta my_bghofs
     lda saved_bgvofs
     sta my_bgvofs
+
+    stz my_bg3hofs
+    stz my_bg3vofs
+
     rts
