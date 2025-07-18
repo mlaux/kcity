@@ -1,6 +1,12 @@
 TITLE_ANIMATION_FRAMES .word $40, $4, $10, $4, $50, $4
 TITLE_ANIMATION_LENGTH = 6
 
+TITLE_HDMA_TABLE .byte 111, 0, 0, 10, 2, 0, 18, 253, 1, 10, 2, 0, 1, 0, 0, 0
+TITLE_HDMA_SCROLL_1 = 4
+TITLE_HDMA_SCROLL_2 = 7
+TITLE_HDMA_SCROLL_3 = 10
+TITLE_HDMA_SCROLL_4 = 13
+
 state_title_init
 .al
 .xl
@@ -99,24 +105,50 @@ state_title_vblank
     sta CGADD
     lda title_animation_step
     and #1
-    beq _glitch
-    ldx #<>(TITLE_SCENE_TEXT_PALETTE + $40)
-    stx DMAADDR
-    lda #`(TITLE_SCENE_TEXT_PALETTE + $40)
-    sta DMAADDRBANK
-    bra _send
+    bne _glitch
 
-_glitch
     ldx #<>(TITLE_SCENE_TEXT_PALETTE + $60)
     stx DMAADDR
     lda #`(TITLE_SCENE_TEXT_PALETTE + $60)
     sta DMAADDRBANK
+    stz title_glitch_hdma_table + TITLE_HDMA_SCROLL_1
+    stz title_glitch_hdma_table + TITLE_HDMA_SCROLL_2
+    stz title_glitch_hdma_table + TITLE_HDMA_SCROLL_2 + 1
+    stz title_glitch_hdma_table + TITLE_HDMA_SCROLL_3
+    stz title_glitch_hdma_table + TITLE_HDMA_SCROLL_4
+    bra _send
+
+_glitch
+    ldx #<>(TITLE_SCENE_TEXT_PALETTE + $40)
+    stx DMAADDR
+    lda #`(TITLE_SCENE_TEXT_PALETTE + $40)
+    sta DMAADDRBANK
+    lda #2
+    sta title_glitch_hdma_table + TITLE_HDMA_SCROLL_1
+    lda #253
+    sta title_glitch_hdma_table + TITLE_HDMA_SCROLL_2
+    lda #1
+    sta title_glitch_hdma_table + TITLE_HDMA_SCROLL_2 + 1
+    lda #2
+    sta title_glitch_hdma_table + TITLE_HDMA_SCROLL_3
+    lda #4
+    sta title_glitch_hdma_table + TITLE_HDMA_SCROLL_4
 
 _send
     ldx #$20
     stx DMALEN
     lda #1
     sta MDMAEN
+
+    lda #$2
+    sta DMAP7
+    lda #BG1HOFS & $ff
+    sta BBAD7
+    ldx #title_glitch_hdma_table
+    stx A1T7L
+    stz A1B7
+    lda #$80
+    sta HDMAEN
 
     jmp vblank_oam_dma
 
@@ -260,4 +292,22 @@ hide_newt
     bne -
 
     plp
+    rts
+
+clear_bg3_tiles
+.as
+.xl
+    ldx #$2000 ; in bytes
+    stx DMALEN
+    ldx #$3000 ; in words
+    stx VMADDL
+    ldx #DMAMODE_PPUFILL
+    stx DMAMODE
+
+    lda #$80
+    sta VMAIN
+
+    lda #1
+    sta MDMAEN
+
     rts

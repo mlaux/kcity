@@ -4,6 +4,7 @@ state_gameplay_init
     sep #$20
     jsr enable_force_blank
 
+    jsr clear_bg3_tiles
     jsr palette_init
     jsr tileset_init ; for font and player tiles only
     jsr background_init
@@ -100,6 +101,13 @@ background_init
     sta text_box_hdma_table, x
     dex
     bpl -
+
+    ldx #size(TITLE_HDMA_TABLE) - 1
+-   lda TITLE_HDMA_TABLE, x
+    sta title_glitch_hdma_table, x
+    dex
+    bpl -
+
 
     rts
 

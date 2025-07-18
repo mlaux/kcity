@@ -7,6 +7,12 @@ DMAADDRBANK  = $4304 ; A1Bn
 DMALEN       = $4305 ; DASnL
 DMALENHI     = $4306 ; DASnH
 
+DMAP7 = $4370
+BBAD7 = $4371
+A1T7L = $4372
+A1T7H = $4373
+A1B7 = $4374
+
 ; Configuration for $43n0
 ; OR these together to get the desired effect
 DMA_LINEAR   = $00
