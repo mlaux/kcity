@@ -145,6 +145,7 @@ load_journal_background
     ; turn off sprites
     lda #(BG1_ON | BG2_ON | BG3_ON)
     sta TM
+    sta my_tm
 
     ldx #DMAMODE_PPUDATA
     stx DMAMODE

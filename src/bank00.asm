@@ -24,6 +24,11 @@
 .include "fontdata.asm"
 .endsection
 
+.dsection palettes
+.section palettes
+.include "palettes.asm"
+.endsection
+
 .dsection x2s_driver
 .section x2s_driver
 .include "xm2snes/spx_snes.asm"

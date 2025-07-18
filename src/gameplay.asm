@@ -85,6 +85,7 @@ background_init
     ; enable bg1+bg3+obj on main screen
     lda #(BG1_ON | BG3_ON | OBJ_ON)
     sta TM
+    sta my_tm
 
     ; enable window 1 for color
     lda #$20

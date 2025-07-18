@@ -199,6 +199,9 @@ NMI_ISR
     lda my_bg3vofs + 1
     sta BG3VOFS
 
+    lda my_tm
+    sta TM
+
     jsr draw_cpu_usage
 
     inc frame_counter

@@ -7,15 +7,18 @@ state_title_init
     jsr background_init
     jsr load_title_tiles
     jsr init_newt_sprite
-    lda #$19 ; 0x10 = 16x16 tile mode
+    lda #$39 ; 0x30 = 16x16 tile mode for BGs 1 and 2
     sta BGMODE
     sta my_bgmode
+    lda #(BG2_ON | OBJ_ON)
+    sta TM
+    sta my_tm
     jsr load_title_background
     jsr disable_force_blank
 
     rep #$20
     lda #$120
-    sta my_bgvofs
+    sta my_bg2vofs
 
     lda #EFFECT_FADE_IN
     sta effect_id
@@ -32,7 +35,7 @@ state_title
     and #(A_BUTTON | START_BUTTON)
     beq _animate
 
-    lda my_bgvofs
+    lda my_bg2vofs
     bne +
 
     ldy #1
@@ -43,25 +46,32 @@ state_title
     sta effect_level
     sta my_inidisp
     stz effect_id
-    stz my_bghofs
-    stz my_bgvofs
-    jsr hide_newt
+    stz my_bg2hofs
+    stz my_bg2vofs
+    lda #(BG1_ON | BG2_ON | OBJ_ON)
+    sta my_tm
+    jmp hide_newt
 
 _animate
     lda effect_id
-    bne +
+    bne _nothing
 
     lda frame_counter
     and #$3
-    bne +
+    bne _nothing
 
-    lda my_bgvofs
-    beq +
+    lda my_bg2vofs
+    beq _done_scrolling
 
-    dec my_bgvofs
-    jsr move_newt
+    dec my_bg2vofs
+    jmp move_newt
 
-+   rts
+_done_scrolling
+    lda #(BG1_ON | BG2_ON | OBJ_ON)
+    sta my_tm
+
+_nothing
+    rts
 
 state_title_vblank
 .al
@@ -84,20 +94,26 @@ load_title_background
     ldx #0
     stx VMADD
 
-    #dma_ppu_data TITLE_SCENE_TILEMAP
+    #dma_ppu_data TITLE_SCENE_TILEMAP_BG1
+    #dma_ppu_data TITLE_SCENE_TILEMAP_BG2 ; $400
 
     ldx #$1000
     stx VMADD
 
-    #dma_ppu_data TITLE_SCENE_TILESET
+    #dma_ppu_data TITLE_SCENE_TILESET_BG1
 
+    ldx #$2000
+    stx VMADD
+
+    #dma_ppu_data TITLE_SCENE_TILESET_BG2
 
     ldx #DMAMODE_CGDATA
     stx DMAMODE
 
-    lda #$10
+    lda #$0
     sta CGADD
     #dma_ppu_data TITLE_SCENE_PALETTE
+    #dma_ppu_data TITLE_SCENE_TEXT_PALETTE
 
     lda #$f
     sta my_inidisp

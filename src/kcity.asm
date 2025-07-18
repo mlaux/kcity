@@ -144,6 +144,7 @@ my_bg2hofs .word ?
 my_bg2vofs .word ?
 my_bg3hofs .word ?
 my_bg3vofs .word ?
+my_tm .word ?
 vertical_counter .word ?
 vertical_counter_end .word ?
 vertical_counter_this_frame .word ?
@@ -274,8 +275,18 @@ collision_map .fill $2000
 .cerror * > $40000, "bank03 too long"
 .here
 
-; 128k minus one byte
-* = $01ffff
+* = $20000
+.logical $48000
+.dsection bank04
+.section bank04
+.include "bank04.asm"
+.endsection bank04
+.warn format("bank04 free space: $%04x", $50000 - *)
+.cerror * > $50000, "bank04 too long"
+.here
+
+; 256k minus one byte
+* = $03ffff
 .byte 0
 
 ; VRAM MAP

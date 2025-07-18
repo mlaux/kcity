@@ -1,6 +1,7 @@
 ; contains routines for rendering text in a variable-width font to WRAM,
 ; and copying those tiles to VRAM
 
+; 3800 to give layer 2 some extra space
 TILE_DESTINATION_START = $3800
 
 ; $21 = priority on, tile ID high bits = 01 (256 + low byte)

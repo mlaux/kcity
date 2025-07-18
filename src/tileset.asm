@@ -17,10 +17,6 @@ tileset_init
 
     #dma_ppu_data GENEVA_CHARS
 
-    ldx #$4000
-    stx VMADD
-
-    #dma_ppu_data NPC_TILESET
 
     rts
 
