@@ -149,6 +149,9 @@ vertical_counter .word ?
 vertical_counter_end .word ?
 vertical_counter_this_frame .word ?
 
+title_animation_step .word ?
+title_animation_frame .word ?
+
 game_progress .word ?
 progress_flags1 .word ?
 

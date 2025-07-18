@@ -1,3 +1,5 @@
+TITLE_ANIMATION_FRAMES .word $40, $4, $10, $4, $50, $4
+TITLE_ANIMATION_LENGTH = 6
 
 state_title_init
 .al
@@ -31,7 +33,21 @@ state_title_init
 state_title
 .al
 .xl
-    lda joypad_new
+    lda title_animation_step
+    asl
+    tax
+    inc title_animation_frame
+    lda title_animation_frame
+    cmp TITLE_ANIMATION_FRAMES, x
+    bne +
+    stz title_animation_frame
+    inc title_animation_step
+    lda title_animation_step
+    cmp #TITLE_ANIMATION_LENGTH
+    bne +
+    stz title_animation_step
+
++   lda joypad_new
     and #(A_BUTTON | START_BUTTON)
     beq _animate
 
@@ -77,10 +93,32 @@ state_title_vblank
 .al
 .xl
     sep #$20
+    ldx #DMAMODE_CGDATA
+    stx DMAMODE
+    lda #$70
+    sta CGADD
+    lda title_animation_step
+    and #1
+    beq _glitch
+    ldx #<>(TITLE_SCENE_TEXT_PALETTE + $40)
+    stx DMAADDR
+    lda #`(TITLE_SCENE_TEXT_PALETTE + $40)
+    sta DMAADDRBANK
+    bra _send
 
-    ; move player and send updated position to OAM
-    jsr vblank_oam_dma
-    rts
+_glitch
+    ldx #<>(TITLE_SCENE_TEXT_PALETTE + $60)
+    stx DMAADDR
+    lda #`(TITLE_SCENE_TEXT_PALETTE + $60)
+    sta DMAADDRBANK
+
+_send
+    ldx #$20
+    stx DMALEN
+    lda #1
+    sta MDMAEN
+
+    jmp vblank_oam_dma
 
 load_title_background
 .as

@@ -17,7 +17,6 @@ tileset_init
 
     #dma_ppu_data GENEVA_CHARS
 
-
     rts
 
 ; copies 16x32 sprite in tileset to video ram 
