@@ -195,7 +195,7 @@ player_locked .word ?
 text_box_enabled .word ?
 ; should be using a different dma channel for this
 text_box_hdma_table .fill $9
-title_glitch_hdma_table .fill $10
+title_glitch_hdma_table .fill $13
 
 text_box_x .word ?
 text_box_y .word ?

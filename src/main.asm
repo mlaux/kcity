@@ -255,7 +255,9 @@ clear_registers
     stz CGWSEL
 
     lda #$e0
-    sta COLDATA
+    sta COLDATA ; SETINI
+    ;lda #$4
+    ;sta SETINI
 
     ; NMITIMEN = 0, WRIO = $ff
     lda #$ff00
