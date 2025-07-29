@@ -6,9 +6,9 @@
 
 .dsection music_town
 .section music_town
-music_town .binary "xm2snes/outside.xms"
+music_town ;.binary "xm2snes/vertigosm.xms"
 .endsection
 .dsection music_water
 .section music_water
-music_water .binary "xm2snes/water.xms"
+music_water .binary "xm2snes/vertigosm.xms"
 .endsection
