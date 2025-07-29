@@ -55,6 +55,10 @@ RESET
 
     jsr vwf_reset_tiles
 
+    ; initialize font type to 8x8 (default)
+    lda #FONT_TYPE_8X16
+    jsr vwf_set_font_type
+
     ; initialization done, enable interrupts and auto joypad reading
     lda #$81
     sta NMITIMEN

@@ -45,6 +45,8 @@ vwf_src .word ?
 vwf_dst .word ?
 ; base address of next tile
 vwf_next .word ?
+vwf_dst_bottom .word ?
+vwf_next_bottom .word ?
 ; font byte currently being shifted/copied
 vwf_font_ptr .word ?
 
@@ -53,6 +55,9 @@ script_element_ptr .word ?
 text_box_lines .word ?
 script_trigger_map_ptr .word ?
 facing_object_script .word ?
+
+; font type for current text rendering (0=8x8, 1=8x16)
+current_font_type .word ?
 
 ; --- start from xm2snes ---
 spx_spvar .byte ?
