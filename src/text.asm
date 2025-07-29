@@ -181,8 +181,8 @@ vwf_reset_tiles
 
 ; get ready to render the next string, call this at the beginning of each line
 ; input: A - address of string
-;        X - x coordinate
-;        Y - y coordinate
+;        X - x coordinate in tiles
+;        Y - y coordinate in tiles
 ; assumes: AXY16
 vwf_init_string
 .al
@@ -351,12 +351,9 @@ _done_shifting
     ; crossing out
     lda zp3
     beq +
-    lda vwf_dst
-    clc
-    adc #8 ; could probably ora #8 instead bc there should never be a carry
-    sta zp2
+    ldy #8
     lda #255
-    sta (zp2)
+    sta (vwf_dst), y
 
 +   lda vwf_next
     sta vwf_dst
