@@ -28,6 +28,14 @@ vwf_set_palette
     sta vwf_tilemap_id_high_byte
     rts
 
+; sets the font type for subsequent text rendering
+; input: A - font type (FONT_TYPE_8X8 or FONT_TYPE_8X16)
+vwf_set_font_type
+.al
+.xl
+    sta vwf_font_type
+    rts
+
 vwf_frame_loop
 .al
 .xl
@@ -181,14 +189,6 @@ _store_height
     lda #$1
     sta HDMAEN
 
-    rts
-
-; sets the font type for subsequent text rendering
-; input: A - font type (FONT_TYPE_8X8 or FONT_TYPE_8X16)
-vwf_set_font_type
-.al
-.xl
-    sta vwf_font_type
     rts
 
 ; call this at the beginning of a text box

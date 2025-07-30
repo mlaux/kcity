@@ -92,7 +92,7 @@ def generate_character_images(font_family, point_size, height, output_prefix="ch
     # Total font height = ascent - descent (descent is negative)
     font_height = ascent - descent
     # Position baseline so descenders fit within the target height
-    baseline_y = ascent + max(0, (height - font_height) // 2) - 2
+    baseline_y = ascent + max(0, (height - font_height) // 2)
     
     for ch in range(32, 128):
         char = chr(ch)
@@ -115,6 +115,7 @@ def generate_character_images(font_family, point_size, height, output_prefix="ch
             "-font", font_family,
             "-pointsize", str(point_size),
             "-fill", "black",
+            "+antialias",
             "-annotate", f"+0+{baseline_y}",
             char,
             # Convert to 4-color indexed PNG (black, white, 2 grays for antialiasing)
@@ -249,8 +250,10 @@ def main():
                        help='Font point size (default: 16)')
     parser.add_argument('--height', type=int, choices=[8, 16], default=8,
                        help='Font height in pixels: 8 for 8x8, 16 for 8x16 (default: 8)')
-    parser.add_argument('--output', '-o', default='geneva',
-                       help='Output filename prefix (default: geneva)')
+    parser.add_argument('--output', '-o', default='fontdata.png',
+                       help='Output filename prefix (default: fontdata.png)')
+    parser.add_argument('--output-widths', '-w', default='chwidths.bin',
+                       help='Output filename prefix (default: chwidths.bin)')
     parser.add_argument('--keep-temp', action='store_true',
                        help='Keep temporary character image files')
     parser.add_argument('--widths-only', action='store_true',
@@ -260,8 +263,8 @@ def main():
     
     args = parser.parse_args()
     
-    output_png = f"{args.output}.png"
-    output_widths = "chwidths.bin"
+    output_png = args.output
+    output_widths = args.output_widths
     
     try:
         print(f"Font: {args.font}")
@@ -271,7 +274,7 @@ def main():
         print()
         
         if not args.widths_only:
-            print(f"Generating {args.height}x8 font images...")
+            print(f"Generating 8x{args.height} font images...")
             
             # Generate individual character images
             generate_character_images(args.font, args.size, args.height)
@@ -290,12 +293,7 @@ def main():
             print(f"  Font sheet: {output_png}")
         print(f"  Character widths: {output_widths}")
         print(f"  Font dimensions: 8x{args.height} pixels per character")
-        
-        if args.height == 16:
-            print(f"\nNote: For 8x16 fonts, make sure to use SuperFamiconv to convert")
-            print(f"the font sheet with the data organized as sequential top/bottom halves:")
-            print(f"  [top A][bottom A][top B][bottom B]...")
-        
+
     except subprocess.CalledProcessError as e:
         print(f"Error during font generation: {e}")
         sys.exit(1)
