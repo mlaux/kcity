@@ -56,9 +56,6 @@ text_box_lines .word ?
 script_trigger_map_ptr .word ?
 facing_object_script .word ?
 
-; font type for current text rendering (0=8x8, 1=8x16)
-current_font_type .word ?
-
 ; --- start from xm2snes ---
 spx_spvar .byte ?
 spx_validation .byte ?
@@ -83,7 +80,7 @@ spx_message	.byte ?
 * = $100
 
 ; $700 bytes is enough for 4 full lines of 24 'M's lol
-NUM_TILE_BYTES = $700
+NUM_TILE_BYTES = $1700
 vwf_tiles .fill NUM_TILE_BYTES
 
 ; how many chars to draw
@@ -110,6 +107,9 @@ vwf_tilemap_dst .word ?
 ; current tile id
 ; ($20 << 8) | (how many tiles have been written to the tilemap so far)
 vwf_tilemap_id .word ?
+
+; font type for current text rendering (0=8x8, 1=8x16)
+vwf_font_type .word ?
 
 game_state .word ?
 state_transitioning .word ?

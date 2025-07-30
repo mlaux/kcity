@@ -92,7 +92,7 @@ def generate_character_images(font_family, point_size, height, output_prefix="ch
     # Total font height = ascent - descent (descent is negative)
     font_height = ascent - descent
     # Position baseline so descenders fit within the target height
-    baseline_y = ascent + max(0, (height - font_height) // 2)
+    baseline_y = ascent + max(0, (height - font_height) // 2) - 2
     
     for ch in range(32, 128):
         char = chr(ch)

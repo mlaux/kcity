@@ -6,6 +6,8 @@
   --bpp 2 \
   --no-discard \
   --no-flip \
+  --no-remap \
   --out-tiles geneva.2bp \
   --out-map geneva.map \
-  --out-tiles-image out.png
+  --out-tiles-image out.png \
+  --out-palette geneva.pal

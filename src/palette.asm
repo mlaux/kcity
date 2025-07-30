@@ -5,7 +5,8 @@ palette_init
     stx DMAMODE
 
     ; destination address in palette ram
-    stz CGADD
+    lda #$4
+    sta CGADD
 
     #dma_ppu_data GENEVA_PALETTE
     lda #$c0

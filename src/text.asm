@@ -4,8 +4,8 @@
 ; 3800 to give layer 2 some extra space
 TILE_DESTINATION_START = $3800
 
-; $21 = priority on, tile ID high bits = 01 (256 + low byte)
-DEST_TILE_ID_START = $2100
+; $21 = priority on, palette 1, tile ID high bits = 01 (256 + low byte)
+DEST_TILE_ID_START = $2500
 BYTES_PER_TILE = $10
 
 ; font types
@@ -141,7 +141,7 @@ text_box_vblank
     ; based on height of text box and font type
 _set_height
     ldx text_box_num_lines
-    lda current_font_type
+    lda vwf_font_type
     cmp #FONT_TYPE_8X16
     beq _use_8x16_heights
     
@@ -172,7 +172,7 @@ _store_height
 vwf_set_font_type
 .al
 .xl
-    sta current_font_type
+    sta vwf_font_type
     rts
 
 ; call this at the beginning of a text box
@@ -186,10 +186,34 @@ vwf_reset_tiles
     rep #$20
     lda #vwf_tiles
     sta vwf_dst
+
+    ; set up pointers based on font type
+    lda vwf_font_type
+    cmp #FONT_TYPE_8X16
+    beq _reset_8x16
+    
+_reset_8x8
+    ; 8x8: vwf_next is just one tile ahead
+    lda vwf_dst
+    sta vwf_dst_bottom
     clc
     adc #BYTES_PER_TILE
     sta vwf_next
+    sta vwf_next_bottom
+    bra _dst_next_done
+    
+_reset_8x16
+    ; 8x16: dst, dst_bottom, next, next_bottom
+    lda vwf_dst
+    clc
+    adc #BYTES_PER_TILE
+    sta vwf_dst_bottom
+    adc #BYTES_PER_TILE  
+    sta vwf_next
+    adc #BYTES_PER_TILE
+    sta vwf_next_bottom
 
+_dst_next_done
     lda #TILE_DESTINATION_START
     sta vwf_dmadst
 
@@ -207,11 +231,14 @@ vwf_reset_tiles
 ;        X - x coordinate in tiles
 ;        Y - y coordinate in tiles
 ; assumes: AXY16
-; uses current_font_type to determine 8x8 vs 8x16 rendering
+; uses vwf_font_type to determine 8x8 vs 8x16 rendering
 vwf_init_string
 .al
 .xl
     sta vwf_src
+
+    lda vwf_font_type
+    bne _8x16
 
     lda vwf_dst
     clc
@@ -219,7 +246,22 @@ vwf_init_string
     sta vwf_dst
     adc #BYTES_PER_TILE
     sta vwf_next
+    bra _continue
 
+_8x16
+    lda vwf_dst
+    clc
+    adc #BYTES_PER_TILE
+    adc #BYTES_PER_TILE
+    sta vwf_dst
+    adc #BYTES_PER_TILE
+    sta vwf_dst_bottom
+    adc #BYTES_PER_TILE
+    sta vwf_next
+    adc #BYTES_PER_TILE
+    sta vwf_next_bottom
+
+_continue
     ; convert tile coordinates to layer 3 tilemap address
     ; $800 + (y << 5) + x
     tya
@@ -243,6 +285,7 @@ vwf_init_string
     lda #$0
     ldy #$e
  -  sta (vwf_dst), y
+    sta (vwf_dst_bottom), y
     dey
     dey
     bpl -
@@ -306,7 +349,7 @@ _exit_length_parameter_reached
 
 _process_char
     ; check font type to determine how to process character
-    lda current_font_type
+    lda vwf_font_type
     cmp #FONT_TYPE_8X16
     beq _process_char_8x16
 
@@ -345,11 +388,8 @@ _process_char_8x16
     sta vwf_font_ptr
 
     ; process top half (first 16 bytes)
-    ldy #15
-    jsr _process_8x8_tile
-    
-    ; advance to next tile for bottom half
-    jsr _advance_to_next_tile
+    lda #0  ; 0 = top half
+    jsr _process_8x16_half_tile
     
     ; calculate font pointer for bottom half: same base + 31 (second 16 bytes)
     lda vwf_ch
@@ -364,8 +404,8 @@ _process_char_8x16
     sta vwf_font_ptr
     
     ; process bottom half (second 16 bytes)
-    ldy #15
-    jsr _process_8x8_tile
+    lda #1  ; 1 = bottom half
+    jsr _process_8x16_half_tile
     jmp _char_processing_done
 
 _each_byte_8x8
@@ -407,15 +447,29 @@ _done_shifting_8x8
     bpl _each_byte_8x8
     jmp _char_processing_done
 
-; helper routine to process a single 8x8 tile (used by both 8x8 and 8x16 fonts)
-_process_8x8_tile
+; helper routine to process a single 8x8 tile in the 8x16 case
+; input: A = 0 for top half, 1 for bottom half
+_process_8x16_half_tile
+    ; save which half we're processing
+    sta zp2
+    
     ldy #15
 -   sep #$20
 
-    ; save existing tile byte
+    lda zp2
+    bne _save_bottom
+
+    ; save existing tile byte from top tile
     lda (vwf_dst), y
     sta vwf_cur_tile_byte
+    bra _process_font_data
+    
+_save_bottom
+    ; save existing tile byte from bottom tile
+    lda (vwf_dst_bottom), y
+    sta vwf_cur_tile_byte
 
+_process_font_data
     lda #0
     sta vwf_remainder
 
@@ -435,12 +489,25 @@ _shift_loop
 _done_shifting_tile
     ; combine new partial character with existing tile
     ora vwf_cur_tile_byte
-    sta (vwf_dst), y
+    
+    ; store back to appropriate tile and handle remainder
+    ldx zp2
+    bne _store_bottom_half
 
-    ; leftover pixels need to go in the next tile
+_store_top_half
+    sta (vwf_dst), y
+    ; remainder goes to next top tile
     lda vwf_remainder
     sta (vwf_next), y
+    bra _continue_tile_loop
+    
+_store_bottom_half
+    sta (vwf_dst_bottom), y
+    ; remainder goes to next bottom tile
+    lda vwf_remainder
+    sta (vwf_next_bottom), y
 
+_continue_tile_loop
     rep #$20
 
     dec vwf_font_ptr
@@ -448,25 +515,7 @@ _done_shifting_tile
     bpl -
     rts
 
-; helper routine to advance to the next tile destination
-_advance_to_next_tile
-    lda vwf_next
-    sta vwf_dst
-    clc
-    adc #BYTES_PER_TILE
-    sta vwf_next
-    
-    ; clear out the new tile
-    lda #$0
-    ldy #$e
--   sta (vwf_dst), y
-    dey
-    dey
-    bpl -
-    rts
-
 _char_processing_done
-
     ; vwf_offs = (vwf_offs + CHAR_WIDTHS[vwf_ch]) % 8;
     ldx vwf_ch
     lda CHAR_WIDTHS, x
@@ -477,31 +526,44 @@ _char_processing_done
 
     ; if vwf_offs < 8 move to next char
     cmp #8
-    bmi _no_tile_increment
+    bmi _next_char
     ; was >= 8, so need to move to next dest tile
     and #7
     sta vwf_offs
 
     ; crossing out
-    lda zp3
-    beq +
-    ldy #8
-    lda #255
-    sta (vwf_dst), y
+    ; lda zp3
+    ; beq +
+    ; ldy #8
+    ; lda #255
+    ; sta (vwf_dst), y
 
-+   lda vwf_next
+    ldy vwf_font_type
+    bne _advance_8x16
+
+    ; 8x8
+    lda vwf_next
     sta vwf_dst
     clc
     adc #BYTES_PER_TILE
-    
-    ; for 8x16 fonts, need to advance by 2 tiles instead of 1
-    ldy current_font_type
-    cpy #FONT_TYPE_8X16
-    bne +
-    adc #BYTES_PER_TILE  ; add another tile for 8x16
-+   sta vwf_next
+    sta vwf_next
+    bra _next_char
 
-_no_tile_increment
+_advance_8x16
+    lda vwf_next
+    sta vwf_dst
+    clc
+    adc #BYTES_PER_TILE
+    adc #BYTES_PER_TILE
+    sta vwf_next
+
+    lda vwf_next_bottom
+    sta vwf_dst_bottom
+    adc #BYTES_PER_TILE
+    adc #BYTES_PER_TILE
+    sta vwf_next_bottom
+
+_next_char
     ; successfully completed this char without overflowing the tile
     ; onto the next char
     inc vwf_src
@@ -557,7 +619,7 @@ vwf_transfer_map
     stx VMADD
 
     ; check font type to determine tilemap layout
-    lda current_font_type
+    lda vwf_font_type
     cmp #FONT_TYPE_8X16
     beq _transfer_map_8x16
 

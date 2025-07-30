@@ -6,7 +6,7 @@ CHAR_WIDTHS .binary "../font/chwidths.bin"
 TEXT_BOX_HEIGHTS .byte 0, $18, $20, $28, $30
 
 ; heights for 1, 2, 3, 4 lines (8x16 font - double height)
-TEXT_BOX_HEIGHTS_8X16 .byte 0, $30, $40, $50, $60
+TEXT_BOX_HEIGHTS_8X16 .byte 0, $20, $30, $40, $50
 
 ; $40 for $AA lines
 ; $40 for $BB more lines
