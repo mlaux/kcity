@@ -21,6 +21,13 @@ state_gameplay_init
     rep #$20
 
     jsr player_init
+
+    lda #GENEVA_CHARS
+    jsr vwf_set_font
+    lda #1
+    jsr vwf_set_palette
+    lda #FONT_TYPE_8X8
+    jsr vwf_set_font_type
     jsr vwf_reset_map
     jsr vwf_reset_tiles
 

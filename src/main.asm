@@ -53,9 +53,6 @@ RESET
     jsr BootSPC
     jsr SPX_Transfer_LFT
 
-    lda #FONT_TYPE_8X16
-    jsr vwf_set_font_type
-
     jsr vwf_reset_tiles
 
     ; initialization done, enable interrupts and auto joypad reading

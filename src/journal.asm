@@ -183,6 +183,12 @@ load_journal_background
 draw_journal_text
 .al
 .xl
+    lda #INDIE_FLOWER_CHARS
+    jsr vwf_set_font
+    lda #2
+    jsr vwf_set_palette
+    lda #FONT_TYPE_8X16
+    jsr vwf_set_font_type
     jsr vwf_reset_map
     jsr vwf_reset_tiles
 

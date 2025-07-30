@@ -5,12 +5,28 @@
 TILE_DESTINATION_START = $3800
 
 ; $21 = priority on, palette 1, tile ID high bits = 01 (256 + low byte)
-DEST_TILE_ID_START = $2500
+DEST_TILE_ID_START = $0
 BYTES_PER_TILE = $10
 
 ; font types
 FONT_TYPE_8X8 = 0
 FONT_TYPE_8X16 = 1
+
+vwf_set_font
+.al
+.xl
+    sta vwf_font_base
+    rts
+
+vwf_set_palette
+.al
+.xl
+    asl
+    asl
+    ora #$21
+    xba
+    sta vwf_tilemap_id_high_byte
+    rts
 
 vwf_frame_loop
 .al
@@ -362,7 +378,7 @@ _process_char_8x8
     asl
     asl
     clc
-    adc #GENEVA_CHARS
+    adc vwf_font_base
     adc #$f
     sta vwf_font_ptr
 
@@ -383,7 +399,7 @@ _process_char_8x16
     asl
     asl ; multiply by 32 for 8x16 chars
     clc
-    adc #GENEVA_CHARS ; will need separate font data for 8x16
+    adc vwf_font_base ; will need separate font data for 8x16
     adc #$f ; start from byte 15 for top half
     sta vwf_font_ptr
 
@@ -399,7 +415,7 @@ _process_char_8x16
     asl
     asl
     clc
-    adc #GENEVA_CHARS
+    adc vwf_font_base
     adc #$1f ; start from byte 31 for bottom half
     sta vwf_font_ptr
     
@@ -518,7 +534,7 @@ _continue_tile_loop
 _char_processing_done
     ; vwf_offs = (vwf_offs + CHAR_WIDTHS[vwf_ch]) % 8;
     ldx vwf_ch
-    lda CHAR_WIDTHS, x
+    lda GENEVA_CHAR_WIDTHS, x
     and #$ff
     clc
     adc vwf_offs
@@ -630,13 +646,15 @@ _transfer_map_8x8
     lsr
     lsr
     lsr
+    tax
 
     ; standard 8x8 font - one tile per character
--   ldx vwf_tilemap_id
-    stx VMDATA
+-   lda vwf_tilemap_id
+    ora vwf_tilemap_id_high_byte
+    sta VMDATA
     inc vwf_tilemap_id
     inc vwf_tilemap_dst
-    dec a
+    dex
     bne -
     bra _transfer_map_done
 
@@ -651,6 +669,7 @@ _transfer_map_8x16
     tax  ; save character count in X
 -   ; write top tile
     lda vwf_tilemap_id
+    ora vwf_tilemap_id_high_byte
     sta VMDATA
     inc vwf_tilemap_id
     
@@ -663,6 +682,7 @@ _transfer_map_8x16
     
     ; write bottom tile
     lda vwf_tilemap_id
+    ora vwf_tilemap_id_high_byte
     sta VMDATA
     inc vwf_tilemap_id
     

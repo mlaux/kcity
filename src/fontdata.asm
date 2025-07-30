@@ -1,6 +1,9 @@
 
 GENEVA_CHARS .binary "../font/geneva.2bp"
-CHAR_WIDTHS .binary "../font/chwidths.bin"
+GENEVA_CHAR_WIDTHS .binary "../font/geneva.bin"
+
+INDIE_FLOWER_CHARS .binary "../font/indieflr.2bp"
+INDIE_FLOWER_CHAR_WIDTHS .binary "../font/indieflr.bin"
 
 ; heights for 1, 2, 3, 4 lines (8x8 font)
 TEXT_BOX_HEIGHTS .byte 0, $18, $20, $28, $30

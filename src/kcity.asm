@@ -102,11 +102,14 @@ vwf_dmadst .word ?
 vwf_dmalen .word ?
 vwf_end_of_string .word ?
 
+vwf_font_base .word ?
+
 ; current tile pointer for currently rendered string
 vwf_tilemap_dst .word ?
 ; current tile id
 ; ($20 << 8) | (how many tiles have been written to the tilemap so far)
 vwf_tilemap_id .word ?
+vwf_tilemap_id_high_byte .word ?
 
 ; font type for current text rendering (0=8x8, 1=8x16)
 vwf_font_type .word ?
