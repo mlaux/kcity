@@ -1,29 +1,4 @@
-LAB_MAP_NAME .text "Ram's lab", 255
-
-; 1 is walkable, 0 is blocked
-; 0x80 | warp lookup id
-; 0x40 | script lookup id
-
-LAB_COLLISION_MAP .binary "../gfx/lab/walkmap.cwm"
-LAB_SCRIPT_TRIGGERS .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, $42, 0, 0, 0, 0, 0
-                    .byte 0, 0, $41, 0, 0, $82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                    .byte 0, 0, $41, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                    .byte 0, 0, 0, 0, 0, 0, 0, $82, $82, 0, 0, 0, 0, 0, 0, 0
-  ; filler for final two rows just in case? idk, can probably remove
-                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-
-BEDROOM_NAME .text "Juno and Leif's living room", 255
+BEDROOM_NAME .text "Juno and Leif's bedroom", 255
 
 BEDROOM_COLLISION_MAP .binary "../gfx/livingrm/walkmap.cwm"
 ; TODO: reimplement all of this with the per pixel walking
@@ -43,19 +18,46 @@ BEDROOM_SCRIPT_TRIGGERS .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                         .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                         .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                         .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                        .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, $81, $81, 0, 0
-                        .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, $81, $81, 0, 0
+                        .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, $82, $82, 0, 0
+                        .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, $82, $82, 0, 0
                         .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
-START_X .word $d8, $60
-START_Y .word $180, $90
+LAB_MAP_NAME .text "Ram's lab", 255
 
-ALL_MAP_PALETTES .word <>LAB_PALETTE, <>BEDROOM_PALETTE
-ALL_TILESETS .word <>LAB_TILESET, <>BEDROOM_TILESET
-ALL_TILEMAPS .word <>LAB_TILEMAP, <>BEDROOM_TILEMAP
-ALL_TILESET_LENGTHS .word size(LAB_TILESET), size(BEDROOM_TILESET)
-; TODO generate test map collision as a .png
-COLLISION_MAPS .word LAB_COLLISION_MAP, BEDROOM_COLLISION_MAP
-COLLISION_MAP_LENGTHS .word size(LAB_COLLISION_MAP), size(BEDROOM_COLLISION_MAP)
-SCRIPT_TRIGGER_MAPS .word LAB_SCRIPT_TRIGGERS, BEDROOM_SCRIPT_TRIGGERS
-LOCATION_NAMES .word LAB_MAP_NAME, BEDROOM_NAME
+; 1 is walkable, 0 is blocked
+; 0x80 | warp lookup id
+; 0x40 | script lookup id
+
+LAB_COLLISION_MAP .binary "../gfx/lab/walkmap.cwm"
+LAB_SCRIPT_TRIGGERS .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, $42, 0, 0, 0, 0, 0
+                    .byte 0, 0, $41, 0, 0, $81, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                    .byte 0, 0, $41, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                    .byte 0, 0, 0, 0, 0, 0, 0, $81, $81, 0, 0, 0, 0, 0, 0, 0
+  ; filler for final two rows just in case? idk, can probably remove
+                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+
+START_X .word $60, $d8
+START_Y .word $90, $180
+START_BGMODE .word $39, $9
+START_HOFS .word $0, $0
+START_VOFS .word $120, 0
+
+ALL_MAP_PALETTES .word <>BEDROOM_PALETTE, <>LAB_PALETTE
+ALL_TILESETS .word <>BEDROOM_TILESET, <>LAB_TILESET
+ALL_TILEMAPS .word <>BEDROOM_TILEMAP, <>LAB_TILEMAP
+ALL_TILESET_LENGTHS .word size(BEDROOM_TILESET), size(LAB_TILESET)
+COLLISION_MAPS .word BEDROOM_COLLISION_MAP, LAB_COLLISION_MAP
+COLLISION_MAP_LENGTHS .word size(BEDROOM_COLLISION_MAP), size(LAB_COLLISION_MAP)
+SCRIPT_TRIGGER_MAPS .word BEDROOM_SCRIPT_TRIGGERS, LAB_SCRIPT_TRIGGERS
+LOCATION_NAMES .word BEDROOM_NAME, LAB_MAP_NAME

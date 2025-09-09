@@ -143,6 +143,13 @@ map_run_warp
     asl
     tax
 
+    lda START_BGMODE - 2, x
+    sta my_bgmode
+    lda START_HOFS - 2, x
+    sta my_bghofs
+    lda START_VOFS - 2, x
+    sta my_bgvofs
+
     lda ALL_TILEMAPS - 2, x
     sta DMAADDR
     lda #TILEMAP_SIZE
