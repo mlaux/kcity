@@ -79,10 +79,6 @@ spx_message	.byte ?
 ; some of these are definitely redundant but made the algorithms easier
 * = $100
 
-; $700 bytes is enough for 4 full lines of 24 'M's lol
-NUM_TILE_BYTES = $1700
-vwf_tiles .fill NUM_TILE_BYTES
-
 ; how many chars to draw
 vwf_count .word ?
 
@@ -228,6 +224,12 @@ dma_queue_entry_length .fill 2 * MAX_DMA_QUEUE_ENTRIES
 dma_queue_entry_vmadd .fill 2 * MAX_DMA_QUEUE_ENTRIES
 dma_queue_entry_vmain .fill 2 * MAX_DMA_QUEUE_ENTRIES
 
+; $700 bytes is enough for 4 full lines of 24 'M's lol
+.align $10
+NUM_TILE_BYTES = $c00
+vwf_tiles .fill NUM_TILE_BYTES
+
+.cerror * > $fff, "ram too long"
 .warn "lowram end: ", *
 
 * = $700000

@@ -6,6 +6,9 @@ state_gameplay_init
 
     jsr clear_bg3_tiles
     jsr palette_init
+    ; todo move this? the vwf_reset_map later in the init can overwrite the 
+    ; font tiles if the previous text write operation overflowed into the font
+    ; tiles, when it clears its area
     jsr tileset_init ; for font and player tiles only
     jsr background_init
     jsr copy_ram_scripts

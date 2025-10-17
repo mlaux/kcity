@@ -12,7 +12,7 @@ JOURNAL_ENTRY_TABLE .word JOURNAL_ENTRY_1, JOURNAL_ENTRY_2, JOURNAL_ENTRY_3, JOU
 open_journal
 .al
 .xl
-    lda #3
+    lda #6
     sta game_progress
     ldy #2
     jsr run_state_init
