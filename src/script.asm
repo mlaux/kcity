@@ -25,6 +25,7 @@
 ; $a: branch if equal
 ; $b: increment variable
 ; $c: lock/unlock player
+; $d: add
 ; - change sprite movement to use same direction system as player
 ; - variable length steps using table of lengths?
 
@@ -180,6 +181,22 @@ step_set_player_locked .macro
     .word OPCODE_SET_PLAYER_LOCKED
     .word \1
     .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+.endm
+
+
+OPCODE_ADD = $d
+; script_storage[dst] = script_storage[src1] + src2
+; +4: destination variable index
+; +6: source1 variable index
+; +8: flags (currently 0 = src2 is a variable, 1 = src2 is a constant)
+; +9: source2 (variable index or constant value)
+step_add .macro
+    .sint 0
+    .word OPCODE_ADD
+    .word \1 ; dst
+    .word \2 ; src1
+    .byte \3 ; flags
+    .word \4 ; src2
 .endm
 
 ; this gets copied to RAM so it can modify the script with a pointer to the
@@ -617,4 +634,49 @@ op_set_player_locked
     lda (script_element_ptr), y
     sta player_locked
 
+    rts
+    
+; script_storage[dst] = script_storage[src1] + src2
+; +4: destination variable index
+; +6: source1 variable index
+; +8: flags (currently 0 = src2 is a variable, 1 = src2 is a constant)
+; +9: source2 (variable index or constant value)
+; #step_add 1, 0, 0, 5 → script_storage[1] = script_storage[0] + 5
+op_add
+    rep #$20
+    ldy #$6
+    lda (script_element_ptr), y
+    asl
+    tax
+    lda script_storage, x
+    pha
+
+    ldy #$8
+    lda (script_element_ptr), y
+    and #$1
+    beq _src2_constant
+
+_src2_variable
+    ldy #$9
+    lda (script_element_ptr), y
+    asl
+    tax
+    lda script_storage, x
+    bra _do_add
+
+_src2_constant
+    ldy #$9
+    lda (script_element_ptr), y
+
+_do_add
+    clc
+    ; todo study as example for stack addressing in other places, nice
+    adc 1, s
+    sta 1, s
+    ldy #$4
+    lda (script_element_ptr), y
+    asl
+    tax
+    pla
+    sta script_storage, x
     rts
