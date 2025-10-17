@@ -197,6 +197,7 @@ step_add .macro
     .word \2 ; src1
     .byte \3 ; flags
     .word \4 ; src2
+    .byte 0, 0, 0, 0, 0
 .endm
 
 ; this gets copied to RAM so it can modify the script with a pointer to the
@@ -272,6 +273,17 @@ TEST_REACT_TO_BOOKSHELF
     #step_set_player_locked 0
 
 TEST_BOOK1
+    ; test add opcode
+    ; [0] = 4
+    ; [1] = 8
+    ; [2] = [0] + [1]
+    ; [3] = 12
+    ; [3] = [3] + 16
+    ; #step_set_variable 0, 4
+    ; #step_set_variable 1, 8
+    ; #step_add 2, 0, 0, 1
+    ; #step_set_variable 3, 12
+    ; #step_add 3, 3, 1, 16
     #step_wait 1
     #step_set_player_locked 1
     #step_text_box -1, 1, 21, 30, 1, BOOK_TITLE1, 0, 0, 0
@@ -329,6 +341,7 @@ script_operations
     .word op_branch_eq
     .word op_inc_variable
     .word op_set_player_locked
+    .word op_add
 
 copy_ram_scripts
 .as
@@ -643,7 +656,10 @@ op_set_player_locked
 ; +9: source2 (variable index or constant value)
 ; #step_add 1, 0, 0, 5 → script_storage[1] = script_storage[0] + 5
 op_add
+.as
+.xl
     rep #$20
+    ; push src1 to stack
     ldy #$6
     lda (script_element_ptr), y
     asl
@@ -651,10 +667,11 @@ op_add
     lda script_storage, x
     pha
 
+    ; decide if src2 is variable or constant
     ldy #$8
     lda (script_element_ptr), y
     and #$1
-    beq _src2_constant
+    bne _src2_constant
 
 _src2_variable
     ldy #$9
@@ -668,6 +685,7 @@ _src2_constant
     ldy #$9
     lda (script_element_ptr), y
 
+    ; A is now set up with src2
 _do_add
     clc
     ; todo study as example for stack addressing in other places, nice
