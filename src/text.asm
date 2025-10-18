@@ -354,19 +354,41 @@ _load_char
     and #$ff
     cmp #$ff
     sta vwf_ch
-    bne _process_char
+    bne _check_special_char
 
     ; end of string. next time called, return immediately
     inc vwf_end_of_string
     stz current_text
     ; take into account any unfinished tiles this time
     lda vwf_next
-    bra +
+    bra _set_dmalen_and_exit
+
+_check_special_char
+    ; check for $80 (option marker)
+    cmp #$80
+    bne _process_char
+
+    ; save current tilemap position for this option
+    lda text_box_num_options
+    asl
+    tax
+    lda vwf_tilemap_dst
+    sta text_box_option_positions, x
+
+    inc text_box_num_options
+    ; indent options a little bit for cursor
+    inc vwf_tilemap_dst
+    inc vwf_tilemap_dst
+
+    ; move to next character
+    inc vwf_src
+    bra _check_count
 
 _exit_length_parameter_reached
     ; calculate length used (in bytes)
     lda vwf_dst
-+   sec
+_set_dmalen_and_exit
+    sec
     sbc vwf_dmasrc
     sta vwf_dmalen
 

@@ -242,8 +242,8 @@ BOOKSHELF_MESSAGE2 .text "Don't look in there.", $ff
 
 TEST_DECISION_1 .text "Pet the cat?", $ff
 TEST_DECISION_2 .byte $ff
-TEST_DECISION_3 .text $81, "Yes", $ff
-TEST_DECISION_4 .text $82, "No", $ff
+TEST_DECISION_3 .text $80, "Yes", $ff
+TEST_DECISION_4 .text $80, "No", $ff
 
 SCRIPT_MESSAGE_SAVED
     #step_text_box $40, 1, 1, 5, 1, MESSAGE_SAVED, 0, 0, 0
