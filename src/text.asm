@@ -4,7 +4,6 @@
 ; 3800 to give layer 2 some extra space
 TILE_DESTINATION_START = $3800
 
-; $21 = priority on, palette 1, tile ID high bits = 01 (256 + low byte)
 DEST_TILE_ID_START = $0
 BYTES_PER_TILE = $10
 
@@ -23,6 +22,7 @@ vwf_set_palette
 .xl
     asl
     asl
+    ; $21 = priority on, palette 1, tile ID high bits = 01 (256 + low byte)
     ora #$21
     xba
     sta vwf_tilemap_id_high_byte

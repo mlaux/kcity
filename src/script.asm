@@ -3,18 +3,28 @@
 ; a script is an array of steps and a length
 ; each step is 16 bytes long (1 timing word, 1 opcode word, and 12 data bytes)
 ; +0: number of frames to wait before continuing
-;     -3: wait for script_step_result to change to non-zero, no cancel
-;     -2: wait for script_step_result to change to non-zero, B to cancel
-;     -1: wait for A button
-;      0: one-time action
 ;    > 0: time delay before moving on
+;      0: one-time action
+;     -1: wait for A button
+;     -2: wait for script_step_result to change to non-zero, B to continue anyway
+;     -3: wait for script_step_result to change to non-zero, no cancel
 ; +2: opcode
 ; +4..F: up to 12 parameter bytes depending on the type of step, then padding
 ;        to 16 byte boundary
 ; the last step only needs the bytes actually read for the step, not all 16
 
+LEN_WAIT_FOR_A = -1
+LEN_WAIT_RESULT_CANCEL_OK = -2
+LEN_WAIT_RESULT_NO_CANCEL = -3
+
+RESULT_CANCELLED = -1
+
+; ideas:
+; - change sprite movement to use same direction system as player
+; - variable length steps using table of lengths?
+
 ; script opcodes:
-; $0: reset text box
+; $0: no operation
 ; $1: show text box
 ; $2: hide text box
 ; $3: set sprite flags
@@ -22,22 +32,30 @@
 ; $5: add/sub sprite x
 ; $6: add/sub sprite y
 ; $7: set sprite direction
-; $8: unconditional branch
-; $9: set variable
-; $a: branch if equal
-; $b: increment variable
-; $c: lock/unlock player
-; $d: add
-; $e: read and reset script_step_result
+; $8: set variable
+; $9: read script_step_result into variable, reset result
+; $a: increment variable
+; $b: add two variables or variable+constant
+; $c: unconditional branch
+; $d: branch if equal
+; $e: branch if not equal
+; $f: lock/unlock player
 
-; ideas:
-; - change sprite movement to use same direction system as player
-; - variable length steps using table of lengths?
-
-LEN_WAIT_FOR_A = -1
-LEN_WAIT_RESULT_CANCEL_OK = -2
-LEN_WAIT_RESULT_NO_CANCEL = -3
-RESULT_CANCELLED = -1
+; can eliminate some redundancy in the implementations of these
+script_operations
+    .word op_none
+    .word op_text_box, op_hide_text_box
+    .word op_set_sprite_flags, op_set_sprite_position
+    .word op_move_sprite_x, op_move_sprite_y
+    .word op_set_sprite_direction
+    .word op_set_variable
+    .word op_read_result
+    .word op_inc_variable
+    .word op_add
+    .word op_unconditional_branch
+    .word op_branch_eq
+    .word op_branch_ne
+    .word op_set_player_locked
 
 ; just wait for the specified amount of frames
 OPCODE_WAIT = 0
@@ -145,7 +163,7 @@ step_set_sprite_direction .macro
 .endm
 
 ; +4: step to branch to
-OPCODE_UNCONDITIONAL_BRANCH = 8
+OPCODE_UNCONDITIONAL_BRANCH = $c
 step_unconditional_branch .macro
     .sint 0
     .word OPCODE_UNCONDITIONAL_BRANCH
@@ -155,7 +173,7 @@ step_unconditional_branch .macro
 
 ; +4: variable slot
 ; +6: the value
-OPCODE_SET_VARIABLE = 9
+OPCODE_SET_VARIABLE = 8
 step_set_variable .macro
     .sint 0
     .word OPCODE_SET_VARIABLE
@@ -167,7 +185,7 @@ step_set_variable .macro
 ; +4: variable slot
 ; +6: value to compare
 ; +8: step to branch to
-OPCODE_BRANCH_EQ = $a
+OPCODE_BRANCH_EQ = $d
 step_branch_eq .macro
     .sint 0
     .word OPCODE_BRANCH_EQ
@@ -177,7 +195,17 @@ step_branch_eq .macro
     .byte 0, 0, 0, 0, 0, 0
 .endm
 
-OPCODE_INC_VARIABLE = $b
+OPCODE_BRANCH_NE = $e
+step_branch_ne .macro
+    .sint 0
+    .word OPCODE_BRANCH_NE
+    .word \1
+    .word \2
+    .word \3
+    .byte 0, 0, 0, 0, 0, 0
+.endm
+
+OPCODE_INC_VARIABLE = $a
 step_inc_variable .macro
     .sint 0
     .word OPCODE_INC_VARIABLE
@@ -185,7 +213,7 @@ step_inc_variable .macro
     .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 .endm
 
-OPCODE_SET_PLAYER_LOCKED = $c
+OPCODE_SET_PLAYER_LOCKED = $f
 step_set_player_locked .macro
     .sint 0
     .word OPCODE_SET_PLAYER_LOCKED
@@ -193,7 +221,7 @@ step_set_player_locked .macro
     .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 .endm
 
-OPCODE_ADD = $d
+OPCODE_ADD = $b
 ; script_storage[dst] = script_storage[src1] + src2
 ; +4: destination variable index
 ; +6: source1 variable index
@@ -209,7 +237,7 @@ step_add .macro
     .byte 0, 0, 0, 0, 0
 .endm
 
-OPCODE_READ_RESULT = $e
+OPCODE_READ_RESULT = $9
 ; script_storage[dst] = script_step_result
 ; +4: destination variable index
 step_read_result .macro
@@ -266,11 +294,6 @@ TEST_OBJECT_SCRIPT
 TEST_HAIR_BLEACH
     #step_text_box $c0, 1, 21, 30, 3, OBJECT_DESC2_1, EMPTY_STRING, OBJECT_DESC2_2, 0
     #step_hide_text_box
-    ; #step_wait 20
-    ; #step_text_box $c0, 1, 21, 30, 1, OBJECT_DESC, 0, 0, 0
-    ; #step_hide_text_box
-    ; #step_wait 20
-    ; #step_unconditional_branch 3
 
 TEST_REACT_TO_BOOKSHELF
     #step_set_player_locked 1
@@ -311,14 +334,11 @@ TEST_BOOK1
     ; #step_add 3, 3, 1, 16
 
     ; test decision text box
-    #step_wait 1
-    #step_text_box -2, 1, 21, 30, 4, TEST_DECISION_1, TEST_DECISION_2, TEST_DECISION_3, TEST_DECISION_4
+    #step_wait 0
+    #step_text_box -3, 1, 21, 30, 4, TEST_DECISION_1, TEST_DECISION_2, TEST_DECISION_3, TEST_DECISION_4
     #step_read_result 0
     #step_hide_text_box
-    ; need step_branch_ne 0, 1, x
-    #step_branch_eq 0, 2, 8
-    #step_branch_eq 0, 3, 8
-    #step_branch_eq 0, $ffff, 8 ; cancelled
+    #step_branch_ne 0, 1, 6
     #step_text_box -1, 1, 21, 30, 1, TEST_MEOW, 0, 0, 0
     #step_hide_text_box
 
@@ -347,7 +367,7 @@ TEST_BOOK3
     #step_hide_text_box
 
 OBJECT_SCRIPTS .word TEST_OBJECT_SCRIPT, TEST_HAIR_BLEACH, TEST_REACT_TO_BOOKSHELF, TEST_BOOK1, TEST_BOOK2, TEST_BOOK3
-OBJECT_SCRIPT_LENGTHS .word 3, 2, 23, 9, 4, 10
+OBJECT_SCRIPT_LENGTHS .word 3, 2, 23, 7, 4, 10
 
 load_oam_index_16x32 .macro
     ; x = sprite_id * 8
@@ -366,21 +386,6 @@ load_anim_index .macro
     asl
     tax
 .endm
-
-; can eliminate some redundancy in the implementations of these
-script_operations
-    .word op_none
-    .word op_text_box, op_hide_text_box
-    .word op_set_sprite_flags, op_set_sprite_position
-    .word op_move_sprite_x, op_move_sprite_y
-    .word op_set_sprite_direction
-    .word op_unconditional_branch
-    .word op_set_variable
-    .word op_branch_eq
-    .word op_inc_variable
-    .word op_set_player_locked
-    .word op_add
-    .word op_read_result
 
 copy_ram_scripts
 .as
@@ -635,16 +640,6 @@ op_set_sprite_direction
 
     rts
 
-op_unconditional_branch
-.as
-.xl
-    rep #$20
-    ldy #$4
-    lda (script_element_ptr), y
-    ; will be incremented after this runs, so need to decrement here
-    dec a
-    jmp set_script_step
-
 op_set_variable
 .as
 .xl
@@ -658,23 +653,20 @@ op_set_variable
     sta script_storage, x
     rts
 
-op_branch_eq
+op_read_result
 .as
 .xl
     rep #$20
+    lda script_step_result
+    pha
+    stz script_step_result
     ldy #$4
     lda (script_element_ptr), y
     asl
     tax
-    ldy #$6
-    lda (script_element_ptr), y
-    cmp script_storage, x
-    bne +
-    ldy #$8
-    lda (script_element_ptr), y
-    dec a
-    jmp set_script_step
-+   rts
+    pla
+    sta script_storage, x
+    rts
 
 op_inc_variable
 .as
@@ -687,16 +679,6 @@ op_inc_variable
     inc script_storage, x
     rts
 
-op_set_player_locked
-.as
-.xl
-    rep #$20
-    ldy #$4
-    lda (script_element_ptr), y
-    sta player_locked
-
-    rts
-    
 ; script_storage[dst] = script_storage[src1] + src2
 ; +4: destination variable index
 ; +6: source1 variable index
@@ -747,17 +729,58 @@ _do_add
     sta script_storage, x
     rts
 
-op_read_result
+op_unconditional_branch
 .as
 .xl
     rep #$20
-    lda script_step_result
-    pha
-    stz script_step_result
+    ldy #$4
+    lda (script_element_ptr), y
+    ; will be incremented after this runs, so need to decrement here
+    dec a
+    jmp set_script_step
+
+op_branch_eq
+.as
+.xl
+    rep #$20
     ldy #$4
     lda (script_element_ptr), y
     asl
     tax
-    pla
-    sta script_storage, x
+    ldy #$6
+    lda (script_element_ptr), y
+    cmp script_storage, x
+    bne +
+    ldy #$8
+    lda (script_element_ptr), y
+    dec a
+    jmp set_script_step
++   rts
+
+op_branch_ne
+.as
+.xl
+    rep #$20
+    ldy #$4
+    lda (script_element_ptr), y
+    asl
+    tax
+    ldy #$6
+    lda (script_element_ptr), y
+    cmp script_storage, x
+    beq +
+    ldy #$8
+    lda (script_element_ptr), y
+    dec a
+    jmp set_script_step
++   rts
+
+op_set_player_locked
+.as
+.xl
+    rep #$20
+    ldy #$4
+    lda (script_element_ptr), y
+    sta player_locked
+
     rts
