@@ -3,6 +3,7 @@
 ; a script is an array of steps and a length
 ; each step is 16 bytes long (1 timing word, 1 opcode word, and 12 data bytes)
 ; +0: number of frames to wait before continuing
+;     -2: wait for script_step_result to change to non-zero
 ;     -1: wait for A button
 ;      0: one-time action
 ;    > 0: time delay before moving on
@@ -26,6 +27,9 @@
 ; $b: increment variable
 ; $c: lock/unlock player
 ; $d: add
+; $e: read and reset script_step_result
+
+; ideas:
 ; - change sprite movement to use same direction system as player
 ; - variable length steps using table of lengths?
 
@@ -183,7 +187,6 @@ step_set_player_locked .macro
     .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 .endm
 
-
 OPCODE_ADD = $d
 ; script_storage[dst] = script_storage[src1] + src2
 ; +4: destination variable index
@@ -200,6 +203,16 @@ step_add .macro
     .byte 0, 0, 0, 0, 0
 .endm
 
+OPCODE_READ_RESULT = $e
+; script_storage[dst] = script_step_result
+; +4: destination variable index
+step_read_result .macro
+    .sint 0
+    .word OPCODE_READ_RESULT
+    .word \1
+    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+.endm
+
 ; this gets copied to RAM so it can modify the script with a pointer to the
 ; location name that's being entered when the map is loaded
 DISPLAY_LOCATION_NAME_TEMPLATE
@@ -211,21 +224,26 @@ DISPLAY_LOCATION_NAME_TEMPLATE
 DISPLAY_LOCATION_NAME_LENGTH = * - DISPLAY_LOCATION_NAME_TEMPLATE
 
 EMPTY_STRING .byte $ff
-MESSAGE_SAVED .text "Saved", 255
-OBJECT_DESC .text "What could be down here?", 255
-OBJECT_DESC2_1 .text "It's a standard 55-gallon drum.", 255
-OBJECT_DESC2_2 .text "'AMMONIUM PERSULFATE NET WT 412 KG'", 255
+MESSAGE_SAVED .text "Saved", $ff
+OBJECT_DESC .text "What could be down here?", $ff
+OBJECT_DESC2_1 .text "It's a standard 55-gallon drum.", $ff
+OBJECT_DESC2_2 .text "'AMMONIUM PERSULFATE NET WT 412 KG'", $ff
 
-BOOK_TITLE1 .text "Investing in Your Future", 255
-BOOK_TITLE2 .text "Artificial Intelligence:", 255
-BOOK_TITLE2_2 .text "The best thing since sliced bread!", 255
-BOOK_TITLE3 .text "Numbers in Science", 255
+BOOK_TITLE1 .text "Investing in Your Future", $ff
+BOOK_TITLE2 .text "Artificial Intelligence:", $ff
+BOOK_TITLE2_2 .text "The best thing since sliced bread!", $ff
+BOOK_TITLE3 .text "Numbers in Science", $ff
 
-BOOK_REACTION1 .text "...investing in what future?", 255
-BOOK_REACTION2 .text "Darker than usual... I should see where everyone is.", 255
+BOOK_REACTION1 .text "...investing in what future?", $ff
+BOOK_REACTION2 .text "Darker than usual... I should see where everyone is.", $ff
 
-BOOKSHELF_MESSAGE1 .text "Hey!", 255
-BOOKSHELF_MESSAGE2 .text "Don't look in there.", 255
+BOOKSHELF_MESSAGE1 .text "Hey!", $ff
+BOOKSHELF_MESSAGE2 .text "Don't look in there.", $ff
+
+TEST_DECISION_1 .text "Pet the cat?", $ff
+TEST_DECISION_2 .byte $ff
+TEST_DECISION_3 .text $81, "Yes", $ff
+TEST_DECISION_4 .text $82, "No", $ff
 
 SCRIPT_MESSAGE_SAVED
     #step_text_box $40, 1, 1, 5, 1, MESSAGE_SAVED, 0, 0, 0
@@ -284,12 +302,19 @@ TEST_BOOK1
     ; #step_add 2, 0, 0, 1
     ; #step_set_variable 3, 12
     ; #step_add 3, 3, 1, 16
+
+    ; test decision text box
     #step_wait 1
-    #step_set_player_locked 1
-    #step_text_box -1, 1, 21, 30, 1, BOOK_TITLE1, 0, 0, 0
+    #step_text_box -2, 1, 21, 30, 4, TEST_DECISION_1, TEST_DECISION_2, TEST_DECISION_3, TEST_DECISION_4
+    #step_read_result 0
     #step_hide_text_box
-    #step_inc_variable 0
-    #step_set_player_locked 0
+
+    ; #step_wait 1
+    ; #step_set_player_locked 1
+    ; #step_text_box -1, 1, 21, 30, 1, BOOK_TITLE1, 0, 0, 0
+    ; #step_hide_text_box
+    ; #step_inc_variable 0
+    ; #step_set_player_locked 0
 
 TEST_BOOK2
     #step_wait 1
@@ -309,7 +334,7 @@ TEST_BOOK3
     #step_hide_text_box
 
 OBJECT_SCRIPTS .word TEST_OBJECT_SCRIPT, TEST_HAIR_BLEACH, TEST_REACT_TO_BOOKSHELF, TEST_BOOK1, TEST_BOOK2, TEST_BOOK3
-OBJECT_SCRIPT_LENGTHS .word 3, 2, 23, 6, 4, 10
+OBJECT_SCRIPT_LENGTHS .word 3, 2, 23, 4, 4, 10
 
 load_oam_index_16x32 .macro
     ; x = sprite_id * 8
@@ -342,6 +367,7 @@ script_operations
     .word op_inc_variable
     .word op_set_player_locked
     .word op_add
+    .word op_read_result
 
 copy_ram_scripts
 .as
@@ -416,11 +442,20 @@ _run_step
 
 _done_with_step
     rep #$20
-    ; check for -1 length
+    ; check for negative length
     lda script_step_time_remaining
-    cmp #$ffff
-    bne _check_time
+    bpl _check_time
 
+_check_indeterminate
+    cmp #-1
+    beq _check_a_button
+
+_check_result_condition
+    lda script_step_result
+    bne _go_to_next_step
+    rts
+
+_check_a_button
     lda joypad_new
     bit #A_BUTTON
     bne _go_to_next_step
@@ -691,6 +726,21 @@ _do_add
     ; todo study as example for stack addressing in other places, nice
     adc 1, s
     sta 1, s
+    ldy #$4
+    lda (script_element_ptr), y
+    asl
+    tax
+    pla
+    sta script_storage, x
+    rts
+
+op_read_result
+.as
+.xl
+    rep #$20
+    lda script_step_result
+    pha
+    stz script_step_result
     ldy #$4
     lda (script_element_ptr), y
     asl

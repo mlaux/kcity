@@ -136,6 +136,7 @@ current_text .word ?
 script_step .word ?
 script_length .word ?
 script_step_time_remaining .word ?
+script_step_result .word ?
 
 script_storage .fill $20
 
@@ -205,6 +206,14 @@ text_box_x .word ?
 text_box_y .word ?
 text_box_width .word ?
 text_box_num_lines .word ?
+
+MAX_TEXT_BOX_OPTIONS = 4
+; 0-3, nonzero means decision is active
+text_box_num_choices .word ?
+; also 0-3
+text_box_active_choice .word ?
+; address in tilemap of each choice
+text_box_choice_positions .fill 2 * MAX_TEXT_BOX_OPTIONS
 
 target_warp_map .word ?
 target_player_x .word ?
