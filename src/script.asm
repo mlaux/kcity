@@ -247,9 +247,10 @@ BOOKSHELF_MESSAGE1 .text "Hey!", $ff
 BOOKSHELF_MESSAGE2 .text "Don't look in there.", $ff
 
 TEST_DECISION_1 .text "Pet the cat?", $ff
-TEST_DECISION_2 .byte $ff
-TEST_DECISION_3 .text $80, "Yes", $ff
-TEST_DECISION_4 .text $80, "No", $ff
+TEST_DECISION_2 .text $80, "Yes", $ff
+TEST_DECISION_3 .text $80, "No", $ff
+TEST_DECISION_4 .text $80, "Maybe...", $ff
+TEST_MEOW .text "Meow", $ff
 
 SCRIPT_MESSAGE_SAVED
     #step_text_box $40, 1, 1, 5, 1, MESSAGE_SAVED, 0, 0, 0
@@ -314,6 +315,12 @@ TEST_BOOK1
     #step_text_box -2, 1, 21, 30, 4, TEST_DECISION_1, TEST_DECISION_2, TEST_DECISION_3, TEST_DECISION_4
     #step_read_result 0
     #step_hide_text_box
+    ; need step_branch_ne 0, 1, x
+    #step_branch_eq 0, 2, 8
+    #step_branch_eq 0, 3, 8
+    #step_branch_eq 0, $ffff, 8 ; cancelled
+    #step_text_box -1, 1, 21, 30, 1, TEST_MEOW, 0, 0, 0
+    #step_hide_text_box
 
     ; #step_wait 1
     ; #step_set_player_locked 1
@@ -340,7 +347,7 @@ TEST_BOOK3
     #step_hide_text_box
 
 OBJECT_SCRIPTS .word TEST_OBJECT_SCRIPT, TEST_HAIR_BLEACH, TEST_REACT_TO_BOOKSHELF, TEST_BOOK1, TEST_BOOK2, TEST_BOOK3
-OBJECT_SCRIPT_LENGTHS .word 3, 2, 23, 4, 4, 10
+OBJECT_SCRIPT_LENGTHS .word 3, 2, 23, 9, 4, 10
 
 load_oam_index_16x32 .macro
     ; x = sprite_id * 8
