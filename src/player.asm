@@ -196,6 +196,7 @@ move_player
 .al
 .xl
     lda player_locked
+    ora text_box_num_options
     beq +
     rts
 

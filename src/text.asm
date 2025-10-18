@@ -193,12 +193,7 @@ _store_height
     lda #$1
     sta HDMAEN
 
-    lda text_box_num_options
-    beq +
-
-    
-
-+   rts
+    rts
 
 ; call this at the beginning of a text box
 ; - resets destination text tile pointer to beginning of WRAM output buffer

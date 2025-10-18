@@ -3,7 +3,8 @@
 ; a script is an array of steps and a length
 ; each step is 16 bytes long (1 timing word, 1 opcode word, and 12 data bytes)
 ; +0: number of frames to wait before continuing
-;     -2: wait for script_step_result to change to non-zero
+;     -3: wait for script_step_result to change to non-zero, no cancel
+;     -2: wait for script_step_result to change to non-zero, B to cancel
 ;     -1: wait for A button
 ;      0: one-time action
 ;    > 0: time delay before moving on
@@ -32,6 +33,11 @@
 ; ideas:
 ; - change sprite movement to use same direction system as player
 ; - variable length steps using table of lengths?
+
+LEN_WAIT_FOR_A = -1
+LEN_WAIT_RESULT_CANCEL_OK = -2
+LEN_WAIT_RESULT_NO_CANCEL = -3
+RESULT_CANCELLED = -1
 
 ; just wait for the specified amount of frames
 OPCODE_WAIT = 0

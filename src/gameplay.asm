@@ -124,7 +124,12 @@ background_init
 process_input
 .al
 .xl
-    lda joypad_new
+    lda text_box_num_options
+    beq +
+    ; active text box overrides any other input
+    jmp process_text_box_input
+
++   lda joypad_new
     ; if (A pressed && !script_ptr && facing_object_script)
     bit #A_BUTTON
     beq +
@@ -154,6 +159,34 @@ process_input
 
 +   rts
 
+process_text_box_input
+.al
+.xl
+_check_b
+    lda joypad_new
+    bit #B_BUTTON
+    beq _check_a
+    lda script_step_time_remaining
+    ; + to accept signed constant operands
+    cmp #+LEN_WAIT_RESULT_CANCEL_OK
+    bne _check_a
+    lda #+RESULT_CANCELLED
+    sta script_step_result
+    rts
+
+_check_a
+    lda joypad_new
+    bit #A_BUTTON
+    beq _check_up_down
+    lda text_box_active_option
+    inc a
+    sta script_step_result
+    rts
+
+_check_up_down
+    ; ...
+_update_cursor
+    rts
 
 spc_message_received
     rts
