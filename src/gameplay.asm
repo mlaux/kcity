@@ -159,6 +159,8 @@ process_input
 
 +   rts
 
+CURSOR_OAM_OFFSET = (15 * 4)
+
 process_text_box_input
 .al
 .xl
@@ -172,6 +174,10 @@ _check_b
     bne _check_a
     lda #+RESULT_CANCELLED
     sta script_step_result
+    sep #$20
+    lda #$e0
+    sta oam_data_y + CURSOR_OAM_OFFSET
+    rep #$20
     rts
 
 _check_a
@@ -181,11 +187,90 @@ _check_a
     lda text_box_active_option
     inc a
     sta script_step_result
+    sep #$20
+    lda #$e0
+    sta oam_data_y + CURSOR_OAM_OFFSET
+    rep #$20
     rts
 
 _check_up_down
-    ; ...
+    lda joypad_new
+    bit #UP_BUTTON
+    beq _check_down
+
+    ; up pressed - decrement selection with wrapping
+    lda text_box_active_option
+    beq _wrap_to_bottom
+    dec a
+    sta text_box_active_option
+    bra _update_cursor
+
+_wrap_to_bottom
+    lda text_box_num_options
+    dec a
+    sta text_box_active_option
+    bra _update_cursor
+
+_check_down
+    lda joypad_new
+    bit #DOWN_BUTTON
+    beq _update_cursor
+
+    ; down pressed - increment selection with wrapping
+    lda text_box_active_option
+    inc a
+    cmp text_box_num_options
+    bcc _store_selection
+    lda #0
+
+_store_selection
+    sta text_box_active_option
+
 _update_cursor
+    ; get tilemap position for current selection (text_box_active_option is 0-3)
+    lda text_box_active_option
+    asl
+    tax
+    lda text_box_option_positions, x
+
+    ; convert tilemap address to tile coordinates
+    ; address format: $0800 + (y * 32) + x
+    sec
+    sbc #$0800
+
+    ; save orig value for x calculation
+    pha
+    and #$ffe0 ; mask to keep only (y * 32)
+    lsr
+    lsr
+    lsr
+    lsr
+    lsr
+    ; A now has y_tile, convert to pixels (y_tile * 8)
+    asl
+    asl
+    asl
+
+    sep #$20
+    sta oam_data_y + CURSOR_OAM_OFFSET
+    rep #$20
+
+    pla
+    and #$001f
+    ; convert to pixels (x_tile * 8)
+    asl
+    asl
+    asl
+
+    sep #$20
+    sta oam_data_x + CURSOR_OAM_OFFSET
+    ; star graphic is at $4200, so tile $20
+    lda #$20
+    sta oam_data_id + CURSOR_OAM_OFFSET
+    lda #$38
+    sta oam_data_flag + CURSOR_OAM_OFFSET
+
+    rep #$20
     rts
 
 spc_message_received
