@@ -209,11 +209,11 @@ text_box_num_lines .word ?
 
 MAX_TEXT_BOX_OPTIONS = 4
 ; 0-3, nonzero means decision is active
-text_box_num_choices .word ?
+text_box_num_options .word ?
 ; also 0-3
-text_box_active_choice .word ?
-; address in tilemap of each choice
-text_box_choice_positions .fill 2 * MAX_TEXT_BOX_OPTIONS
+text_box_active_option .word ?
+; address in tilemap of each option
+text_box_option_positions .fill 2 * MAX_TEXT_BOX_OPTIONS
 
 target_warp_map .word ?
 target_player_x .word ?

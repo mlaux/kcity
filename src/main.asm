@@ -53,7 +53,9 @@ RESET
     jsr BootSPC
     jsr SPX_Transfer_LFT
 
-    jsr vwf_reset_tiles
+    ; don't think this is needed bc gameplay and journal both do it, but
+    ; leaving for now
+    jsr vwf_reset_tiles 
 
     ; initialization done, enable interrupts and auto joypad reading
     lda #$81
