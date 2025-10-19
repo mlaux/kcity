@@ -3,6 +3,8 @@ SPRITE_SIZE = 16
 
 PLAYER_ANIMATION_SPEED = 6
 PLAYER_MOVEMENT_SPEED = 3 ; in half pixels per frame
+SCRIPT_TRIGGER_LOOKAHEAD = 16 ; pixels to look ahead for script triggers
+SCALED_SCRIPT_TRIGGER_LOOKAHEAD = SCRIPT_TRIGGER_LOOKAHEAD << 1 ; in half pixels
 SCALED_MAX_PLAYER_X = (SCREEN_WIDTH - SPRITE_SIZE) << 1
 SCALED_MAX_PLAYER_Y = (SCREEN_HEIGHT - SPRITE_SIZE) << 1
 
@@ -296,18 +298,29 @@ go_right
     sta player_x
     brl animate_player
 
-    ; drop half pixel to check map
-    ; check pixel at (x + speed, y)
-+   lsr
-    tax
-    lda player_y
+    ; set up Y once for both checks
++   lda player_y
     lsr
     tay
+
+    ; check script triggers with larger lookahead
+    lda player_x
+    clc
+    adc #SCALED_SCRIPT_TRIGGER_LOOKAHEAD
+    lsr
+    tax
     phx
     phy
     jsr check_script_triggers
     ply
     plx
+
+    ; check collision at movement speed
+    lda player_x
+    clc
+    adc #PLAYER_MOVEMENT_SPEED
+    lsr
+    tax
     jsr check_collision_per_pixel
     beq +
 
@@ -329,17 +342,29 @@ go_down
     sta player_y
     brl animate_player
 
-    ; check pixel at (x, y + speed)
-+   lsr
-    tay
-    lda player_x
+    ; set up X once for both checks
++   lda player_x
     lsr
     tax
+
+    ; check script triggers with larger lookahead
+    lda player_y
+    clc
+    adc #SCALED_SCRIPT_TRIGGER_LOOKAHEAD
+    lsr
+    tay
     phx
     phy
     jsr check_script_triggers
     ply
     plx
+
+    ; check collision at movement speed
+    lda player_y
+    clc
+    adc #PLAYER_MOVEMENT_SPEED
+    lsr
+    tay
     jsr check_collision_per_pixel
     beq +
 
@@ -360,17 +385,29 @@ go_left
     sta player_x
     bra animate_player
 
-    ; check pixel at (x - speed, y)
-+   lsr
-    tax
-    lda player_y
+    ; set up Y once for both checks
++   lda player_y
     lsr
     tay
+
+    ; check script triggers with larger lookahead
+    lda player_x
+    sec
+    sbc #SCALED_SCRIPT_TRIGGER_LOOKAHEAD
+    lsr
+    tax
     phx
     phy
     jsr check_script_triggers
     ply
     plx
+
+    ; check collision at movement speed
+    lda player_x
+    sec
+    sbc #PLAYER_MOVEMENT_SPEED
+    lsr
+    tax
     jsr check_collision_per_pixel
     beq +
 
@@ -390,17 +427,29 @@ go_up
     sta player_y
     bra animate_player
 
-    ; check pixel at (x, y - speed)
-+   lsr
-    tay
-    lda player_x
+    ; set up X once for both checks
++   lda player_x
     lsr
     tax
+
+    ; check script triggers with larger lookahead
+    lda player_y
+    sec
+    sbc #SCALED_SCRIPT_TRIGGER_LOOKAHEAD
+    lsr
+    tay
     phx
     phy
     jsr check_script_triggers
     ply
     plx
+
+    ; check collision at movement speed
+    lda player_y
+    sec
+    sbc #PLAYER_MOVEMENT_SPEED
+    lsr
+    tay
     jsr check_collision_per_pixel
     beq animate_player
 
