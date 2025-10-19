@@ -2,9 +2,10 @@ TILEMAP_SIZE = $800
 PALETTE_OFFSET = $10
 PALETTE_SIZE = $e0
 
-tileset_init
-.as
+mono_font_init
 .xl
+    php
+    sep #$20
     ldx #DMAMODE_PPUDATA
     stx DMAMODE
 
@@ -17,6 +18,12 @@ tileset_init
 
     #dma_ppu_data GENEVA_CHARS
 
+    ldx #$3fd8 ; blank spot after 'z'
+    stx VMADD
+
+    #dma_ppu_data CURSOR_TILE
+
+    plp
     rts
 
 ; copies 16x32 sprite in tileset to video ram 

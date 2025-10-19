@@ -185,7 +185,7 @@ draw_journal_text
 .xl
     lda #INDIE_FLOWER_CHARS
     jsr vwf_set_font
-    lda #2
+    lda #1
     jsr vwf_set_palette
     lda #FONT_TYPE_8X16
     jsr vwf_set_font_type

@@ -294,6 +294,7 @@ hide_newt
     plp
     rts
 
+; clears from $3000.w to $3fff.w
 clear_bg3_tiles
 .as
 .xl

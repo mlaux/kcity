@@ -6,10 +6,6 @@ state_gameplay_init
 
     jsr clear_bg3_tiles
     jsr palette_init
-    ; todo move this? the vwf_reset_map later in the init can overwrite the 
-    ; font tiles if the previous text write operation overflowed into the font
-    ; tiles, when it clears its area
-    jsr tileset_init ; for font and player tiles only
     jsr background_init
     jsr copy_ram_scripts
 
@@ -27,12 +23,14 @@ state_gameplay_init
 
     lda #GENEVA_CHARS
     jsr vwf_set_font
-    lda #1
+    lda #0
     jsr vwf_set_palette
     lda #FONT_TYPE_8X8
     jsr vwf_set_font_type
     jsr vwf_reset_map
     jsr vwf_reset_tiles
+    ; for Geneva font
+    jsr mono_font_init
 
     jsr gameplay_restore_state
 
@@ -174,10 +172,6 @@ _check_b
     bne _check_a
     lda #+RESULT_CANCELLED
     sta script_step_result
-    sep #$20
-    lda #$e0
-    sta oam_data_y + CURSOR_OAM_OFFSET
-    rep #$20
     rts
 
 _check_a
@@ -187,10 +181,6 @@ _check_a
     lda text_box_active_option
     inc a
     sta script_step_result
-    sep #$20
-    lda #$e0
-    sta oam_data_y + CURSOR_OAM_OFFSET
-    rep #$20
     rts
 
 _check_up_down
@@ -203,18 +193,18 @@ _check_up_down
     beq _wrap_to_bottom
     dec a
     sta text_box_active_option
-    bra _update_cursor
+    bra _done
 
 _wrap_to_bottom
     lda text_box_num_options
     dec a
     sta text_box_active_option
-    bra _update_cursor
+    bra _done
 
 _check_down
     lda joypad_new
     bit #DOWN_BUTTON
-    beq _update_cursor
+    beq _done
 
     ; down pressed - increment selection with wrapping
     lda text_box_active_option
@@ -226,51 +216,7 @@ _check_down
 _store_selection
     sta text_box_active_option
 
-_update_cursor
-    ; get tilemap position for current selection (text_box_active_option is 0-3)
-    lda text_box_active_option
-    asl
-    tax
-    lda text_box_option_positions, x
-
-    ; convert tilemap address to tile coordinates
-    ; address format: $0800 + (y * 32) + x
-    sec
-    sbc #$0800
-
-    ; save orig value for x calculation
-    pha
-    and #$ffe0 ; mask to keep only (y * 32)
-    lsr
-    lsr
-    lsr
-    lsr
-    lsr
-    ; A now has y_tile, convert to pixels (y_tile * 8)
-    asl
-    asl
-    asl
-
-    sep #$20
-    sta oam_data_y + CURSOR_OAM_OFFSET
-    rep #$20
-
-    pla
-    and #$001f
-    ; convert to pixels (x_tile * 8)
-    asl
-    asl
-    asl
-
-    sep #$20
-    sta oam_data_x + CURSOR_OAM_OFFSET
-    ; star graphic is at $4200, so tile $20
-    lda #$20
-    sta oam_data_id + CURSOR_OAM_OFFSET
-    lda #$38
-    sta oam_data_flag + CURSOR_OAM_OFFSET
-
-    rep #$20
+_done
     rts
 
 spc_message_received

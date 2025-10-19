@@ -41,15 +41,6 @@ player_init
     lda #$62
     sta OBJSEL
 
-    ; TODO need to decide where i'm going to put static sprite data
-    ldx #DMAMODE_PPUDATA
-    stx DMAMODE
-
-    ldx #$4200
-    stx VMADD
-
-    #dma_ppu_data CURSOR_TILE
-
     plp
     rts
 
