@@ -1,6 +1,6 @@
 BEDROOM_NAME .text "Juno and Leif's bedroom", 255
 
-BEDROOM_COLLISION_MAP .binary "../gfx/livingrm/walkmap.cwm"
+BEDROOM_COLLISION_MAP .binary "../gfx/bedroom/walkmap.cwm"
 ; TODO: reimplement all of this with the per pixel walking
 BEDROOM_SCRIPT_TRIGGERS .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                         .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -48,7 +48,7 @@ LAB_SCRIPT_TRIGGERS .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                     .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
 START_X .word $60, $d8
-START_Y .word $90, $180
+START_Y .word $120, $180
 START_BGMODE .word $39, $9
 START_HOFS .word $0, $0
 START_VOFS .word $120, 0

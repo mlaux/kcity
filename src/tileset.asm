@@ -189,11 +189,11 @@ map_run_warp
     lda #DMAMODE_CGDATA
     sta DMAMODE
 
-    phx
     lda COLLISION_MAPS - 2, x
     sta zp1
     lda COLLISION_MAP_LENGTHS - 2, x
     sta zp2
+    phx
     jsr decompress_collision_map
     plx
     lda SCRIPT_TRIGGER_MAPS - 2, x
