@@ -829,6 +829,62 @@ static_char .macro
     sta VMDATA
 .endmacro
 
+; converts a nibble (0-15) to a hex character tile ID
+; input: A = nibble value (0-15)
+; output: A = tile ID for hex digit
+; assumes: A16
+nibble_to_hex_tile
+.al
+    and #$f
+    cmp #$a
+    bcs +
+    adc #$10
+    bra _done
++   clc
+    adc #23 ; offset in font between beginning and 'A' excluding 0-9
+_done
+    adc #$21a0
+    rts
+
+; draws a bar graph representing a value in scanlines
+; input: A = value (scanlines)
+; assumes: A16, VMAIN/VMADD already set up, VMDATA ready for writes
+draw_bar_graph
+.al
+    pha
+    lsr
+    lsr
+    lsr  ; A = number of full 8-pixel bars
+    beq _partial
+
+    tax
+-   pha
+    lda #$2198  ; tile $2198 = full 8-pixel bar
+    sta VMDATA
+    pla
+    dex
+    bne -
+
+_partial
+    pla  ; restore original value
+    and #7  ; get remainder (0-7)
+    beq _blanks
+    clc
+    adc #$2190  ; tiles $2191-$2197 are 1-7 pixels (remainder + $2190)
+    sta VMDATA
+
+_blanks
+    ; write 8 blank tiles to clear any leftover from previous frame
+    lda #$2190
+    sta VMDATA
+    sta VMDATA
+    sta VMDATA
+    sta VMDATA
+    sta VMDATA
+    sta VMDATA
+    rts
+
+; is this even worth measuring because of how much time it adds
 draw_cpu_usage
 .xl
     php
@@ -837,41 +893,23 @@ draw_cpu_usage
     sta VMAIN
     rep #$20
 
+    lda #$b42
+    sta VMADD
+
+    static_char 'L'
+    static_char ' '
+
+    lda vertical_counter_this_frame
+    jsr draw_bar_graph
+
     lda #$b62
     sta VMADD
 
-    static_char 'c'
-    static_char 'p'
-    static_char 'u'
+    static_char 'V'
     static_char ' '
 
--   lda vertical_counter_this_frame
-    lsr
-    lsr
-    lsr
-    lsr
-    and #$f
-    cmp #$a
-    bcs +
-    adc #$10
-    bra _go
-+   clc
-    adc #23 ; offset in font between beginning and 'A' excluding 0-9
-_go
-    adc #$21a0
-    sta VMDATA
-
--   lda vertical_counter_this_frame
-    and #$f
-    cmp #$a
-    bcs +
-    adc #$10
-    bra _go2
-+   clc
-    adc #23
-_go2
-    adc #$21a0
-    sta VMDATA
+    lda vertical_counter_vblank_this_frame
+    jsr draw_bar_graph
 
     plp
     rts

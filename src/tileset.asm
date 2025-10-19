@@ -18,6 +18,11 @@ mono_font_init
 
     #dma_ppu_data GENEVA_CHARS
 
+    ldx #$3c88
+    stx VMADD
+
+    #dma_ppu_data CPU_USAGE_TILES
+
     ldx #$3fd8 ; blank spot after 'z'
     stx VMADD
 

@@ -115,6 +115,8 @@ state_transitioning .word ?
 
 ; main vs. nmi flag, nmi is skipped if this is 0
 update_ppu .word ?
+; nmi re-entrancy guard, set to 1 when inside NMI handler
+in_nmi .word ?
 frame_counter .word ?
 
 joypad_current .word ?
@@ -150,9 +152,12 @@ my_bg2vofs .word ?
 my_bg3hofs .word ?
 my_bg3vofs .word ?
 my_tm .word ?
-vertical_counter .word ?
+vertical_counter_start .word ?
 vertical_counter_end .word ?
 vertical_counter_this_frame .word ?
+vertical_counter_vblank_start .word ?
+vertical_counter_vblank_end .word ?
+vertical_counter_vblank_this_frame .word ?
 
 title_animation_step .word ?
 title_animation_frame .word ?

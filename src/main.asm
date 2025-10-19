@@ -70,15 +70,15 @@ RESET
     ; fall through to main loop
 main_loop
     ; set H/V counter latch to lock in vertical counter
-    bit SLHV
-    ; load the actual vertical counter
-    lda OPVCT
-    sta vertical_counter
-    lda OPVCT
-    and #1
-    sta vertical_counter + 1
-    ; reading this will reset the counter latch for next time
-    bit STAT78
+    ; bit SLHV
+    ; ; load the actual vertical counter
+    ; lda OPVCT
+    ; sta vertical_counter_start
+    ; lda OPVCT
+    ; and #1
+    ; sta vertical_counter_start + 1
+    ; ; reading this will reset the counter latch for next time
+    ; bit STAT78
 
     jsr SPX_Routine
 
@@ -91,26 +91,25 @@ main_loop
     jsr (STATES, x)
 
     ; measure CPU time in scanlines
-    sep #$20
-    bit SLHV
-    lda OPVCT
-    sta vertical_counter_end
-    lda OPVCT
-    and #1
-    sta vertical_counter_end + 1
-    bit STAT78
+;     sep #$20
+;     bit SLHV
+;     lda OPVCT
+;     sta vertical_counter_end
+;     lda OPVCT
+;     and #1
+;     sta vertical_counter_end + 1
+;     bit STAT78
 
-    rep #$20
-    lda vertical_counter_end
-    sec
-    sbc vertical_counter
-    sta vertical_counter_this_frame
+;     rep #$20
+;     lda vertical_counter_end
+;     sec
+;     sbc vertical_counter_start
+;     bpl +
+;     ; wrapped around scanline 262, compensate
+;     clc
+;     adc #262
+; +   sta vertical_counter_this_frame
     sep #$20
-
-    ; update CPU high water mark
-    ; cmp zp1
-    ; bcc +
-    ; sta zp1
 
     ; signal that the NMI is good to go and busy wait
     lda #1
@@ -138,11 +137,32 @@ NMI_ISR
     sep #$20
     bit RDNMI
 
+    ; check for NMI re-entrancy
+    lda in_nmi
+    beq _check_update
+    brl _skip_vblank
+
+_check_update
     ; current conditions where this will be 0:
     ;   - main loop is still running
     ;   - explicitly disabled for things like uploading to VRAM
     lda update_ppu
-    beq _skip_vblank
+    bne _do_vblank
+    brl _skip_vblank
+
+_do_vblank
+    inc in_nmi
+
+    ; set H/V counter latch to lock in vertical counter
+    ; bit SLHV
+    ; ; load the actual vertical counter
+    ; lda OPVCT
+    ; sta vertical_counter_vblank_start
+    ; lda OPVCT
+    ; and #1
+    ; sta vertical_counter_vblank_start + 1
+    ; ; reading this will reset the counter latch for next time
+    ; bit STAT78
 
     ; do not run state specific vblank if transitioning between states
     lda state_transitioning
@@ -158,6 +178,8 @@ NMI_ISR
     tax
     jsr (VBLANKS, x)
     plp
+
+    ; jsr draw_cpu_usage
 
     ; handle fade or mosaic effect if needed. this is so during transitions, 
     ; states can just busy wait for the effects to be done
@@ -204,14 +226,36 @@ NMI_ISR
     lda my_tm
     sta TM
 
-    jsr draw_cpu_usage
-
     inc frame_counter
+
+    ; measure CPU time in scanlines. delayed by one frame because it's already
+    ; been drawn for this frame, but i wanted to include the drawing in the
+    ; measurement
+;     bit SLHV
+;     lda OPVCT
+;     sta vertical_counter_vblank_end
+;     lda OPVCT
+;     and #1
+;     sta vertical_counter_vblank_end + 1
+;     bit STAT78
+
+;     rep #$20
+;     lda vertical_counter_vblank_end
+;     sec
+;     sbc vertical_counter_vblank_start
+;     bpl +
+;     ; wrapped around scanline 262, compensate
+;     clc
+;     adc #262
+; +   sta vertical_counter_vblank_this_frame
 
     ; reset flag so main loop can continue
     stz update_ppu
+    ; reset reentrancy flag
+    stz in_nmi
 
 _skip_vblank
+
     rep #$30
     pld
     plb
