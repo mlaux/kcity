@@ -1,10 +1,10 @@
 
-PLAYER_SIZE = 16
+SPRITE_SIZE = 16
 
 PLAYER_ANIMATION_SPEED = 6
 PLAYER_MOVEMENT_SPEED = 3 ; in half pixels per frame
-SCALED_MAX_PLAYER_X = (SCREEN_WIDTH - PLAYER_SIZE) << 1
-SCALED_MAX_PLAYER_Y = (SCREEN_HEIGHT - PLAYER_SIZE) << 1
+SCALED_MAX_PLAYER_X = (SCREEN_WIDTH - SPRITE_SIZE) << 1
+SCALED_MAX_PLAYER_Y = (SCREEN_HEIGHT - SPRITE_SIZE) << 1
 
 PLAYER_DIRECTION_NONE = 0
 PLAYER_DIRECTION_RIGHT = 1
@@ -111,13 +111,14 @@ _done
 
 BIT_POSITIONS .byte $80, $40, $20, $10, $8, $4, $2, $1
 
+; input: player X and Y (top left corner)
 check_collision_per_pixel
 .al
 .xl
     ; zp2 = (playerX + 8) / 8
     txa
     clc
-    adc #PLAYER_SIZE >> 1
+    adc #SPRITE_SIZE >> 1
     pha
     srn 3
     sta zp2
@@ -130,7 +131,7 @@ check_collision_per_pixel
     ; idx = (playerY + 15) * 32 + zp2
     tya
     clc
-    adc #PLAYER_SIZE - 1
+    adc #SPRITE_SIZE - 1
     sln 5
     clc
     adc zp2
@@ -151,9 +152,9 @@ check_script_triggers
 .al
 .xl
     txa
-    ; want to check middle of player, not top left
+    ; want to check middle of player's feet
     clc
-    adc #PLAYER_SIZE >> 1
+    adc #SPRITE_SIZE >> 1
     lsr
     lsr
     lsr
@@ -162,7 +163,7 @@ check_script_triggers
 
     tya
     clc
-    adc #PLAYER_SIZE >> 1
+    adc #SPRITE_SIZE - 1
 
     ; lsr lsr lsr lsr, asl asl asl asl
     and #$f0
