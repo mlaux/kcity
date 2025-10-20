@@ -12,7 +12,6 @@
 .include "ppu.asm"
 .include "cpu.asm"
 .include "dma.asm"
-.include "progression.asm"
 
 sln .macro
     .rept \1
@@ -56,28 +55,46 @@ text_box_lines .word ?
 script_trigger_map_ptr .word ?
 facing_object_script .word ?
 
-; --- start from xm2snes ---
-spx_spvar .byte ?
-spx_validation .byte ?
-spx_package_adr .fill 3
+; --- start from snesmod ---
+spc_ptr .fill 3
+spc_v .fill 1
+spc_bank .fill 1
 
-spx_stack .fill $10 * 4
-spx_stack_r	.word ?
-spx_stack_w	.word ?
+spc1 .fill 2
+spc2 .fill 2
 
-spx_var1 .word ?
-spx_var2 .word ?
-spx_var3 .word ?
-spx_var4 .word ?
+spc_fread .fill 1
+spc_fwrite .fill 1
 
-spx_message	.byte ?
-; --- end from xm2snes ---
+; port record [for interruption]
+spc_pr .fill 4
+
+digi_src .fill 3
+digi_src2 .fill 3
+
+SoundTable .fill 3
+; --- end from snesmod ---
 
 .warn "zero page end: ", *
 
 ; Work RAM variables
 ; some of these are definitely redundant but made the algorithms easier
 * = $100
+
+; --- start from snesmod ---
+
+spc_fifo .fill 256	; 128-byte command fifo
+spc_sfx_next .fill 1
+spc_q .fill 1
+
+digi_init .fill 1
+digi_pitch .fill 1
+digi_vp .fill 1
+digi_remain .fill 2
+digi_active .fill 1
+digi_copyrate .fill 1
+
+; --- end from snesmod ---
 
 ; how many chars to draw
 vwf_count .word ?
@@ -161,9 +178,9 @@ vertical_counter_vblank_this_frame .word ?
 
 title_animation_step .word ?
 title_animation_frame .word ?
+title_appear_delay .word ?
 
 game_progress .word ?
-progress_flags1 .word ?
 
 NUM_OAM_ENTRIES = 16
 OAM_MAIN_LENGTH = NUM_OAM_ENTRIES * 4
@@ -243,7 +260,7 @@ dma_queue_entry_vmain .fill 2 * MAX_DMA_QUEUE_ENTRIES
 NUM_TILE_BYTES = $c00
 vwf_tiles .fill NUM_TILE_BYTES
 
-.cerror * > $fff, "ram too long"
+.cerror * > $1200, "ram too long"
 .warn "lowram end: ", *
 
 * = $700000
@@ -252,7 +269,6 @@ sram_map_id .word ?
 sram_player_x .word ?
 sram_player_y .word ?
 sram_game_progress .word ?
-sram_progress_flags1 .word ?
 
 .warn "sram end: ", *
 

@@ -24,15 +24,28 @@ state_title_init
     jsr load_title_background
     jsr disable_force_blank
 
+    ldx	#0
+	jsr	spcLoad
+    ldx #0
+    jsr spcPlay
+    jsr spcFlush
+-   jsr spcReadStatus
+    bit #SPC_P
+    beq -
+
     rep #$20
     lda #$120
     sta my_bg2vofs
+    ; experimentally determined to match the music ending
+    lda #107
+    sta title_appear_delay
 
     lda #EFFECT_FADE_IN
     sta effect_id
     lda #$f
     sta effect_speed
     stz effect_level
+
 
     rts
 
@@ -60,6 +73,9 @@ state_title
     lda my_bg2vofs
     bne +
 
+    sep #$20
+    jsr spcStop
+    rep #$20
     ldy #1
     jsr run_state_init
     jmp longjmp_main
@@ -89,6 +105,12 @@ _animate
     jmp move_newt
 
 _done_scrolling
+    lda title_appear_delay
+    beq _show_title_text
+    dec title_appear_delay
+    bra _nothing
+
+_show_title_text
     lda #(BG1_ON | BG2_ON | OBJ_ON)
     sta my_tm
 

@@ -29,9 +29,10 @@
 .include "palettes.asm"
 .endsection
 
-.dsection x2s_driver
-.section x2s_driver
-.include "xm2snes/spx_snes.asm"
+.dsection snesmod
+.section snesmod
+.include "snesmod/snesmod.asm"
+.include "snesmod/spcdriv.asm"
 .endsection
 
 .warn format("bank00 free space: $%04x", $ffb0 - *)

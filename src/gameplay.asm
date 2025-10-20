@@ -9,14 +9,6 @@ state_gameplay_init
     jsr background_init
     jsr copy_ram_scripts
 
-    lda #`music_water
-    ldy #<>music_water
-    jsr SPX_Transfer_XMS
-    jsr SPXM_BuildDir
-    jsr SPXM_Reset
-    jsr SPX_Flush
-    jsr SPXM_Play
-
     rep #$20
 
     jsr player_init

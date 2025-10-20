@@ -4,11 +4,7 @@
 
 ; sections for each of these so they show up in the .map?
 
-.dsection music_town
-.section music_town
-music_town ;.binary "xm2snes/vertigosm.xms"
-.endsection
-.dsection music_water
-.section music_water
-music_water .binary "xm2snes/vertigosm.xms"
+.dsection sound_bank
+.section sound_bank
+the_sound_bank .binary "../music/build/kcity.smbank"
 .endsection

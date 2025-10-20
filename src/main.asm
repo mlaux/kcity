@@ -50,8 +50,9 @@ RESET
     jsr clear_oam
 
     ; init audio
-    jsr BootSPC
-    jsr SPX_Transfer_LFT
+    jsr spcBoot
+    lda #`the_sound_bank
+    jsr spcSetBank
 
     ; don't think this is needed bc gameplay and journal both do it, but
     ; leaving for now
@@ -80,7 +81,8 @@ main_loop
     ; ; reading this will reset the counter latch for next time
     ; bit STAT78
 
-    jsr SPX_Routine
+	jsr	spcProcess
+    ; jsr SPX_Routine
 
     rep #$20
     jsr read_input
