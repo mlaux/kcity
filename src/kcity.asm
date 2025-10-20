@@ -81,21 +81,6 @@ SoundTable .fill 3
 ; some of these are definitely redundant but made the algorithms easier
 * = $100
 
-; --- start from snesmod ---
-
-spc_fifo .fill 256	; 128-byte command fifo
-spc_sfx_next .fill 1
-spc_q .fill 1
-
-digi_init .fill 1
-digi_pitch .fill 1
-digi_vp .fill 1
-digi_remain .fill 2
-digi_active .fill 1
-digi_copyrate .fill 1
-
-; --- end from snesmod ---
-
 ; how many chars to draw
 vwf_count .word ?
 
@@ -176,9 +161,13 @@ vertical_counter_vblank_start .word ?
 vertical_counter_vblank_end .word ?
 vertical_counter_vblank_this_frame .word ?
 
+; todo use same memory as other stuff for these, only used on title screen
 title_animation_step .word ?
 title_animation_frame .word ?
 title_appear_delay .word ?
+title_solid_palette .word ?
+title_state_palette .word ?
+title_palette_fade_frame .word ?
 
 game_progress .word ?
 
@@ -259,6 +248,21 @@ dma_queue_entry_vmain .fill 2 * MAX_DMA_QUEUE_ENTRIES
 .align $10
 NUM_TILE_BYTES = $c00
 vwf_tiles .fill NUM_TILE_BYTES
+
+; --- start from snesmod ---
+
+spc_fifo .fill 256	; 128-byte command fifo
+spc_sfx_next .fill 1
+spc_q .fill 1
+
+digi_init .fill 1
+digi_pitch .fill 1
+digi_vp .fill 1
+digi_remain .fill 2
+digi_active .fill 1
+digi_copyrate .fill 1
+
+; --- end from snesmod ---
 
 .cerror * > $1200, "ram too long"
 .warn "lowram end: ", *

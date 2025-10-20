@@ -1,7 +1,15 @@
+; this is a mess
+; 1. set up newt which is a sprite for future animation
+; 2. fade in entire screen
+; 3. scroll from $120, 0 to 0, 0
+; 4. wait for music to end
+; 5. fade in SOLID STATE
+; 6. occasionally palette swap "STATE" and move it with hdma
+
 TITLE_ANIMATION_FRAMES .word $40, $4, $10, $4, $50, $4
 TITLE_ANIMATION_LENGTH = 6
 
-TITLE_HDMA_TABLE .byte 95, 253, 1, 6, 0, 0, 10, 2, 0, 18, 253, 1, 10, 2, 0, 1, 0, 0, 0
+TITLE_HDMA_TABLE .byte 95, 0, 0, 6, 253, 1, 10, 2, 0, 18, 253, 1, 10, 2, 0, 1, 0, 0, 0
 TITLE_HDMA_SCROLL_1 = 7
 TITLE_HDMA_SCROLL_2 = 10
 TITLE_HDMA_SCROLL_3 = 13
@@ -40,12 +48,21 @@ state_title_init
     lda #107
     sta title_appear_delay
 
+    ; these files contain 4 palettes, 100% -> 50% -> 25% -> 12.5%
+    ; start at 12.5%
+    lda #(3 * 2 * 16 + TITLE_SCENE_SOLID_PALETTES)
+    sta title_solid_palette
+    lda #(3 * 2 * 16 + TITLE_SCENE_STATE_PALETTES)
+    sta title_state_palette
+    ; frames per brightness level
+    lda #$20
+    sta title_palette_fade_frame
+
     lda #EFFECT_FADE_IN
     sta effect_id
     lda #$f
     sta effect_speed
     stz effect_level
-
 
     rts
 
@@ -120,45 +137,86 @@ _nothing
 state_title_vblank
 .al
 .xl
+    ; if title text isn't showing yet, return
+    lda my_tm
+    and #BG1_ON
+    bne +
     sep #$20
+    jmp vblank_oam_dma
+
++   sep #$20
     ldx #DMAMODE_CGDATA
     stx DMAMODE
     lda #$60
     sta CGADD
     lda title_animation_step
+    ; odd steps in the animation show palette 2 for 
     and #1
-    bne _glitch
+    bne _check_glitch
 
-    ldx #<>(TITLE_SCENE_TEXT_PALETTE + $40)
+_regular
+    ldx title_state_palette
     stx DMAADDR
-    lda #`(TITLE_SCENE_TEXT_PALETTE + $40)
+    lda #`TITLE_SCENE_STATE_PALETTES
     sta DMAADDRBANK
-    stz title_glitch_hdma_table + TITLE_HDMA_SCROLL_1
-    stz title_glitch_hdma_table + TITLE_HDMA_SCROLL_2
-    stz title_glitch_hdma_table + TITLE_HDMA_SCROLL_2 + 1
-    stz title_glitch_hdma_table + TITLE_HDMA_SCROLL_3
-    stz title_glitch_hdma_table + TITLE_HDMA_SCROLL_4
+
+    ; because STATE is too far to the left in the graphics lol
+    lda #253
+    sta title_glitch_hdma_table + TITLE_HDMA_SCROLL_1
+    sta title_glitch_hdma_table + TITLE_HDMA_SCROLL_2
+    sta title_glitch_hdma_table + TITLE_HDMA_SCROLL_3
+    sta title_glitch_hdma_table + TITLE_HDMA_SCROLL_4
+    lda #$1
+    sta title_glitch_hdma_table + TITLE_HDMA_SCROLL_1 + 1
+    sta title_glitch_hdma_table + TITLE_HDMA_SCROLL_2 + 1
+    sta title_glitch_hdma_table + TITLE_HDMA_SCROLL_3 + 1
+    sta title_glitch_hdma_table + TITLE_HDMA_SCROLL_4 + 1
     bra _send
 
+_check_glitch
+    rep #$20
+    lda title_state_palette
+    cmp #TITLE_SCENE_STATE_PALETTES
+    sep #$20
+    bne _regular
+
 _glitch
-    ldx #<>(TITLE_SCENE_TEXT_PALETTE + $20)
+    ldx #<>TITLE_SCENE_GLITCH_PALETTE
     stx DMAADDR
-    lda #`(TITLE_SCENE_TEXT_PALETTE + $20)
+    lda #`TITLE_SCENE_GLITCH_PALETTE
     sta DMAADDRBANK
+
+    ; is it unrolled loops or is it just bad coding
     lda #2
     sta title_glitch_hdma_table + TITLE_HDMA_SCROLL_1
+    lda #0
+    sta title_glitch_hdma_table + TITLE_HDMA_SCROLL_1 + 1
     lda #253
     sta title_glitch_hdma_table + TITLE_HDMA_SCROLL_2
     lda #1
     sta title_glitch_hdma_table + TITLE_HDMA_SCROLL_2 + 1
     lda #2
     sta title_glitch_hdma_table + TITLE_HDMA_SCROLL_3
+    lda #0
+    sta title_glitch_hdma_table + TITLE_HDMA_SCROLL_3 + 1
     lda #4
     sta title_glitch_hdma_table + TITLE_HDMA_SCROLL_4
+    lda #0
+    sta title_glitch_hdma_table + TITLE_HDMA_SCROLL_4 + 1
 
 _send
     ldx #$20
     stx DMALEN
+    lda #1
+    sta MDMAEN
+
+    ; SOLID fades in too
+    ldx title_solid_palette
+    stx DMAADDR
+    ldx #$20
+    stx DMALEN
+    lda #$40
+    sta CGADD
     lda #1
     sta MDMAEN
 
@@ -172,6 +230,28 @@ _send
     lda #$80
     sta HDMAEN
 
+    ; subtract $20 from each palette address to move up one brightness level
+    rep #$20
+    lda title_solid_palette
+    ; if it's the base address it is fully faded in
+    cmp #TITLE_SCENE_SOLID_PALETTES
+    beq _end
+    dec title_palette_fade_frame
+    lda title_palette_fade_frame
+    bne _end
+    lda title_solid_palette
+    sec
+    sbc #$20
+    sta title_solid_palette
+    lda title_state_palette
+    sec
+    sbc #$20
+    sta title_state_palette
+    lda #$20
+    sta title_palette_fade_frame
+
+_end
+    sep #$20
     jmp vblank_oam_dma
 
 load_title_background
@@ -205,7 +285,6 @@ load_title_background
     lda #$0
     sta CGADD
     #dma_ppu_data TITLE_SCENE_PALETTE
-    #dma_ppu_data TITLE_SCENE_TEXT_PALETTE
 
     lda #$f
     sta my_inidisp
