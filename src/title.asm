@@ -21,7 +21,8 @@ state_title_init
     sep #$20
     jsr enable_force_blank
     jsr background_init
-    jsr load_title_tiles
+    jsr load_title_background
+    jsr load_newt_tiles
     jsr init_newt_sprite
     lda #$39 ; 0x30 = 16x16 tile mode for BGs 1 and 2
     sta BGMODE
@@ -29,7 +30,6 @@ state_title_init
     lda #(BG2_ON | OBJ_ON)
     sta TM
     sta my_tm
-    jsr load_title_background
     jsr disable_force_blank
 
     ldx	#0
@@ -103,6 +103,11 @@ state_title
     stz effect_id
     stz my_bg2hofs
     stz my_bg2vofs
+    ; skip to full brightness
+    lda #TITLE_SCENE_SOLID_PALETTES
+    sta title_solid_palette
+    lda #TITLE_SCENE_STATE_PALETTES
+    sta title_state_palette
     lda #(BG1_ON | BG2_ON | OBJ_ON)
     sta my_tm
     jmp hide_newt
@@ -286,11 +291,9 @@ load_title_background
     sta CGADD
     #dma_ppu_data TITLE_SCENE_PALETTE
 
-    lda #$f
-    sta my_inidisp
     rts
 
-load_title_tiles
+load_newt_tiles
 .as
 .xl
     lda #$80
