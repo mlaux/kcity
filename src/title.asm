@@ -1,10 +1,13 @@
 ; this is a mess
-; 1. set up newt which is a sprite for future animation
-; 2. fade in entire screen
-; 3. scroll from $120, 0 to 0, 0
-; 4. wait for music to end
-; 5. fade in SOLID STATE
-; 6. occasionally palette swap "STATE" and move it with hdma
+; 1. load BG1 with SOLID STATE and BG2 with title scene artwork
+; 2. set up newt which is a sprite instead of BG so we can easily animate later
+; 3. turn on BG2 and sprites, start music, fade in entire screen
+; 4. scroll from (0, 288) to (0, 0)
+; 5. wait for music to almost end
+; 6. turn on BG1 to show SOLID STATE and fade it in
+; 7. occasionally palette swap "STATE" and move it with hdma
+; press A/start once: skip to 0 scroll and SOLID STATE at full brightness
+; press A/start again: start game
 
 TITLE_ANIMATION_FRAMES .word $40, $4, $10, $4, $50, $4
 TITLE_ANIMATION_LENGTH = 6
@@ -15,6 +18,25 @@ TITLE_HDMA_SCROLL_2 = 10
 TITLE_HDMA_SCROLL_3 = 13
 TITLE_HDMA_SCROLL_4 = 16
 
+; mode 1, 16x16 tile mode for BGs 1 and 2
+TITLE_BGMODE = $31
+; 8x8 and 16x16, base address $4000.w
+TITLE_OBJSEL = $62
+TITLE_INITIAL_SCROLL_Y = $120
+; frames to wait before showing STATE text
+TITLE_APPEAR_STARTING_DELAY = 107       
+; frames per brightness level
+TITLE_FADE_FRAMES = $10     
+; CGRAM address for palettes, not contiguous bc of how the tiles are in crane
+; ($50 is free to be used)
+TITLE_SOLID_CGRAM_ADDR = $40
+TITLE_STATE_CGRAM_ADDR = $60
+; scroll every 4 frames
+TITLE_SCROLL_SPEED_MASK = $3 
+TITLE_SPRITE_HIDDEN_Y = $e0
+
+PALETTE_SIZE = $20 ; 16 colors * 2 bytes/color
+
 state_title_init
 .al
 .xl
@@ -24,7 +46,7 @@ state_title_init
     jsr load_title_background
     jsr load_newt_tiles
     jsr init_newt_sprite
-    lda #$39 ; 0x30 = 16x16 tile mode for BGs 1 and 2
+    lda #TITLE_BGMODE
     sta BGMODE
     sta my_bgmode
     lda #(BG2_ON | OBJ_ON)
@@ -37,25 +59,27 @@ state_title_init
     ldx #0
     jsr spcPlay
     jsr spcFlush
+    ; wait for music to start.
+    ; why is this so delayed sometimes and almost immediate other times?
 -   jsr spcReadStatus
     bit #SPC_P
     beq -
 
     rep #$20
-    lda #$120
+    lda #TITLE_INITIAL_SCROLL_Y
     sta my_bg2vofs
     ; experimentally determined to match the music ending
-    lda #107
+    lda #TITLE_APPEAR_STARTING_DELAY
     sta title_appear_delay
 
-    ; these files contain 4 palettes, 100% -> 50% -> 25% -> 12.5%
-    ; start at 12.5%
-    lda #(3 * 2 * 16 + TITLE_SCENE_SOLID_PALETTES)
+    ; these files contain 9 palettes, 8/8 -> 0/8 brightness
+    ; start at black
+    lda #(8 * 2 * 16 + TITLE_SCENE_SOLID_PALETTES)
     sta title_solid_palette
-    lda #(3 * 2 * 16 + TITLE_SCENE_STATE_PALETTES)
+    lda #(8 * 2 * 16 + TITLE_SCENE_STATE_PALETTES)
     sta title_state_palette
     ; frames per brightness level
-    lda #$20
+    lda #TITLE_FADE_FRAMES
     sta title_palette_fade_frame
 
     lda #EFFECT_FADE_IN
@@ -117,7 +141,7 @@ _animate
     bne _nothing
 
     lda frame_counter
-    and #$3
+    and #TITLE_SCROLL_SPEED_MASK
     bne _nothing
 
     lda my_bg2vofs
@@ -152,12 +176,18 @@ state_title_vblank
 +   sep #$20
     ldx #DMAMODE_CGDATA
     stx DMAMODE
-    lda #$60
+    lda #TITLE_STATE_CGRAM_ADDR
     sta CGADD
     lda title_animation_step
-    ; odd steps in the animation show palette 2 for 
+    ; odd steps in the animation show palette 2 for glitch effect
     and #1
-    bne _check_glitch
+    beq _regular
+_check_glitch
+    rep #$20
+    lda title_state_palette
+    cmp #TITLE_SCENE_STATE_PALETTES
+    sep #$20
+    beq _glitch
 
 _regular
     ldx title_state_palette
@@ -177,13 +207,6 @@ _regular
     sta title_glitch_hdma_table + TITLE_HDMA_SCROLL_3 + 1
     sta title_glitch_hdma_table + TITLE_HDMA_SCROLL_4 + 1
     bra _send
-
-_check_glitch
-    rep #$20
-    lda title_state_palette
-    cmp #TITLE_SCENE_STATE_PALETTES
-    sep #$20
-    bne _regular
 
 _glitch
     ldx #<>TITLE_SCENE_GLITCH_PALETTE
@@ -210,7 +233,7 @@ _glitch
     sta title_glitch_hdma_table + TITLE_HDMA_SCROLL_4 + 1
 
 _send
-    ldx #$20
+    ldx #PALETTE_SIZE
     stx DMALEN
     lda #1
     sta MDMAEN
@@ -218,13 +241,31 @@ _send
     ; SOLID fades in too
     ldx title_solid_palette
     stx DMAADDR
-    ldx #$20
+    ldx #PALETTE_SIZE
     stx DMALEN
-    lda #$40
+    lda #TITLE_SOLID_CGRAM_ADDR
     sta CGADD
     lda #1
     sta MDMAEN
 
+;     lda #$0d
+;     sta CGADD
+;     lda frame_counter
+;     and #63
+;     cmp #8
+;     bcs +
+;     lda #$ff
+;     sta CGDATA
+;     lda #$2a
+;     sta CGDATA
+;     bra _do_hdma
+
+; +   lda #$bf
+;     sta CGDATA
+;     lda #$2b
+;     sta CGDATA
+
+_do_hdma
     lda #$2
     sta DMAP7
     lda #BG1HOFS & $ff
@@ -246,13 +287,13 @@ _send
     bne _end
     lda title_solid_palette
     sec
-    sbc #$20
+    sbc #PALETTE_SIZE
     sta title_solid_palette
     lda title_state_palette
     sec
-    sbc #$20
+    sbc #PALETTE_SIZE
     sta title_state_palette
-    lda #$20
+    lda #TITLE_FADE_FRAMES
     sta title_palette_fade_frame
 
 _end
@@ -326,7 +367,7 @@ init_newt_sprite
 .as
 .xl
     ; 8x8 and 16x16, base address $4000
-    lda #$62
+    lda #TITLE_OBJSEL
     sta OBJSEL
 
     lda #$20
@@ -366,7 +407,7 @@ move_newt
     ldy #NEWT_TILE_COUNT
     ldx #0
 -   lda oam_data_y, x
-    cmp #$e0
+    cmp #TITLE_SPRITE_HIDDEN_Y
     beq +
     inc oam_data_y, x
 +   inx
@@ -384,7 +425,7 @@ hide_newt
     php
     sep #$20
 
-    lda #$e0
+    lda #TITLE_SPRITE_HIDDEN_Y
     ldx #0
     ldy #NEWT_TILE_COUNT
 -   sta oam_data_y, x

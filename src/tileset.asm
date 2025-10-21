@@ -1,6 +1,6 @@
 TILEMAP_SIZE = $800
 PALETTE_OFFSET = $10
-PALETTE_SIZE = $e0
+TILEMAP_PALETTE_SIZE = $e0
 
 mono_font_init
 .xl
@@ -189,7 +189,7 @@ map_run_warp
 
     lda ALL_MAP_PALETTES - 2, x
     sta DMAADDR
-    lda #PALETTE_SIZE
+    lda #TILEMAP_PALETTE_SIZE
     sta DMALEN
     lda #DMAMODE_CGDATA
     sta DMAMODE

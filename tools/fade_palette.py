@@ -4,7 +4,7 @@ SNES Palette Fade Generator
 
 Generates darkened palettes for fade-in/fade-out effects.
 Input: SNES palette (up to 16 colors in little-endian BGR555 format)
-Output: N palettes, each progressively darker (R, G, B shifted right by 1 each iteration)
+Output: 9 palettes with linear brightness interpolation (8/8 to 0/8 in steps of 1/8)
 """
 
 import sys
@@ -40,44 +40,35 @@ def encode_color(r, g, b):
     return bytes([byte0, byte1])
 
 
-def darken_palette(palette_bytes):
+def scale_palette(palette_bytes, numerator, denominator):
     """
-    Create a darkened version of a palette by shifting R, G, B right by 1.
-    Returns the new palette bytes and whether all colors are black.
+    Scale a palette's brightness by multiplying each RGB component by numerator/denominator.
     """
     new_palette = bytearray()
-    all_black = True
 
     for k in range(0, len(palette_bytes), 2):
         r, g, b = decode_color(palette_bytes[k], palette_bytes[k + 1])
 
-        # Shift right by 1
-        r >>= 1
-        g >>= 1
-        b >>= 1
-
-        if r != 0 or g != 0 or b != 0:
-            all_black = False
+        # Scale each component
+        r = (r * numerator) // denominator
+        g = (g * numerator) // denominator
+        b = (b * numerator) // denominator
 
         new_palette.extend(encode_color(r, g, b))
 
-    return bytes(new_palette), all_black
+    return bytes(new_palette)
 
 
 def generate_fade_palettes(input_palette):
     """
-    Generate all fade palettes from the input palette.
-    Returns a list of palette bytes.
+    Generate 9 fade palettes with linear brightness interpolation.
+    Uses steps of 1/8 for cleaner math (8/8, 7/8, 6/8, ..., 1/8, 0/8).
     """
-    palettes = [input_palette]
-    current = input_palette
+    palettes = []
 
-    while True:
-        current, all_black = darken_palette(current)
-        palettes.append(current)
-
-        if all_black:
-            break
+    for k in range(8, -1, -1):
+        palette = scale_palette(input_palette, k, 8)
+        palettes.append(palette)
 
     return palettes
 
@@ -109,7 +100,8 @@ def main():
         for palette in palettes:
             f.write(palette)
 
-    print(f"Generated {len(palettes)} palettes ({num_colors} colors each)")
+    print(f"Generated 9 palettes ({num_colors} colors each)")
+    print(f"Brightness steps: 8/8, 7/8, 6/8, 5/8, 4/8, 3/8, 2/8, 1/8, 0/8")
     print(f"Total output size: {len(palettes) * len(input_palette)} bytes")
     print(f"Written to: {args.output}")
 

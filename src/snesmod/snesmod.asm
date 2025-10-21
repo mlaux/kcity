@@ -184,7 +184,6 @@ spcSetBank
 	
 ; increment memory pointer by 2
 incptr .macro
-.block
 	iny
 	iny
 	
@@ -198,7 +197,6 @@ incptr .macro
 ; .endif
 
 _catch_overflow
-.endblock
 .endmacro
 
 ;**********************************************************************
