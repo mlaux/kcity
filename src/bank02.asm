@@ -1,10 +1,17 @@
-.dsection title_screen_graphics
-.section title_screen_graphics
+.dsection map_graphics
+.section map_graphics
+MAP_GRAPHICS_BANK = `*
 
-TITLE_SCENE_TILESET_BG1 .binary "../gfx/title/titletext.4bp"
-TITLE_SCENE_TILEMAP_BG1 .binary "../gfx/title/titletext.map"
+LAB_TILESET .binary "../gfx/lab/lab.4bp"
+LAB_TILEMAP .binary "../gfx/lab/lab.map"
 
-TITLE_SCENE_TILESET_BG2 .binary "../gfx/title/title.4bp"
-TITLE_SCENE_TILEMAP_BG2 .binary "../gfx/title/title.map"
+BEDROOM_TILESET .binary "../gfx/bedroom/bedroom.4bp"
+BEDROOM_TILEMAP .binary "../gfx/bedroom/bedroom.map"
+
+JOURNAL_TILESET .binary "../gfx/journal/notepad.4bp"
+JOURNAL_TILEMAP .binary "../gfx/journal/notepad.map"
+
+PAPER_TILESET .binary "../gfx/paper/paper.4bp"
+PAPER_TILEMAP .binary "../gfx/paper/paper.map"
 
 .endsection

@@ -1,12 +1,10 @@
+;.dsection spc_code
+;.section spc_code
+;.binary "spc700/kcity-audio.sfc", $1000, $8000
 
-.dsection player_graphics
-.section player_graphics
-PLAYER_GRAPHICS_BANK = `*
+; sections for each of these so they show up in the .map?
 
-PLAYER_TILESET .binary "../gfx/juno/juno.4bp"
-NPC_TILESET .binary "../gfx/leif/leif.4bp"
-NEWT_TILESET .binary "../gfx/newt/newtrainbow.4bp"
-CURSOR_TILE .binary "../gfx/star.4bp"
-CPU_USAGE_TILES .binary "../gfx/cpu.4bp"
-
+.dsection sound_bank
+.section sound_bank
+the_sound_bank .binary "../music/build/kcity.smbank", 0, $8000
 .endsection

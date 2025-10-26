@@ -333,6 +333,16 @@ collision_map .fill $2000
 .cerror * > $50000, "bank04 too long"
 .here
 
+* = $28000
+.logical $58000
+.dsection bank05
+.section bank05
+.include "bank05.asm"
+.endsection bank05
+.warn format("bank05 free space: $%04x", $60000 - *)
+.cerror * > $60000, "bank05 too long"
+.here
+
 ; 256k minus one byte
 * = $03ffff
 .byte 0

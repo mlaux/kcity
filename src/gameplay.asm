@@ -9,6 +9,15 @@ state_gameplay_init
     jsr background_init
     jsr copy_ram_scripts
 
+    ldx	#1
+	jsr	spcLoad
+    ldx #0
+    jsr spcPlay
+    jsr spcFlush
+-   jsr spcReadStatus
+    bit #SPC_P
+    beq -
+
     rep #$20
 
     jsr player_init

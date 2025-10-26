@@ -1,17 +1,12 @@
-.dsection map_graphics
-.section map_graphics
-MAP_GRAPHICS_BANK = `*
 
-LAB_TILESET .binary "../gfx/lab/lab.4bp"
-LAB_TILEMAP .binary "../gfx/lab/lab.map"
+.dsection player_graphics
+.section player_graphics
+PLAYER_GRAPHICS_BANK = `*
 
-BEDROOM_TILESET .binary "../gfx/bedroom/bedroom.4bp"
-BEDROOM_TILEMAP .binary "../gfx/bedroom/bedroom.map"
-
-JOURNAL_TILESET .binary "../gfx/journal/notepad.4bp"
-JOURNAL_TILEMAP .binary "../gfx/journal/notepad.map"
-
-PAPER_TILESET .binary "../gfx/paper/paper.4bp"
-PAPER_TILEMAP .binary "../gfx/paper/paper.map"
+PLAYER_TILESET .binary "../gfx/juno/juno.4bp"
+NPC_TILESET .binary "../gfx/leif/leif.4bp"
+NEWT_TILESET .binary "../gfx/newt/newtrainbow.4bp"
+CURSOR_TILE .binary "../gfx/star.4bp"
+CPU_USAGE_TILES .binary "../gfx/cpu.4bp"
 
 .endsection

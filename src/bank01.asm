@@ -1,10 +1,10 @@
-;.dsection spc_code
-;.section spc_code
-;.binary "spc700/kcity-audio.sfc", $1000, $8000
+.dsection title_screen_graphics
+.section title_screen_graphics
 
-; sections for each of these so they show up in the .map?
+TITLE_SCENE_TILESET_BG1 .binary "../gfx/title/titletext.4bp"
+TITLE_SCENE_TILEMAP_BG1 .binary "../gfx/title/titletext.map"
 
-.dsection sound_bank
-.section sound_bank
-the_sound_bank .binary "../music/build/kcity.smbank"
+TITLE_SCENE_TILESET_BG2 .binary "../gfx/title/title.4bp"
+TITLE_SCENE_TILEMAP_BG2 .binary "../gfx/title/title.map"
+
 .endsection

@@ -7,6 +7,7 @@
 	.import __SOUNDBANK__
 
 	MOD_TITLE                        = 0
+MOD_CITY                         = 1
 
 
 .endif ; __SOUNDBANK_DEFINITIONS__
