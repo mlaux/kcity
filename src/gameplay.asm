@@ -46,6 +46,7 @@ state_gameplay
 .xl
     jsr process_input
     jsr move_player
+    jsr update_scroll
     jsr set_updated_player_pos
     jsr run_script_v2
 

@@ -5,8 +5,6 @@ PLAYER_ANIMATION_SPEED = 6
 PLAYER_MOVEMENT_SPEED = 3 ; in half pixels per frame
 SCRIPT_TRIGGER_LOOKAHEAD = 16 ; pixels to look ahead for script triggers
 SCALED_SCRIPT_TRIGGER_LOOKAHEAD = SCRIPT_TRIGGER_LOOKAHEAD << 1 ; in half pixels
-SCALED_MAX_PLAYER_X = (SCREEN_WIDTH - SPRITE_SIZE) << 1
-SCALED_MAX_PLAYER_Y = (SCREEN_HEIGHT - SPRITE_SIZE) << 1
 
 PLAYER_DIRECTION_NONE = 0
 PLAYER_DIRECTION_RIGHT = 1
@@ -290,11 +288,11 @@ go_right
     lda player_x
     clc
     adc #PLAYER_MOVEMENT_SPEED
-    ; would moving take you off the screen?
-    cmp #SCALED_MAX_PLAYER_X
+    ; would moving take you off the map?
+    cmp current_map_max_player_x
     bmi +
     ; yep, clamp to max x
-    lda #SCALED_MAX_PLAYER_X
+    lda current_map_max_player_x
     sta player_x
     brl animate_player
 
@@ -334,11 +332,11 @@ go_down
     lda player_y
     clc
     adc #PLAYER_MOVEMENT_SPEED
-    ; would moving take you off the screen?
-    cmp #SCALED_MAX_PLAYER_Y
+    ; would moving take you off the map?
+    cmp current_map_max_player_y
     bmi +
     ; clamp to max y
-    lda #SCALED_MAX_PLAYER_Y
+    lda current_map_max_player_y
     sta player_y
     brl animate_player
 
@@ -555,14 +553,35 @@ animate_npcs
 set_updated_player_pos
 .al
 .xl
+    lda current_map_scroll_flags
+    and #1
+    beq _no_hscroll
     lda player_x
     lsr
+    sec
+    sbc my_bghofs
+    bra _set_x
+_no_hscroll
+    lda player_x
+    lsr
+_set_x
     sep #$20
     sta player_x_sprite
     sta player_x_head_sprite
     rep #$20
+
+    lda current_map_scroll_flags
+    and #2
+    beq _no_vscroll
     lda player_y
     lsr
+    sec
+    sbc my_bgvofs
+    bra _set_y
+_no_vscroll
+    lda player_y
+    lsr
+_set_y
     sep #$20
     sta player_y_sprite
     sec
@@ -590,5 +609,56 @@ vblank_oam_dma
     sta DMALEN
     lda #1
     sta MDMAEN
-    
+
+    rts
+
+; updates my_bghofs and my_bgvofs based on player position
+; centers player on screen, clamped to map boundaries
+; parameters: none
+; returns: none
+; assumes: AXY 16
+update_scroll
+.al
+.xl
+    php
+    rep #$20
+
+    lda current_map_scroll_flags
+    beq _done
+
+    ; check horizontal scroll (bit 0)
+    bit #1
+    beq _check_vertical
+
+    ; scroll_x = (player_x >> 1) - 128
+    lda player_x
+    lsr
+    sec
+    sbc #128
+    bpl +
+    lda #0
++   cmp #256
+    bmi +
+    lda #256
++   sta my_bghofs
+
+_check_vertical
+    lda current_map_scroll_flags
+    bit #2
+    beq _done
+
+    ; scroll_y = (player_y >> 1) - 112
+    lda player_y
+    lsr
+    sec
+    sbc #112
+    bpl +
+    lda #0
++   cmp #288
+    bmi +
+    lda #288
++   sta my_bgvofs
+
+_done
+    plp
     rts
