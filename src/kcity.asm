@@ -278,7 +278,10 @@ sram_game_progress .word ?
 
 * = $7e2000
 
-collision_map .fill $2000
+; need 32k (1/4 of the entire ram) for 1bpp 512x512px...
+; might want to reduce collision resolution to 2x2 blocks at some point
+; instead of per-pixel, but i'm not short on ram at all
+collision_map .fill $8000
 
 .warn "other ram end: ", *
 

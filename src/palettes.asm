@@ -9,6 +9,7 @@ TITLE_SCENE_STATE_PALETTES .binary "../gfx/title/state_fade.pal"
 TITLE_SCENE_GLITCH_PALETTE .binary "../gfx/title/glitch.pal"
 JOURNAL_PALETTE .binary "../gfx/journal/notepad.pal"
 NEWT_PALETTE .binary "../gfx/newt/newtrainbow.pal"
+TEST_MAP_PALETTE .binary "../gfx/testbg/testbg.pal"
 
 ; text palettes
 BASIC_TEXT_PALETTE .binary "../font/geneva.pal"

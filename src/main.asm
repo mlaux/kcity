@@ -62,7 +62,7 @@ RESET
     lda #$81
     sta NMITIMEN
 
-    lda #1
+    lda #3
     sta current_map_id
 
     ldy #0

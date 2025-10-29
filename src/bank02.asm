@@ -14,4 +14,7 @@ JOURNAL_TILEMAP .binary "../gfx/journal/notepad.map"
 PAPER_TILESET .binary "../gfx/paper/paper.4bp"
 PAPER_TILEMAP .binary "../gfx/paper/paper.map"
 
+TEST_MAP_TILESET .binary "../gfx/testbg/testbg.4bp"
+TEST_MAP_TILEMAP .binary "../gfx/testbg/testbg.map"
+
 .endsection
