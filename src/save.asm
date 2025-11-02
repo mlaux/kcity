@@ -15,7 +15,7 @@ save_game
     sta sram_game_progress
 
     ldx #SCRIPT_MESSAGE_SAVED
-    ldy #2
+    ldy #3
     jsr set_script
 
     plp

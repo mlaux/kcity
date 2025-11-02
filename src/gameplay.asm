@@ -170,7 +170,7 @@ _check_b
     beq _check_a
     lda script_step_time_remaining
     ; + to accept signed constant operands
-    cmp #+LEN_WAIT_RESULT_CANCEL_OK
+    cmp #+WAIT_RESULT_CANCEL_OK
     bne _check_a
     lda #+RESULT_CANCELLED
     sta script_step_result

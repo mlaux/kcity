@@ -13,9 +13,9 @@
 ;        to 16 byte boundary
 ; the last step only needs the bytes actually read for the step, not all 16
 
-LEN_WAIT_FOR_A = -1
-LEN_WAIT_RESULT_CANCEL_OK = -2
-LEN_WAIT_RESULT_NO_CANCEL = -3
+WAIT_FOR_A = -1
+WAIT_RESULT_CANCEL_OK = -2
+WAIT_RESULT_NO_CANCEL = -3
 
 RESULT_CANCELLED = -1
 
@@ -81,23 +81,23 @@ OPCODE_TEXT_BOX = 1
 
 ; TODO: named/default parameters
 step_text_box .macro
-    .sint \1
+    .sint 0
     .word OPCODE_TEXT_BOX
+    .byte \1
     .byte \2
     .byte \3
     .byte \4
-    .byte \5
+    .word \5
     .word \6
     .word \7
     .word \8
-    .word \9
 .endm
 
 ; hide the currently shown text box and return
 OPCODE_HIDE_TEXT_BOX = 2
 
 step_hide_text_box .macro
-    .sint 1
+    .sint 0
     .word OPCODE_HIDE_TEXT_BOX
     .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 .endm
@@ -106,7 +106,7 @@ step_hide_text_box .macro
 OPCODE_CLEAR_TEXT_TILES = $10
 
 step_clear_text_tiles .macro
-    .sint 1
+    .sint 0
     .word OPCODE_CLEAR_TEXT_TILES
     .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 .endm
@@ -263,7 +263,8 @@ step_read_result .macro
 DISPLAY_LOCATION_NAME_TEMPLATE
     #step_wait 8
     ; first line pointer is modified
-    #step_text_box $80, 1, 1, 24, 1, $DEAD, 0, 0, 0
+    #step_text_box 1, 1, 24, 1, $DEAD, 0, 0, 0
+    #step_wait $80
     #step_hide_text_box
 
 DISPLAY_LOCATION_NAME_LENGTH = * - DISPLAY_LOCATION_NAME_TEMPLATE
@@ -273,14 +274,6 @@ MESSAGE_SAVED .text "Saved", $ff
 OBJECT_DESC .text "What could be down here?", $ff
 OBJECT_DESC2_1 .text "It's a standard 55-gallon drum.", $ff
 OBJECT_DESC2_2 .text "'AMMONIUM PERSULFATE NET WT 412 KG'", $ff
-
-BOOK_TITLE1 .text "Investing in Your Future", $ff
-BOOK_TITLE2 .text "Artificial Intelligence:", $ff
-BOOK_TITLE2_2 .text "The best thing since sliced bread!", $ff
-BOOK_TITLE3 .text "Numbers in Science", $ff
-
-BOOK_REACTION1 .text "...investing in what future?", $ff
-BOOK_REACTION2 .text "Darker than usual... I should see where everyone is.", $ff
 
 BOOKSHELF_MESSAGE1 .text "Hey!", $ff
 BOOKSHELF_MESSAGE2 .text "Don't look in there.", $ff
@@ -292,18 +285,21 @@ TEST_DECISION_4 .text $80, "Maybe...", $ff
 TEST_MEOW .text "Meow", $ff
 
 SCRIPT_MESSAGE_SAVED
-    #step_text_box $40, 1, 1, 5, 1, MESSAGE_SAVED, 0, 0, 0
+    #step_text_box 1, 1, 5, 1, MESSAGE_SAVED, 0, 0, 0
+    #step_wait $40
     #step_hide_text_box
 
 TEST_OBJECT_SCRIPT
     ; bug: if the script was triggered by pressing A, that A press would
     ; immediately dismiss the indeterminate text box, so wait a frame
     #step_wait 1
-    #step_text_box -1, 1, 21, 30, 1, OBJECT_DESC, 0, 0, 0
+    #step_text_box 1, 21, 30, 1, OBJECT_DESC, 0, 0, 0
+    #step_wait WAIT_FOR_A
     #step_hide_text_box
 
 TEST_HAIR_BLEACH
-    #step_text_box $c0, 1, 21, 30, 3, OBJECT_DESC2_1, EMPTY_STRING, OBJECT_DESC2_2, 0
+    #step_text_box 1, 21, 30, 3, OBJECT_DESC2_1, EMPTY_STRING, OBJECT_DESC2_2, 0
+    #step_wait $c0
     #step_hide_text_box
 
 TEST_REACT_TO_BOOKSHELF
@@ -313,7 +309,8 @@ TEST_REACT_TO_BOOKSHELF
     #step_set_sprite_flags 1, $3a
     #step_move_sprite_y 8, 1, $ff
     #step_set_sprite_direction 1, 0
-    #step_text_box $20, 7, 18, 4, 1, BOOKSHELF_MESSAGE1, 0, 0, 0
+    #step_text_box 7, 18, 4, 1, BOOKSHELF_MESSAGE1, 0, 0, 0
+    #step_wait $20
     #step_set_sprite_direction 1, PLAYER_DIRECTION_RIGHT
     #step_move_sprite_x 24, 1, 1
     #step_set_sprite_direction 1, 0
@@ -321,7 +318,8 @@ TEST_REACT_TO_BOOKSHELF
     #step_set_sprite_direction 1, PLAYER_DIRECTION_UP
     #step_move_sprite_y 48, 1, $ff
     #step_set_sprite_direction 1, 0
-    #step_text_box $80, 1, 21, 30, 1, BOOKSHELF_MESSAGE2, 0, 0, 0
+    #step_text_box 1, 21, 30, 1, BOOKSHELF_MESSAGE2, 0, 0, 0
+    #step_wait $80
     #step_hide_text_box
     #step_set_sprite_direction 1, PLAYER_DIRECTION_DOWN
     #step_move_sprite_y 32, 1, 1
@@ -331,7 +329,7 @@ TEST_REACT_TO_BOOKSHELF
     #step_set_sprite_direction 1, 0
     #step_set_player_locked 0
 
-TEST_BOOK1
+TEST_MISC
     ; test add opcode
     ; [0] = 4
     ; [1] = 8
@@ -345,40 +343,21 @@ TEST_BOOK1
     ; #step_add 3, 3, 1, 16
 
     ; test decision text box
-    #step_wait 0
-    #step_text_box -3, 1, 21, 30, 4, TEST_DECISION_1, TEST_DECISION_2, TEST_DECISION_3, TEST_DECISION_4
+    #step_text_box 1, 21, 30, 4, TEST_DECISION_1, TEST_DECISION_2, TEST_DECISION_3, TEST_DECISION_4
+    #step_wait WAIT_RESULT_NO_CANCEL
     #step_read_result 0
-    #step_branch_ne 0, 1, 6
+    #step_branch_ne 0, 1, 8
     #step_clear_text_tiles
-    #step_text_box -1, 1, 21, 30, 1, TEST_MEOW, 0, 0, 0
-    #step_hide_text_box
-
-    ; #step_wait 1
-    ; #step_set_player_locked 1
-    ; #step_text_box -1, 1, 21, 30, 1, BOOK_TITLE1, 0, 0, 0
-    ; #step_hide_text_box
-    ; #step_inc_variable 0
-    ; #step_set_player_locked 0
-
-TEST_BOOK2
+    ; clear_text_tiles takes one vblank to take effect. if i immediately went
+    ; on to the step_text_box, the pending clear action would immediately clear
+    ; the new text.
     #step_wait 1
-    #step_text_box -1, 1, 21, 30, 3, BOOK_TITLE2, EMPTY_STRING, BOOK_TITLE2_2, 0
-    #step_hide_text_box
-    #step_inc_variable 0
-TEST_BOOK3
-    #step_wait 1
-    #step_text_box -1, 1, 21, 30, 1, BOOK_TITLE3, 0, 0, 0
-    #step_hide_text_box
-    #step_inc_variable 0
-    #step_branch_eq 0, 3, 6
-    #step_unconditional_branch 8
-    #step_text_box -1, 1, 21, 30, 1, BOOK_REACTION1, 0, 0, 0
-    #step_hide_text_box
-    #step_text_box -1, 1, 21, 30, 1, BOOK_REACTION2, 0, 0, 0
+    #step_text_box 1, 21, 30, 1, TEST_MEOW, 0, 0, 0
+    #step_wait WAIT_FOR_A
     #step_hide_text_box
 
-OBJECT_SCRIPTS .word TEST_OBJECT_SCRIPT, TEST_HAIR_BLEACH, TEST_REACT_TO_BOOKSHELF, TEST_BOOK1, TEST_BOOK2, TEST_BOOK3
-OBJECT_SCRIPT_LENGTHS .word 3, 2, 23, 7, 4, 10
+OBJECT_SCRIPTS .word TEST_OBJECT_SCRIPT, TEST_HAIR_BLEACH, TEST_REACT_TO_BOOKSHELF, TEST_MISC
+OBJECT_SCRIPT_LENGTHS .word 4, 3, 25, 9
 
 load_oam_index_16x32 .macro
     ; x = sprite_id * 8
@@ -532,15 +511,22 @@ op_text_box
     ldy #$7
     lda (script_element_ptr), y
     sta text_box_num_lines
-    lda #$1
-    sta text_box_enabled
     rep #$20
+    lda #1
+    sta text_box_enabled
     lda script_element_ptr
     clc
     adc #8
     sta text_box_lines
 
-    rts
+    stz text_index
+
+    lda (text_box_lines)
+    ldx text_box_x
+    inx
+    ldy text_box_y
+    iny
+    jmp vwf_init_string
 
 op_hide_text_box
 .as

@@ -222,7 +222,7 @@ map_run_warp
     sta location_name_script + 24
     phx
     ldx #location_name_script
-    ldy #3
+    ldy #4
     jsr set_script
     plx
 

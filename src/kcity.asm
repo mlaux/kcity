@@ -132,11 +132,6 @@ effect_level .word ?
 ; 1, 3, 7, 15, ...
 effect_speed .word ?
 
-; temp index into test text array
-text_index .word ?
-; pointer to string that's being drawn
-current_text .word ?
-
 script_step .word ?
 script_length .word ?
 script_step_time_remaining .word ?
@@ -209,6 +204,9 @@ player_y .word ?
 player_locked .word ?
 
 text_box_enabled .word ?
+; index of string (0-3) currently being drawn
+text_index .word ?
+text_box_init_requested .word ?
 text_box_clear_requested .word ?
 text_box_hide_requested .word ?
 ; should be using a different dma channel for this
