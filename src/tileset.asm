@@ -204,6 +204,9 @@ map_run_warp
     lda SCRIPT_TRIGGER_MAPS - 2, x
     sta script_trigger_map_ptr
 
+    lda MAP_SIZES - 2,x
+    sta current_map_size
+
     lda MAP_SCROLL_FLAGS - 2, x
     sta current_map_scroll_flags
 

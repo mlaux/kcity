@@ -230,6 +230,7 @@ target_warp_map .word ?
 target_player_x .word ?
 target_player_y .word ?
 current_map_id .word ?
+current_map_size .word ?
 current_map_scroll_flags .word ?
 ; might not need these, can depend on the collision data
 current_map_max_player_x .word ?

@@ -127,13 +127,17 @@ check_collision_per_pixel
     and #7
     sta zp3
 
-    ; calculate byte offset into image. 32 bytes per row
-    ; idx = (playerY + 15) * 32 + zp2
+    ; calculate byte offset into image. 
+    ; 32 bytes per row for 256x256 maps, 64 for 512x512
+    ; idx = (playerY + 15) * bytes_per_row + zp2
     tya
     clc
     adc #SPRITE_SIZE - 1
     sln 5
-    clc
+    ldx current_map_size
+    beq +
+    asl
++   clc
     adc zp2
     tax
     lda @l collision_map, x
@@ -166,10 +170,14 @@ check_script_triggers
     adc #SPRITE_SIZE - 1
 
     ; lsr lsr lsr lsr, asl asl asl asl
-    and #$f0
+    and #$fff0
+    ldx current_map_size
+    beq +
+    ; extra << 1 for 32x32 maps
+    asl
 
     ; y*width+x
-    clc
++   clc
     adc zp2
     tay
     lda (script_trigger_map_ptr), y
@@ -371,7 +379,7 @@ go_down
     adc #PLAYER_MOVEMENT_SPEED
     sta player_y
     ; inc player_y_head
-+   bra animate_player
++   brl animate_player
 
 go_left
     ; check left edge of screen
@@ -392,7 +400,13 @@ go_left
     lda player_x
     sec
     sbc #SCALED_SCRIPT_TRIGGER_LOOKAHEAD
-    lsr
+    ; clamp to x=0 here, because:
+    ; if x = $1f, x - $20 = $ffff
+    ; then >> 1 = $7fff -> no longer negative
+    ; so need to check this here instead of in check_script_triggers
+    bpl +
+    lda #0
++   lsr
     tax
     phx
     phy
@@ -434,7 +448,9 @@ go_up
     lda player_y
     sec
     sbc #SCALED_SCRIPT_TRIGGER_LOOKAHEAD
-    lsr
+    bpl +
+    lda #0
++   lsr
     tay
     phx
     phy
