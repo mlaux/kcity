@@ -60,7 +60,8 @@ state_journal_init
 .xl
     ; make sure all of this is off
     jsr clear_script
-    stz text_box_enabled
+    lda #1
+    sta text_box_hide_requested
 
     ; pixelate transition
     lda #EFFECT_MOSAIC_ON

@@ -209,6 +209,8 @@ player_y .word ?
 player_locked .word ?
 
 text_box_enabled .word ?
+text_box_clear_requested .word ?
+text_box_hide_requested .word ?
 ; should be using a different dma channel for this
 text_box_hdma_table .fill $9
 title_glitch_hdma_table .fill $13

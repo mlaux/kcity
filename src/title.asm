@@ -20,8 +20,8 @@ TITLE_HDMA_SCROLL_4 = 16
 
 ; mode 1, 16x16 tile mode for BGs 1 and 2
 TITLE_BGMODE = $31
-; 8x8 and 16x16, base address $4000.w
-TITLE_OBJSEL = $62
+; 8x8 and 16x16, base address $6000.w
+TITLE_OBJSEL = $63
 TITLE_INITIAL_SCROLL_Y = $120
 ; frames to wait before showing STATE text
 TITLE_APPEAR_STARTING_DELAY = 107       
@@ -343,7 +343,7 @@ load_newt_tiles
     ldx #DMAMODE_PPUDATA
     stx DMAMODE
 
-    ldx #$4000
+    ldx #$6000
     stx VMADD
 
     #dma_ppu_data NEWT_TILESET

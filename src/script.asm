@@ -40,6 +40,7 @@ RESULT_CANCELLED = -1
 ; $d: branch if equal
 ; $e: branch if not equal
 ; $f: lock/unlock player
+; $10: clear text tiles (keep box visible)
 
 ; can eliminate some redundancy in the implementations of these
 script_operations
@@ -56,6 +57,7 @@ script_operations
     .word op_branch_eq
     .word op_branch_ne
     .word op_set_player_locked
+    .word op_clear_text_tiles
 
 ; just wait for the specified amount of frames
 OPCODE_WAIT = 0
@@ -97,6 +99,15 @@ OPCODE_HIDE_TEXT_BOX = 2
 step_hide_text_box .macro
     .sint 1
     .word OPCODE_HIDE_TEXT_BOX
+    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+.endm
+
+; clear text tiles and reset text rendering, but keep box visible
+OPCODE_CLEAR_TEXT_TILES = $10
+
+step_clear_text_tiles .macro
+    .sint 1
+    .word OPCODE_CLEAR_TEXT_TILES
     .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 .endm
 
@@ -337,8 +348,8 @@ TEST_BOOK1
     #step_wait 0
     #step_text_box -3, 1, 21, 30, 4, TEST_DECISION_1, TEST_DECISION_2, TEST_DECISION_3, TEST_DECISION_4
     #step_read_result 0
-    #step_hide_text_box
     #step_branch_ne 0, 1, 6
+    #step_clear_text_tiles
     #step_text_box -1, 1, 21, 30, 1, TEST_MEOW, 0, 0, 0
     #step_hide_text_box
 
@@ -534,7 +545,15 @@ op_text_box
 op_hide_text_box
 .as
 .xl
-    stz text_box_enabled
+    lda #1
+    sta text_box_hide_requested
+    rts
+
+op_clear_text_tiles
+.as
+.xl
+    lda #$1
+    sta text_box_clear_requested
     rts
 
 op_set_sprite_flags
