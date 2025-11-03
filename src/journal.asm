@@ -205,7 +205,7 @@ draw_journal_text
     ldx #0
 
     ; set message address and destination coordinates
--   lda JOURNAL_ENTRY_TABLE, x
+-   lda JOURNAL_ENTRY_TABLE,x
     inx
     inx
     phx

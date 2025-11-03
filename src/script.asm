@@ -362,7 +362,7 @@ OBJECT_SCRIPT_LENGTHS .word 4, 3, 25, 9
 load_oam_index_16x32 .macro
     ; x = sprite_id * 8
     ldy #$4
-    lda (script_element_ptr), y
+    lda (script_element_ptr),y
     asl
     asl
     asl
@@ -372,7 +372,7 @@ load_oam_index_16x32 .macro
 load_anim_index .macro
     ; x = sprite_id * 2
     ldy #$4
-    lda (script_element_ptr), y
+    lda (script_element_ptr),y
     asl
     tax
 .endm
@@ -381,8 +381,8 @@ copy_ram_scripts
 .as
 .xl
     ldx #DISPLAY_LOCATION_NAME_LENGTH - 1
--   lda DISPLAY_LOCATION_NAME_TEMPLATE, x
-    sta location_name_script, x
+-   lda DISPLAY_LOCATION_NAME_TEMPLATE,x
+    sta location_name_script,x
     dex
     bpl -
 
@@ -441,12 +441,12 @@ _check_script_end
 
 _run_step
     ldy #$2
-    lda (script_element_ptr), y
+    lda (script_element_ptr),y
     asl
     tax
     per _done_with_step - 1
     sep #$20
-    jmp (script_operations, x)
+    jmp (script_operations,x)
 
 _done_with_step
     rep #$20
@@ -499,17 +499,17 @@ op_text_box
 .as
 .xl
     ldy #$4
-    lda (script_element_ptr), y
+    lda (script_element_ptr),y
     sta text_box_x
     ldy #$5
-    lda (script_element_ptr), y
+    lda (script_element_ptr),y
     sta text_box_y
 
     ldy #$6
-    lda (script_element_ptr), y
+    lda (script_element_ptr),y
     sta text_box_width
     ldy #$7
-    lda (script_element_ptr), y
+    lda (script_element_ptr),y
     sta text_box_num_lines
     rep #$20
     lda #1
@@ -548,13 +548,13 @@ op_set_sprite_flags
     #load_oam_index_16x32
 
     ldy #$5
-    lda (script_element_ptr), y
-    sta oam_data_flag, x
+    lda (script_element_ptr),y
+    sta oam_data_flag,x
     inx
     inx
     inx
     inx
-    sta oam_data_flag, x
+    sta oam_data_flag,x
 
     rts
 
@@ -564,26 +564,26 @@ op_set_sprite_position
     #load_oam_index_16x32
 
     ldy #$5
-    lda (script_element_ptr), y
-    sta oam_data_x, x
+    lda (script_element_ptr),y
+    sta oam_data_x,x
     inx
     inx
     inx
     inx
-    sta oam_data_x, x
+    sta oam_data_x,x
 
     #load_oam_index_16x32
 
     ldy #$6
-    lda (script_element_ptr), y
-    sta oam_data_y, x
+    lda (script_element_ptr),y
+    sta oam_data_y,x
     sec
     sbc #$10
     inx
     inx
     inx
     inx
-    sta oam_data_y, x
+    sta oam_data_y,x
 
     rts
 
@@ -592,16 +592,16 @@ op_move_sprite_x
 .xl
     #load_oam_index_16x32
 
-    lda oam_data_x, x
+    lda oam_data_x,x
     ldy #$5
     clc
-    adc (script_element_ptr), y
-    sta oam_data_x, x
+    adc (script_element_ptr),y
+    sta oam_data_x,x
     inx
     inx
     inx
     inx
-    sta oam_data_x, x
+    sta oam_data_x,x
 
     rts
 
@@ -610,18 +610,18 @@ op_move_sprite_y
 .xl
     #load_oam_index_16x32
 
-    lda oam_data_y, x
+    lda oam_data_y,x
     ldy #$5
     clc
-    adc (script_element_ptr), y
-    sta oam_data_y, x
+    adc (script_element_ptr),y
+    sta oam_data_y,x
     sec
     sbc #$10
     inx
     inx
     inx
     inx
-    sta oam_data_y, x
+    sta oam_data_y,x
 
     rts
 
@@ -631,17 +631,17 @@ op_set_sprite_direction
     #load_anim_index
 
     rep #$20
-    lda sprites_anim_direction, x
-    sta sprites_anim_previous_direction, x
+    lda sprites_anim_direction,x
+    sta sprites_anim_previous_direction,x
     ldy #$5
-    lda (script_element_ptr), y
+    lda (script_element_ptr),y
     and #$ff
     bne +
 
     ; direction 0 -> go to standing pose
-    stz sprites_anim_offset, x
+    stz sprites_anim_offset,x
 
-+   sta sprites_anim_direction, x
++   sta sprites_anim_direction,x
 
     rts
 
@@ -650,12 +650,12 @@ op_set_variable
 .xl
     rep #$20
     ldy #$4
-    lda (script_element_ptr), y
+    lda (script_element_ptr),y
     asl
     tax
     ldy #$6
-    lda (script_element_ptr), y
-    sta script_storage, x
+    lda (script_element_ptr),y
+    sta script_storage,x
     rts
 
 op_read_result
@@ -666,11 +666,11 @@ op_read_result
     pha
     stz script_step_result
     ldy #$4
-    lda (script_element_ptr), y
+    lda (script_element_ptr),y
     asl
     tax
     pla
-    sta script_storage, x
+    sta script_storage,x
     rts
 
 op_inc_variable
@@ -678,10 +678,10 @@ op_inc_variable
 .xl
     rep #$20
     ldy #$4
-    lda (script_element_ptr), y
+    lda (script_element_ptr),y
     asl
     tax
-    inc script_storage, x
+    inc script_storage,x
     rts
 
 ; script_storage[dst] = script_storage[src1] + src2
@@ -696,29 +696,29 @@ op_add
     rep #$20
     ; push src1 to stack
     ldy #$6
-    lda (script_element_ptr), y
+    lda (script_element_ptr),y
     asl
     tax
-    lda script_storage, x
+    lda script_storage,x
     pha
 
     ; decide if src2 is variable or constant
     ldy #$8
-    lda (script_element_ptr), y
+    lda (script_element_ptr),y
     and #$1
     bne _src2_constant
 
 _src2_variable
     ldy #$9
-    lda (script_element_ptr), y
+    lda (script_element_ptr),y
     asl
     tax
-    lda script_storage, x
+    lda script_storage,x
     bra _do_add
 
 _src2_constant
     ldy #$9
-    lda (script_element_ptr), y
+    lda (script_element_ptr),y
 
     ; A is now set up with src2
 _do_add
@@ -727,11 +727,11 @@ _do_add
     adc 1, s
     sta 1, s
     ldy #$4
-    lda (script_element_ptr), y
+    lda (script_element_ptr),y
     asl
     tax
     pla
-    sta script_storage, x
+    sta script_storage,x
     rts
 
 op_unconditional_branch
@@ -739,7 +739,7 @@ op_unconditional_branch
 .xl
     rep #$20
     ldy #$4
-    lda (script_element_ptr), y
+    lda (script_element_ptr),y
     ; will be incremented after this runs, so need to decrement here
     dec a
     jmp set_script_step
@@ -749,15 +749,15 @@ op_branch_eq
 .xl
     rep #$20
     ldy #$4
-    lda (script_element_ptr), y
+    lda (script_element_ptr),y
     asl
     tax
     ldy #$6
-    lda (script_element_ptr), y
-    cmp script_storage, x
+    lda (script_element_ptr),y
+    cmp script_storage,x
     bne +
     ldy #$8
-    lda (script_element_ptr), y
+    lda (script_element_ptr),y
     dec a
     jmp set_script_step
 +   rts
@@ -767,15 +767,15 @@ op_branch_ne
 .xl
     rep #$20
     ldy #$4
-    lda (script_element_ptr), y
+    lda (script_element_ptr),y
     asl
     tax
     ldy #$6
-    lda (script_element_ptr), y
-    cmp script_storage, x
+    lda (script_element_ptr),y
+    cmp script_storage,x
     beq +
     ldy #$8
-    lda (script_element_ptr), y
+    lda (script_element_ptr),y
     dec a
     jmp set_script_step
 +   rts
@@ -785,7 +785,7 @@ op_set_player_locked
 .xl
     rep #$20
     ldy #$4
-    lda (script_element_ptr), y
+    lda (script_element_ptr),y
     sta player_locked
 
     rts

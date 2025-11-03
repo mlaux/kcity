@@ -93,7 +93,7 @@ main_loop
     lda game_state
     asl
     tax
-    jsr (STATES, x)
+    jsr (STATES,x)
 
     ; measure CPU time in scanlines
 ;     sep #$20
@@ -182,7 +182,7 @@ _do_vblank
     lda game_state
     asl
     tax
-    jsr (VBLANKS, x)
+    jsr (VBLANKS,x)
     plp
 
     ; jsr draw_cpu_usage
@@ -383,10 +383,10 @@ clear_oam
 
     lda #224
     ldx #OAM_MAIN_LENGTH - 4
--   sta oam_data_y, x
-    stz oam_data_x, x
-    stz oam_data_id, x
-    stz oam_data_flag, x
+-   sta oam_data_y,x
+    stz oam_data_x,x
+    stz oam_data_id,x
+    stz oam_data_flag,x
     dex
     dex
     dex

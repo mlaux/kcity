@@ -108,14 +108,14 @@ background_init
     sta CGWSEL
 
     ldx #size(TEXT_HDMA_TABLE) - 1
--   lda TEXT_HDMA_TABLE, x
-    sta text_box_hdma_table, x
+-   lda TEXT_HDMA_TABLE,x
+    sta text_box_hdma_table,x
     dex
     bpl -
 
     ldx #size(TITLE_HDMA_TABLE) - 1
--   lda TITLE_HDMA_TABLE, x
-    sta title_glitch_hdma_table, x
+-   lda TITLE_HDMA_TABLE,x
+    sta title_glitch_hdma_table,x
     dex
     bpl -
 
@@ -139,8 +139,8 @@ process_input
     ldx facing_object_script
     beq +
 
-    lda OBJECT_SCRIPTS - 2, x
-    ldy OBJECT_SCRIPT_LENGTHS - 2, x
+    lda OBJECT_SCRIPTS - 2,x
+    ldy OBJECT_SCRIPT_LENGTHS - 2,x
     tax
     jsr set_script
 

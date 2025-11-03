@@ -310,7 +310,7 @@ collision_map .fill $8000
 .section bank01
 .include "bank01.asm"
 .endsection bank01
-.warn format("bank01 free space: $%04x", $20000 - *)
+.warn format("bank01 free space: $%04x", $820000 - *)
 .cerror * > $820000, "bank01 too long"
 .here
 
@@ -320,7 +320,7 @@ collision_map .fill $8000
 .section bank02
 .include "bank02.asm"
 .endsection bank02
-.warn format("bank02 free space: $%04x", $30000 - *)
+.warn format("bank02 free space: $%04x", $830000 - *)
 .cerror * > $830000, "bank02 too long"
 .here
 
@@ -330,7 +330,7 @@ collision_map .fill $8000
 .section bank03
 .include "bank03.asm"
 .endsection bank03
-.warn format("bank03 free space: $%04x", $40000 - *)
+.warn format("bank03 free space: $%04x", $840000 - *)
 .cerror * > $840000, "bank03 too long"
 .here
 
@@ -340,7 +340,7 @@ collision_map .fill $8000
 .section bank04
 .include "bank04.asm"
 .endsection bank04
-.warn format("bank04 free space: $%04x", $50000 - *)
+.warn format("bank04 free space: $%04x", $850000 - *)
 .cerror * > $850000, "bank04 too long"
 .here
 
@@ -350,7 +350,7 @@ collision_map .fill $8000
 .section bank05
 .include "bank05.asm"
 .endsection bank05
-.warn format("bank05 free space: $%04x", $60000 - *)
+.warn format("bank05 free space: $%04x", $860000 - *)
 .cerror * > $860000, "bank05 too long"
 .here
 

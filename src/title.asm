@@ -98,7 +98,7 @@ state_title
     tax
     inc title_animation_frame
     lda title_animation_frame
-    cmp TITLE_ANIMATION_FRAMES, x
+    cmp TITLE_ANIMATION_FRAMES,x
     bne +
     stz title_animation_frame
     inc title_animation_step
@@ -377,18 +377,18 @@ init_newt_sprite
     ldx #0
     ldy #0
 -
-    lda NEWT_X_COORDS, y
+    lda NEWT_X_COORDS,y
     clc
     adc #NEWT_BASE_X
-    sta oam_data_x, x
-    lda NEWT_Y_COORDS, y
+    sta oam_data_x,x
+    lda NEWT_Y_COORDS,y
     clc
     adc #NEWT_BASE_Y
-    sta oam_data_y, x
-    lda NEWT_TILES, y
-    sta oam_data_id, x
+    sta oam_data_y,x
+    lda NEWT_TILES,y
+    sta oam_data_id,x
     lda #$38
-    sta oam_data_flag, x
+    sta oam_data_flag,x
     inx
     inx
     inx
@@ -406,10 +406,10 @@ move_newt
 
     ldy #NEWT_TILE_COUNT
     ldx #0
--   lda oam_data_y, x
+-   lda oam_data_y,x
     cmp #TITLE_SPRITE_HIDDEN_Y
     beq +
-    inc oam_data_y, x
+    inc oam_data_y,x
 +   inx
     inx
     inx
@@ -428,7 +428,7 @@ hide_newt
     lda #TITLE_SPRITE_HIDDEN_Y
     ldx #0
     ldy #NEWT_TILE_COUNT
--   sta oam_data_y, x
+-   sta oam_data_y,x
     inx
     inx
     inx

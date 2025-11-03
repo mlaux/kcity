@@ -63,7 +63,7 @@ _init_next_line
     sta text_index
     asl
     tay
-    lda (text_box_lines), y
+    lda (text_box_lines),y
     pha
 
     lda text_index
@@ -190,11 +190,11 @@ _set_height
     beq _use_8x16_heights
     
 _use_8x8_heights
-    lda TEXT_BOX_HEIGHTS, x
+    lda TEXT_BOX_HEIGHTS,x
     bra _store_height
     
 _use_8x16_heights
-    lda TEXT_BOX_HEIGHTS_8X16, x
+    lda TEXT_BOX_HEIGHTS_8X16,x
     
 _store_height
     sta text_box_hdma_table + 4
@@ -234,14 +234,14 @@ update_text_box_cursor
     bne _write_empty
 
 _write_cursor
-    lda text_box_option_positions, y
+    lda text_box_option_positions,y
     sta VMADD
     lda #$21fb
     sta VMDATA
     bra _next
 
 _write_empty
-    lda text_box_option_positions, y
+    lda text_box_option_positions,y
     sta VMADD
     lda #$0000
     sta VMDATA
@@ -359,8 +359,8 @@ _continue
     ; ORed into the one that it's about to draw
     lda #$0
     ldy #$e
- -  sta (vwf_dst), y
-    sta (vwf_dst_bottom), y
+ -  sta (vwf_dst),y
+    sta (vwf_dst_bottom),y
     dey
     dey
     bpl -
@@ -422,7 +422,7 @@ _check_special_char
     asl
     tax
     lda vwf_tilemap_dst
-    sta text_box_option_positions, x
+    sta text_box_option_positions,x
 
     inc text_box_num_options
     ; indent options a little bit for cursor
@@ -508,7 +508,7 @@ _each_byte_8x8
     sep #$20
 
     ; save existing tile byte
-    lda (vwf_dst), y
+    lda (vwf_dst),y
     sta vwf_cur_tile_byte
 
     lda #0
@@ -530,11 +530,11 @@ _done_shifting_8x8
     ; combine new partial character with existing tile
     ; 0 - transparent, 1 - black, 2 - black, 3 - white
     ora vwf_cur_tile_byte
-    sta (vwf_dst), y
+    sta (vwf_dst),y
 
     ; leftover pixels need to go in the next tile
     lda vwf_remainder
-    sta (vwf_next), y
+    sta (vwf_next),y
 
     rep #$20
 
@@ -556,13 +556,13 @@ _process_8x16_half_tile
     bne _save_bottom
 
     ; save existing tile byte from top tile
-    lda (vwf_dst), y
+    lda (vwf_dst),y
     sta vwf_cur_tile_byte
     bra _process_font_data
     
 _save_bottom
     ; save existing tile byte from bottom tile
-    lda (vwf_dst_bottom), y
+    lda (vwf_dst_bottom),y
     sta vwf_cur_tile_byte
 
 _process_font_data
@@ -591,17 +591,17 @@ _done_shifting_tile
     bne _store_bottom_half
 
 _store_top_half
-    sta (vwf_dst), y
+    sta (vwf_dst),y
     ; remainder goes to next top tile
     lda vwf_remainder
-    sta (vwf_next), y
+    sta (vwf_next),y
     bra _continue_tile_loop
     
 _store_bottom_half
-    sta (vwf_dst_bottom), y
+    sta (vwf_dst_bottom),y
     ; remainder goes to next bottom tile
     lda vwf_remainder
-    sta (vwf_next_bottom), y
+    sta (vwf_next_bottom),y
 
 _continue_tile_loop
     rep #$20
@@ -614,7 +614,7 @@ _continue_tile_loop
 _char_processing_done
     ; vwf_offs = (vwf_offs + CHAR_WIDTHS[vwf_ch]) % 8;
     ldx vwf_ch
-    lda GENEVA_CHAR_WIDTHS, x
+    lda GENEVA_CHAR_WIDTHS,x
     and #$ff
     clc
     adc vwf_offs
@@ -632,7 +632,7 @@ _char_processing_done
     ; beq +
     ; ldy #8
     ; lda #255
-    ; sta (vwf_dst), y
+    ; sta (vwf_dst),y
 
     ldy vwf_font_type
     bne _advance_8x16
@@ -838,11 +838,11 @@ vwf_reset_map
     beq _use_8x16_tile_heights
 
 _use_8x8_tile_heights
-    lda TEXT_BOX_TILE_HEIGHTS, x
+    lda TEXT_BOX_TILE_HEIGHTS,x
     bra _got_tile_height
 
 _use_8x16_tile_heights
-    lda TEXT_BOX_TILE_HEIGHTS_8X16, x
+    lda TEXT_BOX_TILE_HEIGHTS_8X16,x
 
 _got_tile_height
     ; y = height - 1

@@ -23,7 +23,7 @@ run_effect
     tax
     sep #$20
     lda effect_level
-    jmp (EFFECTS, x)
+    jmp (EFFECTS,x)
 
 run_fade_in
     inc a

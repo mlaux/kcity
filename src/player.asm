@@ -57,22 +57,22 @@ set_sprite_id_16x32
     asl
     tay ; *2 again for dest offset in oam array, *2 because two sprites stacked up
 
-    lda SPRITE_BASE_IDS_FEET, x
-    sta oam_data_id, y
-    lda SPRITE_INITIAL_FLAGS, x
-    sta oam_data_flag, y
+    lda SPRITE_BASE_IDS_FEET,x
+    sta oam_data_id,y
+    lda SPRITE_INITIAL_FLAGS,x
+    sta oam_data_flag,y
     lda #$e0
-    sta oam_data_y, y
+    sta oam_data_y,y
     iny
     iny
     iny
     iny
-    lda SPRITE_BASE_IDS_HEAD, x
-    sta oam_data_id, y
-    lda SPRITE_INITIAL_FLAGS, x
-    sta oam_data_flag, y
+    lda SPRITE_BASE_IDS_HEAD,x
+    sta oam_data_id,y
+    lda SPRITE_INITIAL_FLAGS,x
+    sta oam_data_flag,y
     lda #$e0
-    sta oam_data_y, y
+    sta oam_data_y,y
 
     plp
     rts
@@ -92,7 +92,7 @@ player_set_initial_position
     stz target_player_x
     bra _y
 
-+   lda START_X - 2, x
++   lda START_X - 2,x
     sta player_x
 
 _y
@@ -102,7 +102,7 @@ _y
     stz target_player_y
     bra _done
 
-+   lda START_Y - 2, x
++   lda START_Y - 2,x
     sta player_y
 
 _done
@@ -140,11 +140,11 @@ check_collision_per_pixel
 +   clc
     adc zp2
     tax
-    lda @l collision_map, x
+    lda @l collision_map,x
     and #$ff
     ldx zp3
     ; x offset within that byte
-    and BIT_POSITIONS, x
+    and BIT_POSITIONS,x
 
     rts
 
@@ -180,7 +180,7 @@ check_script_triggers
 +   clc
     adc zp2
     tay
-    lda (script_trigger_map_ptr), y
+    lda (script_trigger_map_ptr),y
     bit #$80
     beq +
     and #$7f
@@ -290,7 +290,7 @@ _process_movement
 +   asl
     tax
     ; MOVEMENT_JUMP_TABLE[(player_direction - 1) << 1]()
-    jmp (MOVEMENT_JUMP_TABLE - 2, x)
+    jmp (MOVEMENT_JUMP_TABLE - 2,x)
 
 go_right
     lda player_x
@@ -509,12 +509,12 @@ animate_sprite_v2
     asl
     tax
 
-    lda sprites_anim_direction, x
+    lda sprites_anim_direction,x
     and #$ff
     bne _moving
 
     ; if direction = 0 try previous direction so it can set a final idle frame
-    lda sprites_anim_previous_direction, x
+    lda sprites_anim_previous_direction,x
     and #$ff
     bne _stopped
 
@@ -522,42 +522,42 @@ animate_sprite_v2
     rts
 
 _stopped
-    stz sprites_anim_previous_direction, x
+    stz sprites_anim_previous_direction,x
     ; set frame 0 for previous direction
     dec a
     sln 7
     clc
-    adc SPRITE_ID_TO_DATA, x
+    adc SPRITE_ID_TO_DATA,x
     jmp dma_queue_add
 
 _moving
     ; if it's not time to go to the next frame, exit
-    inc sprites_anim_timer, x
-    lda sprites_anim_timer, x
+    inc sprites_anim_timer,x
+    lda sprites_anim_timer,x
     cmp #PLAYER_ANIMATION_SPEED
     bpl +
     rts
 
 ;     ; $400, $800, $c00, $1000, $1400, $1800, reset
-+   stz sprites_anim_timer, x
-    lda sprites_anim_offset, x
++   stz sprites_anim_timer,x
+    lda sprites_anim_offset,x
     clc
     adc #$400
     cmp #$1c00
     beq +
-    sta sprites_anim_offset, x
+    sta sprites_anim_offset,x
     bra _go
 
 +   lda #$400
-    sta sprites_anim_offset, x
+    sta sprites_anim_offset,x
 
 _go
-    lda sprites_anim_direction, x
+    lda sprites_anim_direction,x
     dec a
     sln 7
     clc
-    adc sprites_anim_offset, x
-    adc SPRITE_ID_TO_DATA, x
+    adc sprites_anim_offset,x
+    adc SPRITE_ID_TO_DATA,x
     jmp dma_queue_add
 
 animate_npcs

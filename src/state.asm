@@ -33,7 +33,7 @@ run_state_init
     tya
     asl
     tax
-    jsr (INITS, x)
+    jsr (INITS,x)
 
     ply
     sty game_state

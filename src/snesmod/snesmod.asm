@@ -127,7 +127,7 @@ spcBoot
 sb_send
 ;----------------------------------------------------------------------
 	xba			; swap DATA into A
-	lda	SNESMOD_SPC, x; read next byte
+	lda	SNESMOD_SPC,x; read next byte
 	inx			; swap DATA into B
 	xba			;--------------------------------------
 -	cmp	REG_APUIO0	; wait for SPC
@@ -219,12 +219,12 @@ spcLoad
 	sty	spc2
 	jsr	get_address
 	rep	#$20
-	lda	[spc_ptr], y	; X = MODULE SIZE
+	lda	[spc_ptr],y	; X = MODULE SIZE
 	tax
 	
 	incptr
 	
-	lda	[spc_ptr], y	; read SOURCE LIST SIZE
+	lda	[spc_ptr],y	; read SOURCE LIST SIZE
 	
 	incptr
 	
@@ -267,14 +267,14 @@ spcLoad
 	incptr
 	
 	rep	#$20		; x = number of sources
-	lda	[spc_ptr], y	;
+	lda	[spc_ptr],y	;
 	tax			;
 	
 	incptr
 	
 transfer_sources
 	
-	lda	[spc_ptr], y	; read source index
+	lda	[spc_ptr],y	; read source index
 	sta	spc1		;
 	
 	incptr
@@ -323,12 +323,12 @@ transfer_source
 	lda	#$01		; port0=$01
 	sta	REG_APUIO0	;
 	rep	#$20		; x = length (bytes->words)
-	lda	[spc_ptr], y	;
+	lda	[spc_ptr],y	;
 	incptr			;
 	ina			;
 	lsr			;
 	tax			;
-	lda	[spc_ptr], y	; port2,3 = loop point
+	lda	[spc_ptr],y	; port2,3 = loop point
 	sta	REG_APUIO2
 	incptr
 	sep	#$20
@@ -360,7 +360,7 @@ do_transfer
 ;--------------------------------------------------------------
 
 	rep	#$20		; transfer 1 word
-	lda	[spc_ptr], y	;
+	lda	[spc_ptr],y	;
 	sta	REG_APUIO2	;
 	sep	#$20		;
 	lda	spc_v		;
@@ -433,7 +433,7 @@ spcLoadEffect
 -	cmp	REG_APUIO1	;
 	bne	-		;--------------------------------------
 	rep	#$20		; x = length (bytes->words)
-	lda	[spc_ptr], y	;
+	lda	[spc_ptr],y	;
 	ina			;
 	lsr			;
 	incptr			;
@@ -456,13 +456,13 @@ QueueMessage
 			
 	sep	#$10			; queue data in fifo
 	ldx	spc_fwrite		;
-	sta	spc_fifo, x		;
+	sta	spc_fifo,x		;
 	inx				;
 	lda	spc1			;
-	sta	spc_fifo, x		;
+	sta	spc_fifo,x		;
 	inx				;
 	lda	spc1+1			;
-	sta	spc_fifo, x		;
+	sta	spc_fifo,x		;
 	inx				;
 	stx	spc_fwrite		;
 	rep	#$10			;
@@ -509,15 +509,15 @@ _process_again
 	bne	_next			; no: decrement time
 					;------------------------------
 	ldx	spc_fread		; copy message arguments
-	lda	spc_fifo, x		; and update fifo read pos
+	lda	spc_fifo,x		; and update fifo read pos
 	sta	REG_APUIO0		;
 	sta	spc_pr+0
 	inx				;
-	lda	spc_fifo, x		;
+	lda	spc_fifo,x		;
 	sta	REG_APUIO2		;
 	sta	spc_pr+2
 	inx				;
-	lda	spc_fifo, x		;
+	lda	spc_fifo,x		;
 	sta	REG_APUIO3		;
 	sta	spc_pr+3
 	inx				;
@@ -751,12 +751,12 @@ spcPlaySoundEx
 	sta	digi_pitch		;
 	bra	_direct_pitch		;
 _use_default_pitch			;
-	lda	[SoundTable], y		;
+	lda	[SoundTable],y		;
 	sta	digi_pitch		;
 _direct_pitch				;
 ;----------------------------------------------------------------------------
 	tax				; set transfer rate
-	lda	digi_rates, x		;
+	lda	digi_rates,x		;
 	sta	digi_copyrate		;
 ;----------------------------------------------------------------------------
 	iny				; [point to PAN]
@@ -765,7 +765,7 @@ _direct_pitch				;
 	sta	spc1
 	bra	_direct_pan
 _use_default_pan
-	lda	[SoundTable], y
+	lda	[SoundTable],y
 	sta	spc1
 _direct_pan
 ;----------------------------------------------------------------------------
@@ -774,7 +774,7 @@ _direct_pan
 	bmi	_use_default_vol	; otherwise use direct
 	bra	_direct_vol
 _use_default_vol
-	lda	[SoundTable], y
+	lda	[SoundTable],y
 _direct_vol
 ;----------------------------------------------------------------------------
 	asl				; vp = (vol << 4) | pan
@@ -786,12 +786,12 @@ _direct_vol
 ;----------------------------------------------------------------------------
 	iny				; [point to LENGTH]
 	rep	#$20			; copy length
-	lda	[SoundTable], y		;
+	lda	[SoundTable],y		;
 	sta	digi_remain		;
 ;----------------------------------------------------------------------------
 	iny				; [point to SOURCE]
 	iny				;
-	lda	[SoundTable], y		; copy SOURCE also make +2 copy
+	lda	[SoundTable],y		; copy SOURCE also make +2 copy
 	iny				;
 	iny				;
 	sta	digi_src		;
@@ -799,7 +799,7 @@ _direct_vol
 	ina				;
 	sta	digi_src2		;
 	sep	#$20			;
-	lda	[SoundTable], y		;
+	lda	[SoundTable],y		;
 	sta	digi_src+2		;
 	sta	digi_src2+2		;
 ;----------------------------------------------------------------------------
@@ -879,10 +879,10 @@ _copysat				;
 
 _next_block
 		
-	lda	[digi_src2], y
+	lda	[digi_src2],y
 	sta	spc2
 	rep	#$20			; read 2 bytes
-	lda	[digi_src], y		;
+	lda	[digi_src],y		;
 -	cpx	REG_APUIO0		;-sync with spc
 	bne	-			;
 	inx				; increment v
