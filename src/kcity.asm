@@ -120,11 +120,8 @@ update_ppu .word ?
 ; nmi re-entrancy guard, set to 1 when inside NMI handler
 in_nmi .word ?
 frame_counter .word ?
-frame_counter_hi .word ?
-play_time .word ?
-play_time_hi .word ?
-playtime_temp .fill 4
-playtime_string .fill 4
+frame_counter_mod_60 .word ?
+play_time_hms .fill 6
 
 joypad_current .word ?
 joypad_last .word ?
@@ -283,8 +280,8 @@ sram_map_id .word ?
 sram_player_x .word ?
 sram_player_y .word ?
 sram_game_progress .word ?
-sram_play_time .word ?
-sram_play_time_hi .word ?
+; sram_play_time .word ?
+; sram_play_time_hi .word ?
 
 .warn "sram end: ", *
 
