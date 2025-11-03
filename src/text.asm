@@ -820,14 +820,70 @@ vwf_reset_map
     lda #1
     sta MDMAEN
 
-    ; clear tilemap - actually only need to clear where the text box was
-    ; future optimization
-    ldx #$800 ; 400 words
+
+    ; only clear tilemap where the text box was, row by row. according to Mesen
+    ; debugger, this approach takes:
+    ; - 3730 master clocks for small location name text box
+    ; - 8038 master clocks for large 4-line text box
+    ; - clearing entire tilemap is 2048 bytes * 8 clocks per byte = 16384
+    ; so, for huge text boxes, doing one dma to clear the tilemap might still
+    ; be faster
+    rep #$20
+
+    ; get height in tiles
+    ldx text_box_num_lines
+    lda vwf_font_type
+    cmp #FONT_TYPE_8X16
+    beq _use_8x16_tile_heights
+
+_use_8x8_tile_heights
+    lda TEXT_BOX_TILE_HEIGHTS, x
+    bra _got_tile_height
+
+_use_8x16_tile_heights
+    lda TEXT_BOX_TILE_HEIGHTS_8X16, x
+
+_got_tile_height
+    ; y = height - 1
+    and #$ff
+    dec a
+    tay
+
+    ; zp1 = $800 + 32 * (height - 1) + x
+    clc
+    adc text_box_y
+    asl
+    asl
+    asl
+    asl
+    asl
+    clc
+    adc text_box_x
+    adc #$0800
+    sta zp1
+
+    lda text_box_width
+    asl
+    tax
+
+_clear_row_loop
+    lda zp1
+    sta VMADD
+
+    ; gets reset to 0 every time
     stx DMALEN
-    ldx #$800
-    stx VMADD
-    lda #$1
+
+    sep #$20
+    lda #1
     sta MDMAEN
+    rep #$20
+
+    lda zp1
+    sec
+    sbc #$20
+    sta zp1
+    dey
+    bpl _clear_row_loop
 
     ldx #DEST_TILE_ID_START
     stx vwf_tilemap_id

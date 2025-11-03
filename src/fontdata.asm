@@ -11,6 +11,12 @@ TEXT_BOX_HEIGHTS .byte 0, $18, $20, $28, $30
 ; heights for 1, 2, 3, 4 lines (8x16 font - double height)
 TEXT_BOX_HEIGHTS_8X16 .byte 0, $20, $30, $40, $50
 
+; tile heights for 1, 2, 3, 4 lines (8x8 font)
+TEXT_BOX_TILE_HEIGHTS .byte 0, 3, 4, 5, 6
+
+; tile heights for 1, 2, 3, 4 lines (8x16 font)
+TEXT_BOX_TILE_HEIGHTS_8X16 .byte 0, 4, 6, 8, 10
+
 ; $40 for $AA lines
 ; $40 for $BB more lines
 ; $51 for $CC lines
