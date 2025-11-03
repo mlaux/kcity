@@ -1,17 +1,17 @@
 
 ; all functions will be called with AXY16 and should return with AXY16
 INITS
-    .word state_title_init
-    .word state_gameplay_init
-    .word state_journal_init
+    .addr state_title_init
+    .addr state_gameplay_init
+    .addr state_journal_init
 STATES
-    .word state_title
-    .word state_gameplay
-    .word state_journal
+    .addr state_title
+    .addr state_gameplay
+    .addr state_journal
 VBLANKS
-    .word state_title_vblank
-    .word state_gameplay_vblank
-    .word state_journal_vblank
+    .addr state_title_vblank
+    .addr state_gameplay_vblank
+    .addr state_journal_vblank
 
 ; turns rendering off and runs the state init function for the given state,
 ; then sets the game_state to the new value. this does not immediately start

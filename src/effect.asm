@@ -73,7 +73,7 @@ run_mosaic_off
 
     rts
 
-EFFECTS .word run_fade_in, run_fade_out, run_mosaic_on, run_mosaic_off
+EFFECTS .addr run_fade_in, run_fade_out, run_mosaic_on, run_mosaic_off
 
 ; "Effect-aware" way to disable rendering immediately
 enable_force_blank

@@ -9,6 +9,9 @@ RESET
 .xl
     rep #$30
 
+    jml _fast
+_fast
+
     ; set up stack, set data bank = program bank
     ldx #$1fff
     txs
@@ -71,18 +74,18 @@ RESET
     ; fall through to main loop
 main_loop
     ; set H/V counter latch to lock in vertical counter
-    bit SLHV
-    ; load the actual vertical counter
-    lda OPVCT
-    sta vertical_counter_start
-    lda OPVCT
-    and #1
-    sta vertical_counter_start + 1
-    ; reading this will reset the counter latch for next time
-    bit STAT78
+    ; bit SLHV
+    ; ; load the actual vertical counter
+    ; lda OPVCT
+    ; sta vertical_counter_start
+    ; lda OPVCT
+    ; and #1
+    ; sta vertical_counter_start + 1
+    ; ; reading this will reset the counter latch for next time
+    ; bit STAT78
 
-	jsr	spcProcess
-    ; jsr SPX_Routine
+    ; don't actually need this unless i'm streaming sounds
+	; jsr spcProcess
 
     rep #$20
     jsr read_input
@@ -93,26 +96,27 @@ main_loop
     jsr (STATES, x)
 
     ; measure CPU time in scanlines
-    sep #$20
-    bit SLHV
-    lda OPVCT
-    sta vertical_counter_end
-    lda OPVCT
-    and #1
-    sta vertical_counter_end + 1
-    bit STAT78
+;     sep #$20
+;     bit SLHV
+;     lda OPVCT
+;     sta vertical_counter_end
+;     lda OPVCT
+;     and #1
+;     sta vertical_counter_end + 1
+;     bit STAT78
+
+;     rep #$20
+;     lda vertical_counter_end
+;     sec
+;     sbc vertical_counter_start
+;     bpl +
+;     ; wrapped around scanline 262, compensate
+;     clc
+;     adc #262
+; +   sta vertical_counter_this_frame
+;     sep #$20
 
     rep #$20
-    lda vertical_counter_end
-    sec
-    sbc vertical_counter_start
-    bpl +
-    ; wrapped around scanline 262, compensate
-    clc
-    adc #262
-+   sta vertical_counter_this_frame
-    sep #$20
-
     ; signal that the NMI is good to go and busy wait
     lda #1
     sta update_ppu
@@ -123,9 +127,9 @@ main_loop
     jmp main_loop
 
 NMI_ISR
-.al
-.xl
     rep #$30
+    jml _fast
+_fast
     pha
     phx
     phy
@@ -156,15 +160,15 @@ _do_vblank
     inc in_nmi
 
     ; set H/V counter latch to lock in vertical counter
-    bit SLHV
-    ; load the actual vertical counter
-    lda OPVCT
-    sta vertical_counter_vblank_start
-    lda OPVCT
-    and #1
-    sta vertical_counter_vblank_start + 1
-    ; reading this will reset the counter latch for next time
-    bit STAT78
+    ; bit SLHV
+    ; ; load the actual vertical counter
+    ; lda OPVCT
+    ; sta vertical_counter_vblank_start
+    ; lda OPVCT
+    ; and #1
+    ; sta vertical_counter_vblank_start + 1
+    ; ; reading this will reset the counter latch for next time
+    ; bit STAT78
 
     ; do not run state specific vblank if transitioning between states
     lda state_transitioning
@@ -181,7 +185,7 @@ _do_vblank
     jsr (VBLANKS, x)
     plp
 
-    jsr draw_cpu_usage
+    ; jsr draw_cpu_usage
 
     ; handle fade or mosaic effect if needed. this is so during transitions, 
     ; states can just busy wait for the effects to be done
@@ -232,23 +236,23 @@ _do_vblank
     ; measure CPU time in scanlines. delayed by one frame because it's already
     ; been drawn for this frame, but i wanted to include the drawing in the
     ; measurement
-    bit SLHV
-    lda OPVCT
-    sta vertical_counter_vblank_end
-    lda OPVCT
-    and #1
-    sta vertical_counter_vblank_end + 1
-    bit STAT78
+;     bit SLHV
+;     lda OPVCT
+;     sta vertical_counter_vblank_end
+;     lda OPVCT
+;     and #1
+;     sta vertical_counter_vblank_end + 1
+;     bit STAT78
 
-    rep #$20
-    lda vertical_counter_vblank_end
-    sec
-    sbc vertical_counter_vblank_start
-    bpl +
-    ; wrapped around scanline 262, compensate
-    clc
-    adc #262
-+   sta vertical_counter_vblank_this_frame
+;     rep #$20
+;     lda vertical_counter_vblank_end
+;     sec
+;     sbc vertical_counter_vblank_start
+;     bpl +
+;     ; wrapped around scanline 262, compensate
+;     clc
+;     adc #262
+; +   sta vertical_counter_vblank_this_frame
 
     rep #$20
     inc frame_counter
@@ -318,7 +322,9 @@ clear_registers
     stz WRDIVB ; HTIMEL
     stz HTIMEH ; VTIMEL
     stz VTIMEH ; MDMAEN
-    stz HDMAEN ; MEMSEL
+    ; HDMAEN = 0, MEMSEL = $1
+    lda #$0100
+    sta HDMAEN
     rts
 
 clear_ppu_ram

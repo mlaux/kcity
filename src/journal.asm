@@ -7,7 +7,7 @@ JOURNAL_ENTRY_6 .text "String six", 255
 JOURNAL_ENTRY_7 .text "String seven", 255
 JOURNAL_ENTRY_8 .text "String eight", 255
 
-JOURNAL_ENTRY_TABLE .word JOURNAL_ENTRY_1, JOURNAL_ENTRY_2, JOURNAL_ENTRY_3, JOURNAL_ENTRY_4, JOURNAL_ENTRY_5, JOURNAL_ENTRY_6, JOURNAL_ENTRY_7, JOURNAL_ENTRY_8
+JOURNAL_ENTRY_TABLE .addr JOURNAL_ENTRY_1, JOURNAL_ENTRY_2, JOURNAL_ENTRY_3, JOURNAL_ENTRY_4, JOURNAL_ENTRY_5, JOURNAL_ENTRY_6, JOURNAL_ENTRY_7, JOURNAL_ENTRY_8
 
 open_journal
 .al
@@ -184,7 +184,7 @@ load_journal_background
 draw_journal_text
 .al
 .xl
-    lda #INDIE_FLOWER_CHARS
+    lda #<>INDIE_FLOWER_CHARS
     jsr vwf_set_font
     lda #1
     jsr vwf_set_palette

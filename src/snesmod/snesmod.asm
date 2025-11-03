@@ -68,10 +68,10 @@ CMD_FX		=$08
 CMD_TEST	=$09
 CMD_SSIZE	=$0A
 
-REG_APUIO0 = $2140
-REG_APUIO1 = $2141
-REG_APUIO2 = $2142
-REG_APUIO3 = $2143
+REG_APUIO0 = $802140
+REG_APUIO1 = $802141
+REG_APUIO2 = $802142
+REG_APUIO3 = $802143
 
 ;*************************************************************************
 ;* status register definitions

@@ -1,17 +1,17 @@
 ; Registers            Also known as...
-DMAMODE      = $4300 ; DMAPn
-DMAPPUREG    = $4301 ; BBADn
-DMAADDR      = $4302 ; A1TnL
-DMAADDRHI    = $4303 ; A1TnH
-DMAADDRBANK  = $4304 ; A1Bn
-DMALEN       = $4305 ; DASnL
-DMALENHI     = $4306 ; DASnH
+DMAMODE      = $804300 ; DMAPn
+DMAPPUREG    = $804301 ; BBADn
+DMAADDR      = $804302 ; A1TnL
+DMAADDRHI    = $804303 ; A1TnH
+DMAADDRBANK  = $804304 ; A1Bn
+DMALEN       = $804305 ; DASnL
+DMALENHI     = $804306 ; DASnH
 
-DMAP7 = $4370
-BBAD7 = $4371
-A1T7L = $4372
-A1T7H = $4373
-A1B7 = $4374
+DMAP7 = $804370
+BBAD7 = $804371
+A1T7L = $804372
+A1T7H = $804373
+A1B7 = $804374
 
 ; Configuration for $43n0
 ; OR these together to get the desired effect

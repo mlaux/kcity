@@ -20,7 +20,7 @@ save_game
     lda play_time_hms + 4
     sta sram_play_time_hms + 4
 
-    ldx #SCRIPT_MESSAGE_SAVED
+    ldx #<>SCRIPT_MESSAGE_SAVED
     ldy #3
     jsr set_script
 

@@ -36,7 +36,7 @@
 .include "snesmod/spcdriv.asm"
 .endsection
 
-.warn format("bank00 free space: $%04x", $ffb0 - *)
+.warn format("bank00 free space: $%04x", $80ffb0 - *)
 
 ; * = $f000
 ; .dsection tad_driver
@@ -44,7 +44,7 @@
 ; .binary "spc700/kcity-audio.sfc", 0, $1000
 ; .endsection
 
-* = $ffb0
+* = $80ffb0
 .dsection header
 .section header
 ZERO
@@ -52,8 +52,8 @@ ZERO
     ; "Software Submission Requirements: ROM Registration Data Specification"
     .fill 16, 0  ; extended data, not using it
     .text "K****** walled city" ; game title
-    .fill $ffd5 - *, $20 ; pad title with space
-    .byte $20   ; mapping mode 20, normal speed
+    .fill $80ffd5 - *, $20 ; pad title with space
+    .byte $30   ; mapping mode 20, fast speed
     .byte $02   ; ROM + SRAM + battery
     .byte $07   ; 2 << 7 = 128 KB (1 megabit) ROM size
     .byte $01   ; 2 << 1 = 2 KB (16 kilobits) SRAM size
@@ -65,22 +65,22 @@ ZERO
 .endsection
 
 ; 65816 vectors
-* = $ffe4
+* = $80ffe4
 .dsection vectors
 .section vectors
-v16_COP    .word EMPTY_ISR
-v16_BRK    .word EMPTY_ISR
-v16_ABORT  .word EMPTY_ISR
-v16_NMI    .word NMI_ISR
-v16_RESET  .word EMPTY_ISR
-v16_IRQ    .word EMPTY_ISR
+v16_COP    .word <>EMPTY_ISR
+v16_BRK    .word <>EMPTY_ISR
+v16_ABORT  .word <>EMPTY_ISR
+v16_NMI    .word <>NMI_ISR
+v16_RESET  .word <>EMPTY_ISR
+v16_IRQ    .word <>EMPTY_ISR
 
 ; 6502 vectors
-* = $fff4
-v02_COP    .word EMPTY_ISR
-v02_BRK    .word EMPTY_ISR
-v02_ABORT  .word EMPTY_ISR
-v02_NMI    .word EMPTY_ISR
-v02_RESET  .word RESET
-v02_IRQ    .word EMPTY_ISR
+* = $80fff4
+v02_COP    .word <>EMPTY_ISR
+v02_BRK    .word <>EMPTY_ISR
+v02_ABORT  .word <>EMPTY_ISR
+v02_NMI    .word <>EMPTY_ISR
+v02_RESET  .word <>RESET
+v02_IRQ    .word <>EMPTY_ISR
 .endsection

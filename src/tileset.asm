@@ -221,7 +221,7 @@ map_run_warp
     lda LOCATION_NAMES - 2, x
     sta location_name_script + 24
     phx
-    ldx #location_name_script
+    ldx #<>location_name_script
     ldy #4
     jsr set_script
     plx

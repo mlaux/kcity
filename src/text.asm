@@ -203,9 +203,10 @@ _store_height
     sta DMAMODE
     lda #CGADSUB & $ff
     sta DMAPPUREG
-    ldx #text_box_hdma_table
+    ldx #<>text_box_hdma_table
     stx DMAADDR
-    stz DMAADDRBANK
+    lda #`text_box_hdma_table
+    sta DMAADDRBANK
     lda #$1
     sta HDMAEN
 
@@ -260,7 +261,7 @@ vwf_reset_tiles
     rep #$20
 .al
 .xl
-    lda #vwf_tiles
+    lda #<>vwf_tiles
     sta vwf_dst
 
     ; set up pointers based on font type

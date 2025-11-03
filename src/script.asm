@@ -44,20 +44,20 @@ RESULT_CANCELLED = -1
 
 ; can eliminate some redundancy in the implementations of these
 script_operations
-    .word op_none
-    .word op_text_box, op_hide_text_box
-    .word op_set_sprite_flags, op_set_sprite_position
-    .word op_move_sprite_x, op_move_sprite_y
-    .word op_set_sprite_direction
-    .word op_set_variable
-    .word op_read_result
-    .word op_inc_variable
-    .word op_add
-    .word op_unconditional_branch
-    .word op_branch_eq
-    .word op_branch_ne
-    .word op_set_player_locked
-    .word op_clear_text_tiles
+    .addr op_none
+    .addr op_text_box, op_hide_text_box
+    .addr op_set_sprite_flags, op_set_sprite_position
+    .addr op_move_sprite_x, op_move_sprite_y
+    .addr op_set_sprite_direction
+    .addr op_set_variable
+    .addr op_read_result
+    .addr op_inc_variable
+    .addr op_add
+    .addr op_unconditional_branch
+    .addr op_branch_eq
+    .addr op_branch_ne
+    .addr op_set_player_locked
+    .addr op_clear_text_tiles
 
 ; just wait for the specified amount of frames
 OPCODE_WAIT = 0
@@ -87,10 +87,10 @@ step_text_box .macro
     .byte \2
     .byte \3
     .byte \4
-    .word \5
-    .word \6
-    .word \7
-    .word \8
+    .word <>\5
+    .word <>\6
+    .word <>\7
+    .word <>\8
 .endm
 
 ; hide the currently shown text box and return
@@ -356,7 +356,7 @@ TEST_MISC
     #step_wait WAIT_FOR_A
     #step_hide_text_box
 
-OBJECT_SCRIPTS .word TEST_OBJECT_SCRIPT, TEST_HAIR_BLEACH, TEST_REACT_TO_BOOKSHELF, TEST_MISC
+OBJECT_SCRIPTS .addr TEST_OBJECT_SCRIPT, TEST_HAIR_BLEACH, TEST_REACT_TO_BOOKSHELF, TEST_MISC
 OBJECT_SCRIPT_LENGTHS .word 4, 3, 25, 9
 
 load_oam_index_16x32 .macro

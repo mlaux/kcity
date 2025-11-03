@@ -18,7 +18,7 @@ SPRITE_BASE_IDS_HEAD .word $0, $4
 SPRITE_INITIAL_FLAGS .word $38, $0
 SPRITE_ID_TO_DATA .word $0, $2000
 
-MOVEMENT_JUMP_TABLE .word go_right, go_down, go_left, go_up
+MOVEMENT_JUMP_TABLE .addr go_right, go_down, go_left, go_up
 
 player_init
     php

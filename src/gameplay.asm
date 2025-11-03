@@ -5,6 +5,7 @@ state_gameplay_init
     jsr enable_force_blank
 
     jsr clear_bg3_tiles
+    jsr clear_bg3_tilemap
     jsr palette_init
     jsr background_init
     jsr copy_ram_scripts
@@ -22,7 +23,7 @@ state_gameplay_init
 
     jsr player_init
 
-    lda #GENEVA_CHARS
+    lda #<>GENEVA_CHARS
     jsr vwf_set_font
     lda #0
     jsr vwf_set_palette
@@ -277,4 +278,24 @@ gameplay_restore_state
     stz my_bg3hofs
     stz my_bg3vofs
 
+    rts
+
+clear_bg3_tilemap
+.as
+.xl
+    ldx #DMAMODE_PPUFILL
+    stx DMAMODE
+
+    ldx #<>ZERO
+    stx DMAADDR
+    lda #`ZERO
+    sta DMAADDRBANK
+    ldx #$800
+    stx VMADD ; in words
+    stx DMALEN ; in bytes
+
+    lda #$80
+    sta VMAIN
+    lda #1
+    sta MDMAEN
     rts

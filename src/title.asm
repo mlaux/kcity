@@ -74,9 +74,9 @@ state_title_init
 
     ; these files contain 9 palettes, 8/8 -> 0/8 brightness
     ; start at black
-    lda #(8 * 2 * 16 + TITLE_SCENE_SOLID_PALETTES)
+    lda #(8 * 2 * 16 + <>TITLE_SCENE_SOLID_PALETTES)
     sta title_solid_palette
-    lda #(8 * 2 * 16 + TITLE_SCENE_STATE_PALETTES)
+    lda #(8 * 2 * 16 + <>TITLE_SCENE_STATE_PALETTES)
     sta title_state_palette
     ; frames per brightness level
     lda #TITLE_FADE_FRAMES
@@ -128,9 +128,9 @@ state_title
     stz my_bg2hofs
     stz my_bg2vofs
     ; skip to full brightness
-    lda #TITLE_SCENE_SOLID_PALETTES
+    lda #<>TITLE_SCENE_SOLID_PALETTES
     sta title_solid_palette
-    lda #TITLE_SCENE_STATE_PALETTES
+    lda #<>TITLE_SCENE_STATE_PALETTES
     sta title_state_palette
     lda #(BG1_ON | BG2_ON | OBJ_ON)
     sta my_tm
@@ -185,7 +185,7 @@ state_title_vblank
 _check_glitch
     rep #$20
     lda title_state_palette
-    cmp #TITLE_SCENE_STATE_PALETTES
+    cmp #<>TITLE_SCENE_STATE_PALETTES
     sep #$20
     beq _glitch
 
@@ -270,7 +270,7 @@ _do_hdma
     sta DMAP7
     lda #BG1HOFS & $ff
     sta BBAD7
-    ldx #title_glitch_hdma_table
+    ldx #<>title_glitch_hdma_table
     stx A1T7L
     stz A1B7
     lda #$80
@@ -280,7 +280,7 @@ _do_hdma
     rep #$20
     lda title_solid_palette
     ; if it's the base address it is fully faded in
-    cmp #TITLE_SCENE_SOLID_PALETTES
+    cmp #<>TITLE_SCENE_SOLID_PALETTES
     beq _end
     dec title_palette_fade_frame
     lda title_palette_fade_frame

@@ -1,7 +1,7 @@
 .as
 .xl
 .autsiz
-.databank $00
+.databank $80
 .dpage $0000
 
 ; define an ascii encoding
@@ -79,7 +79,7 @@ SoundTable .fill 3
 
 ; Work RAM variables
 ; some of these are definitely redundant but made the algorithms easier
-* = $100
+* = $800100
 
 ; how many chars to draw
 vwf_count .word ?
@@ -271,7 +271,7 @@ digi_copyrate .fill 1
 
 ; --- end from snesmod ---
 
-.cerror * > $1200, "ram too long"
+.cerror * > $801200, "ram too long"
 .warn "lowram end: ", *
 
 * = $700000
@@ -296,62 +296,62 @@ collision_map .fill $8000
 * = $0
 
 ; place first 32k
-.logical $8000
+.logical $808000
 .dsection bank00
 .section bank00
 .include "bank00.asm"
 .endsection bank00
-.cerror * > $10000, "bank00 too long"
+.cerror * > $810000, "bank00 too long"
 .here
 
 * = $8000
-.logical $18000
+.logical $818000
 .dsection bank01
 .section bank01
 .include "bank01.asm"
 .endsection bank01
 .warn format("bank01 free space: $%04x", $20000 - *)
-.cerror * > $20000, "bank01 too long"
+.cerror * > $820000, "bank01 too long"
 .here
 
 * = $10000
-.logical $28000
+.logical $828000
 .dsection bank02
 .section bank02
 .include "bank02.asm"
 .endsection bank02
 .warn format("bank02 free space: $%04x", $30000 - *)
-.cerror * > $30000, "bank02 too long"
+.cerror * > $830000, "bank02 too long"
 .here
 
 * = $18000
-.logical $38000
+.logical $838000
 .dsection bank03
 .section bank03
 .include "bank03.asm"
 .endsection bank03
 .warn format("bank03 free space: $%04x", $40000 - *)
-.cerror * > $40000, "bank03 too long"
+.cerror * > $840000, "bank03 too long"
 .here
 
 * = $20000
-.logical $48000
+.logical $848000
 .dsection bank04
 .section bank04
 .include "bank04.asm"
 .endsection bank04
 .warn format("bank04 free space: $%04x", $50000 - *)
-.cerror * > $50000, "bank04 too long"
+.cerror * > $850000, "bank04 too long"
 .here
 
 * = $28000
-.logical $58000
+.logical $858000
 .dsection bank05
 .section bank05
 .include "bank05.asm"
 .endsection bank05
 .warn format("bank05 free space: $%04x", $60000 - *)
-.cerror * > $60000, "bank05 too long"
+.cerror * > $860000, "bank05 too long"
 .here
 
 ; 256k minus one byte
