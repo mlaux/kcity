@@ -280,8 +280,7 @@ sram_map_id .word ?
 sram_player_x .word ?
 sram_player_y .word ?
 sram_game_progress .word ?
-; sram_play_time .word ?
-; sram_play_time_hi .word ?
+sram_play_time_hms .fill 6
 
 .warn "sram end: ", *
 

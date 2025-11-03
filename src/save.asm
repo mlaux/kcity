@@ -13,10 +13,12 @@ save_game
     sta sram_player_y
     lda game_progress
     sta sram_game_progress
-    ; lda play_time
-    ; sta sram_play_time
-    ; lda play_time_hi
-    ; sta sram_play_time_hi
+    lda play_time_hms
+    sta sram_play_time_hms
+    lda play_time_hms + 2
+    sta sram_play_time_hms + 2
+    lda play_time_hms + 4
+    sta sram_play_time_hms + 4
 
     ldx #SCRIPT_MESSAGE_SAVED
     ldy #3
@@ -43,11 +45,12 @@ load_game
     lda sram_game_progress
     sta game_progress
 
-    ; lda sram_play_time
-    ; sta play_time
-
-    ; lda sram_play_time_hi
-    ; sta play_time_hi
+    lda sram_play_time_hms
+    sta play_time_hms
+    lda sram_play_time_hms + 2
+    sta play_time_hms + 2
+    lda sram_play_time_hms + 4
+    sta play_time_hms + 4
 
     plp
     rts
