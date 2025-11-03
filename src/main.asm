@@ -71,15 +71,15 @@ RESET
     ; fall through to main loop
 main_loop
     ; set H/V counter latch to lock in vertical counter
-    ; bit SLHV
-    ; ; load the actual vertical counter
-    ; lda OPVCT
-    ; sta vertical_counter_start
-    ; lda OPVCT
-    ; and #1
-    ; sta vertical_counter_start + 1
-    ; ; reading this will reset the counter latch for next time
-    ; bit STAT78
+    bit SLHV
+    ; load the actual vertical counter
+    lda OPVCT
+    sta vertical_counter_start
+    lda OPVCT
+    and #1
+    sta vertical_counter_start + 1
+    ; reading this will reset the counter latch for next time
+    bit STAT78
 
 	jsr	spcProcess
     ; jsr SPX_Routine
@@ -93,24 +93,24 @@ main_loop
     jsr (STATES, x)
 
     ; measure CPU time in scanlines
-;     sep #$20
-;     bit SLHV
-;     lda OPVCT
-;     sta vertical_counter_end
-;     lda OPVCT
-;     and #1
-;     sta vertical_counter_end + 1
-;     bit STAT78
+    sep #$20
+    bit SLHV
+    lda OPVCT
+    sta vertical_counter_end
+    lda OPVCT
+    and #1
+    sta vertical_counter_end + 1
+    bit STAT78
 
-;     rep #$20
-;     lda vertical_counter_end
-;     sec
-;     sbc vertical_counter_start
-;     bpl +
-;     ; wrapped around scanline 262, compensate
-;     clc
-;     adc #262
-; +   sta vertical_counter_this_frame
+    rep #$20
+    lda vertical_counter_end
+    sec
+    sbc vertical_counter_start
+    bpl +
+    ; wrapped around scanline 262, compensate
+    clc
+    adc #262
++   sta vertical_counter_this_frame
     sep #$20
 
     ; signal that the NMI is good to go and busy wait
@@ -156,15 +156,15 @@ _do_vblank
     inc in_nmi
 
     ; set H/V counter latch to lock in vertical counter
-    ; bit SLHV
-    ; ; load the actual vertical counter
-    ; lda OPVCT
-    ; sta vertical_counter_vblank_start
-    ; lda OPVCT
-    ; and #1
-    ; sta vertical_counter_vblank_start + 1
-    ; ; reading this will reset the counter latch for next time
-    ; bit STAT78
+    bit SLHV
+    ; load the actual vertical counter
+    lda OPVCT
+    sta vertical_counter_vblank_start
+    lda OPVCT
+    and #1
+    sta vertical_counter_vblank_start + 1
+    ; reading this will reset the counter latch for next time
+    bit STAT78
 
     ; do not run state specific vblank if transitioning between states
     lda state_transitioning
@@ -181,7 +181,7 @@ _do_vblank
     jsr (VBLANKS, x)
     plp
 
-    ; jsr draw_cpu_usage
+    jsr draw_cpu_usage
 
     ; handle fade or mosaic effect if needed. this is so during transitions, 
     ; states can just busy wait for the effects to be done
@@ -229,29 +229,29 @@ _do_vblank
     sta TM
 
     jsr update_play_timer
-    rep #$20
-    inc frame_counter
-
     ; measure CPU time in scanlines. delayed by one frame because it's already
     ; been drawn for this frame, but i wanted to include the drawing in the
     ; measurement
-;     bit SLHV
-;     lda OPVCT
-;     sta vertical_counter_vblank_end
-;     lda OPVCT
-;     and #1
-;     sta vertical_counter_vblank_end + 1
-;     bit STAT78
+    bit SLHV
+    lda OPVCT
+    sta vertical_counter_vblank_end
+    lda OPVCT
+    and #1
+    sta vertical_counter_vblank_end + 1
+    bit STAT78
 
-;     rep #$20
-;     lda vertical_counter_vblank_end
-;     sec
-;     sbc vertical_counter_vblank_start
-;     bpl +
-;     ; wrapped around scanline 262, compensate
-;     clc
-;     adc #262
-; +   sta vertical_counter_vblank_this_frame
+    rep #$20
+    lda vertical_counter_vblank_end
+    sec
+    sbc vertical_counter_vblank_start
+    bpl +
+    ; wrapped around scanline 262, compensate
+    clc
+    adc #262
++   sta vertical_counter_vblank_this_frame
+
+    rep #$20
+    inc frame_counter
 
     ; reset flag so main loop can continue
     stz update_ppu

@@ -885,8 +885,12 @@ _partial
     sta VMDATA
 
 _blanks
-    ; write 8 blank tiles to clear any leftover from previous frame
+    ; write some blank tiles to clear any leftover from previous frame
     lda #$2190
+    sta VMDATA
+    sta VMDATA
+    sta VMDATA
+    sta VMDATA
     sta VMDATA
     sta VMDATA
     sta VMDATA
@@ -907,17 +911,11 @@ draw_cpu_usage
     lda #$b42
     sta VMADD
 
-    static_char 'L'
-    static_char ' '
-
     lda vertical_counter_this_frame
     jsr draw_bar_graph
 
     lda #$b62
     sta VMADD
-
-    static_char 'V'
-    static_char ' '
 
     lda vertical_counter_vblank_this_frame
     jsr draw_bar_graph
