@@ -7,8 +7,9 @@ AS="../64tass-1.59.3120-src/64tass"
     --nostart \
     -o out.sfc \
     --map out.map \
-    --mesen-labels --labels-section=bank00.code --labels-add-prefix=SnesPrgRom \
-    --labels out.mlb \
+    --mesen-labels \
+    --labels-section=bank00.code --labels-add-prefix=SnesPrgRom --labels out.mlb \
+    --labels-section=work_ram --labels-add-prefix=SnesWorkRam --labels-append out.mlb \
     --list out.list \
     --verbose-list \
     src/kcity.asm

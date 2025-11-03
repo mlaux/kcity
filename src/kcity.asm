@@ -30,6 +30,8 @@ SCREEN_HEIGHT = 224
 
 ; Zero page
 * = $0
+.dsection zeropage
+.section zeropage
 
 zp0 .word ?
 zp1 .word ?
@@ -75,10 +77,15 @@ digi_src2 .fill 3
 SoundTable .fill 3
 ; --- end from snesmod ---
 
+.endsection
+
 .warn "zero page end: ", *
 
 ; Work RAM variables
 ; some of these are definitely redundant but made the algorithms easier
+.virtual $800000
+.dsection work_ram
+.section work_ram
 * = $800100
 
 ; how many chars to draw
@@ -271,8 +278,10 @@ digi_copyrate .fill 1
 
 ; --- end from snesmod ---
 
+.endsection
 .cerror * > $801200, "ram too long"
 .warn "lowram end: ", *
+.endvirtual
 
 * = $700000
 

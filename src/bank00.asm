@@ -68,19 +68,19 @@ ZERO
 * = $80ffe4
 .dsection vectors
 .section vectors
-v16_COP    .word <>EMPTY_ISR
-v16_BRK    .word <>EMPTY_ISR
-v16_ABORT  .word <>EMPTY_ISR
-v16_NMI    .word <>NMI_ISR
-v16_RESET  .word <>EMPTY_ISR
-v16_IRQ    .word <>EMPTY_ISR
+v16_COP    .addr EMPTY_ISR
+v16_BRK    .addr EMPTY_ISR
+v16_ABORT  .addr EMPTY_ISR
+v16_NMI    .addr NMI_ISR
+v16_RESET  .addr EMPTY_ISR
+v16_IRQ    .addr EMPTY_ISR
 
 ; 6502 vectors
 * = $80fff4
-v02_COP    .word <>EMPTY_ISR
-v02_BRK    .word <>EMPTY_ISR
-v02_ABORT  .word <>EMPTY_ISR
-v02_NMI    .word <>EMPTY_ISR
-v02_RESET  .word <>RESET
-v02_IRQ    .word <>EMPTY_ISR
+v02_COP    .addr EMPTY_ISR
+v02_BRK    .addr EMPTY_ISR
+v02_ABORT  .addr EMPTY_ISR
+v02_NMI    .addr EMPTY_ISR
+v02_RESET  .addr RESET
+v02_IRQ    .addr EMPTY_ISR
 .endsection
