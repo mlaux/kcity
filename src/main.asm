@@ -228,7 +228,20 @@ _do_vblank
     lda my_tm
     sta TM
 
+    rep #$20
     inc frame_counter
+    bne +
+    inc frame_counter_hi
+
++   inc play_time
+    bne +
+    inc play_time_hi
+
+; +   lda #$8970
+;     sta play_time
+;     lda #6
+;     sta play_time_hi
++   jsr convert_playtime_to_hhmm
 
     ; measure CPU time in scanlines. delayed by one frame because it's already
     ; been drawn for this frame, but i wanted to include the drawing in the

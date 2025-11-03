@@ -13,6 +13,7 @@
 .include "player.asm"
 .include "script.asm"
 .include "save.asm"
+.include "time.asm"
 .endsection
 
 .dsection map_data
