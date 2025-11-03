@@ -3,6 +3,7 @@ PALETTE_BANK = `*
 ; background palettes
 LAB_PALETTE .binary "../gfx/lab/lab.pal"
 BEDROOM_PALETTE .binary "../gfx/bedroom/bedroom.pal"
+LIVING_ROOM_PALETTE .binary "../gfx/livingrm/livingrm.pal"
 TITLE_SCENE_PALETTE .binary "../gfx/title/title.pal"
 TITLE_SCENE_SOLID_PALETTES .binary "../gfx/title/solid_fade.pal"
 TITLE_SCENE_STATE_PALETTES .binary "../gfx/title/state_fade.pal"
