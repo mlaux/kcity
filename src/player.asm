@@ -651,7 +651,6 @@ update_scroll
     lda current_map_scroll_flags
     beq _done
 
-    ; check horizontal scroll (bit 0)
     bit #1
     beq _check_vertical
 
@@ -660,10 +659,10 @@ update_scroll
     lsr
     sec
     sbc #128
-    bpl +
+    bcs +
     lda #0
 +   cmp #255
-    bmi +
+    bcc +
     lda #255
 +   sta my_bghofs
 
@@ -678,10 +677,10 @@ _check_vertical
     lsr
     sec
     sbc #127
-    bpl +
+    bcs +
     lda #0
 +   cmp #287
-    bmi +
+    bcc +
     lda #287
 +   sta my_bgvofs
 
