@@ -111,6 +111,7 @@ state_journal
 .xl
     dec my_bg2hofs
     dec my_bg2vofs
+    dec my_bg2vofs
 
     lda my_bgvofs
     beq +

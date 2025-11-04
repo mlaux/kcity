@@ -25,9 +25,6 @@ srn .macro
     .endrept
 .endmacro
 
-SCREEN_WIDTH = 256
-SCREEN_HEIGHT = 224
-
 ; Zero page
 * = $0
 .dsection zeropage
@@ -208,6 +205,7 @@ player_anim_previous_direction = sprites_anim_previous_direction
 player_anim_offset = sprites_anim_offset
 player_anim_timer = sprites_anim_timer
 
+; this is actually the x/y of the bottom half :(
 player_x .word ?
 player_y .word ?
 player_locked .word ?

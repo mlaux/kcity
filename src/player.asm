@@ -646,11 +646,11 @@ update_scroll
     bit #1
     beq _check_vertical
 
-    ; scroll_x = (player_x >> 1) - 128
+    ; scroll_x = (player_x >> 1) - 120
     lda player_x
     lsr
     sec
-    sbc #128
+    sbc #120
     bpl +
     lda #0
 +   cmp #256
