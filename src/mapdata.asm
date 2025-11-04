@@ -52,10 +52,10 @@ START_Y .word $120, $e0, $120
 START_BGMODE .word $39, $39, $39
 START_HOFS .word $0, $0, $0
 START_VOFS .word $120, $120, $0
-; (map_width - 16) << 1, in half-pixels
-MAP_MAX_PLAYER_X .word 480, 480, 992 
-; (map_height - 16) << 1, in half-pixels
-MAP_MAX_PLAYER_Y .word 416, 416, 992
+; max player_x: (map_width - 8 - 1) << 1, in half-pixels
+MAP_MAX_PLAYER_X .word $1ef, $1ef, $3ef
+; max player_y: (map_height - 1) << 1, in half-pixels
+MAP_MAX_PLAYER_Y .word $1ff, $1ff, $3ff
 
 ALL_MAP_PALETTES .word <>BEDROOM_PALETTE, <>LIVING_ROOM_PALETTE, <>TEST_MAP_PALETTE
 ALL_TILESETS .word <>BEDROOM_TILESET, <>LIVING_ROOM_TILESET, <>TEST_MAP_TILESET

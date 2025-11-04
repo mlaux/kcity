@@ -1,10 +1,11 @@
-
-SPRITE_SIZE = 16
+; player_x, player_y are the center-bottom of the sprite in half-pixels
+; to convert to top-left corner for rendering, subtract (16, 30) in half-pixels
 
 PLAYER_ANIMATION_SPEED = 6
-PLAYER_MOVEMENT_SPEED = 3 ; in half pixels per frame
-SCRIPT_TRIGGER_LOOKAHEAD = 16 ; pixels to look ahead for script triggers
-SCALED_SCRIPT_TRIGGER_LOOKAHEAD = SCRIPT_TRIGGER_LOOKAHEAD << 1 ; in half pixels
+; in half pixels per frame
+PLAYER_MOVEMENT_SPEED = 3
+; half pixels to look ahead for script triggers
+SCRIPT_TRIGGER_LOOKAHEAD = 16 << 1
 
 PLAYER_DIRECTION_NONE = 0
 PLAYER_DIRECTION_RIGHT = 1
@@ -111,28 +112,25 @@ _done
 
 BIT_POSITIONS .byte $80, $40, $20, $10, $8, $4, $2, $1
 
-; input: player X and Y (top left corner)
+; input: X = player X in pixels, Y = player Y in pixels
+; checks collision at the player's feet position
 check_collision_per_pixel
 .al
 .xl
-    ; zp2 = (playerX + 8) / 8
+    ; zp2 = playerX / 8
     txa
-    clc
-    adc #SPRITE_SIZE >> 1
     pha
     srn 3
     sta zp2
-    ; zp3 = (playerX + 8) % 8
+    ; zp3 = playerX % 8
     pla
     and #7
     sta zp3
 
-    ; calculate byte offset into image. 
+    ; calculate byte offset into image.
     ; 32 bytes per row for 256x256 maps, 64 for 512x512
-    ; idx = (playerY + 15) * bytes_per_row + zp2
+    ; idx = playerY * bytes_per_row + zp2
     tya
-    clc
-    adc #SPRITE_SIZE - 1
     sln 5
     ldx current_map_size
     beq +
@@ -150,26 +148,22 @@ check_collision_per_pixel
 
 ; sets facing_object_script if the player is facing a tile that activates a script
 ; calls map_set_warp if the player is on a tile that warps
-; parameters: X = player X in pixel coordinates, Y = player Y (top left corner)
+; parameters: X = player X in pixels, Y = player Y in pixels
 ; assumes: AXY 16
 check_script_triggers
 .al
 .xl
+    ; convert X to tile coordinate
     txa
-    ; want to check middle of player's feet
-    clc
-    adc #SPRITE_SIZE >> 1
     lsr
     lsr
     lsr
     lsr
     sta zp2
 
+    ; convert Y to tile coordinate and multiply by map width
+    ; ((y >> 4) << 4) == (y & $fff0)
     tya
-    clc
-    adc #SPRITE_SIZE - 1
-
-    ; lsr lsr lsr lsr, asl asl asl asl
     and #$fff0
     ldx current_map_size
     beq +
@@ -296,15 +290,15 @@ go_right
     lda player_x
     clc
     adc #PLAYER_MOVEMENT_SPEED
-    ; would moving take you off the map?
+    ; is x + speed < max_x
     cmp current_map_max_player_x
-    bmi +
-    ; yep, clamp to max x
+    bcc +
+    ; no, clamp to max x
     lda current_map_max_player_x
     sta player_x
     brl animate_player
 
-    ; set up Y once for both checks
+    ; set up Y once for both checks (convert to pixels)
 +   lda player_y
     lsr
     tay
@@ -312,7 +306,7 @@ go_right
     ; check script triggers with larger lookahead
     lda player_x
     clc
-    adc #SCALED_SCRIPT_TRIGGER_LOOKAHEAD
+    adc #SCRIPT_TRIGGER_LOOKAHEAD
     lsr
     tax
     phx
@@ -340,15 +334,15 @@ go_down
     lda player_y
     clc
     adc #PLAYER_MOVEMENT_SPEED
-    ; would moving take you off the map?
+    ; is y + speed < max_y
     cmp current_map_max_player_y
-    bmi +
-    ; clamp to max y
+    bcc +
+    ; no, clamp to max y
     lda current_map_max_player_y
     sta player_y
     brl animate_player
 
-    ; set up X once for both checks
+    ; set up X once for both checks (convert to pixels)
 +   lda player_x
     lsr
     tax
@@ -356,7 +350,7 @@ go_down
     ; check script triggers with larger lookahead
     lda player_y
     clc
-    adc #SCALED_SCRIPT_TRIGGER_LOOKAHEAD
+    adc #SCRIPT_TRIGGER_LOOKAHEAD
     lsr
     tay
     phx
@@ -378,20 +372,23 @@ go_down
     clc
     adc #PLAYER_MOVEMENT_SPEED
     sta player_y
-    ; inc player_y_head
 +   brl animate_player
 
 go_left
     ; check left edge of screen
+    ; center must stay >= 16 half-pixels
+    ; is x - speed >= 16?
     lda player_x
     sec
     sbc #PLAYER_MOVEMENT_SPEED
-    bpl +
-    lda #0
+    cmp #16
+    bcs +
+    ; no, clamp
+    lda #16
     sta player_x
-    bra animate_player
+    brl animate_player
 
-    ; set up Y once for both checks
+    ; set up Y once for both checks (convert to pixels)
 +   lda player_y
     lsr
     tay
@@ -399,13 +396,11 @@ go_left
     ; check script triggers with larger lookahead
     lda player_x
     sec
-    sbc #SCALED_SCRIPT_TRIGGER_LOOKAHEAD
-    ; clamp to x=0 here, because:
-    ; if x = $1f, x - $20 = $ffff
-    ; then >> 1 = $7fff -> no longer negative
-    ; so need to check this here instead of in check_script_triggers
-    bpl +
-    lda #0
+    sbc #SCRIPT_TRIGGER_LOOKAHEAD
+    ; clamp to x=16 here
+    cmp #16
+    bcs +
+    lda #16
 +   lsr
     tax
     phx
@@ -431,15 +426,18 @@ go_left
 
 go_up
     ; check top edge of screen
+    ; is y - speed >= 62?
     lda player_y
     sec
     sbc #PLAYER_MOVEMENT_SPEED
-    bpl +
-    lda #0
+    cmp #$3e
+    bcs +
+    ; no, clamp
+    lda #$3e
     sta player_y
     bra animate_player
 
-    ; set up X once for both checks
+    ; set up X once for both checks (convert to pixels)
 +   lda player_x
     lsr
     tax
@@ -447,9 +445,10 @@ go_up
     ; check script triggers with larger lookahead
     lda player_y
     sec
-    sbc #SCALED_SCRIPT_TRIGGER_LOOKAHEAD
-    bpl +
-    lda #0
+    sbc #SCRIPT_TRIGGER_LOOKAHEAD
+    cmp #$3e
+    bcs +
+    lda #$3e
 +   lsr
     tay
     phx
@@ -569,34 +568,44 @@ animate_npcs
 set_updated_player_pos
 .al
 .xl
+    ; convert player_x (center, half-pixels) to sprite position (left edge, pixels)
     lda current_map_scroll_flags
     and #1
     beq _no_hscroll
     lda player_x
     lsr
     sec
+    sbc #8  ; center to left edge
+    sec
     sbc my_bghofs
     bra _set_x
 _no_hscroll
     lda player_x
     lsr
+    sec
+    sbc #8  ; center to left edge
 _set_x
     sep #$20
     sta player_x_sprite
     sta player_x_head_sprite
     rep #$20
 
+    ; convert player_y (bottom, half-pixels) to sprite position (top of bottom sprite, pixels)
     lda current_map_scroll_flags
     and #2
     beq _no_vscroll
     lda player_y
     lsr
     sec
+    sbc #15  ; bottom to top of bottom sprite
+    sec
     sbc my_bgvofs
     bra _set_y
 _no_vscroll
     lda player_y
     lsr
+    sec
+    sbc #15  ; bottom to top of bottom sprite
 _set_y
     sep #$20
     sta player_y_sprite
@@ -646,16 +655,16 @@ update_scroll
     bit #1
     beq _check_vertical
 
-    ; scroll_x = (player_x >> 1) - 120
+    ; scroll_x = (player_x >> 1) - 128
     lda player_x
     lsr
     sec
-    sbc #120
+    sbc #128
     bpl +
     lda #0
-+   cmp #256
++   cmp #255
     bmi +
-    lda #256
+    lda #255
 +   sta my_bghofs
 
 _check_vertical
@@ -663,16 +672,17 @@ _check_vertical
     bit #2
     beq _done
 
-    ; scroll_y = (player_y >> 1) - 112
+    ; scroll_y = (player_y >> 1) - 127
+    ; visual center is player_y - 15, screen center is 112
     lda player_y
     lsr
     sec
-    sbc #112
+    sbc #127
     bpl +
     lda #0
-+   cmp #288
++   cmp #287
     bmi +
-    lda #288
+    lda #287
 +   sta my_bgvofs
 
 _done
