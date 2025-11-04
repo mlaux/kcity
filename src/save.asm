@@ -20,6 +20,8 @@ save_game
     lda play_time_hms + 4
     sta sram_play_time_hms + 4
 
+    ; only shows it when saving with select button, menu is its own script
+    ; so this one does not run. menu has its own 'Saved' message
     ldx #<>SCRIPT_MESSAGE_SAVED
     ldy #3
     jsr set_script

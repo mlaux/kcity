@@ -19,6 +19,11 @@ WAIT_RESULT_NO_CANCEL = -3
 
 RESULT_CANCELLED = -1
 
+; canonical location for temp decision text box results when not changing
+; a persistent var
+SCRIPT_STORAGE_TEMP_RESULT = 0
+SCRIPT_STORAGE_IN_MENU = 1
+
 ; ideas:
 ; - change sprite movement to use same direction system as player
 ; - variable length steps using table of lengths?
@@ -41,6 +46,7 @@ RESULT_CANCELLED = -1
 ; $e: branch if not equal
 ; $f: lock/unlock player
 ; $10: clear text tiles (keep box visible)
+; $11: save game
 
 ; can eliminate some redundancy in the implementations of these
 script_operations
@@ -58,6 +64,7 @@ script_operations
     .addr op_branch_ne
     .addr op_set_player_locked
     .addr op_clear_text_tiles
+    .addr op_save_game
 
 ; just wait for the specified amount of frames
 OPCODE_WAIT = 0
@@ -216,6 +223,15 @@ step_branch_ne .macro
     .byte 0, 0, 0, 0, 0, 0
 .endm
 
+step_branch_label .macro
+    .sint 0
+    .word \1
+    .word \2
+    .word \3
+    .word (\4.\5 - \4) >> 4
+    .byte 0, 0, 0, 0, 0, 0
+.endm
+
 OPCODE_INC_VARIABLE = $a
 step_inc_variable .macro
     .sint 0
@@ -256,6 +272,14 @@ step_read_result .macro
     .word OPCODE_READ_RESULT
     .word \1
     .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+.endm
+
+OPCODE_SAVE_GAME = $11
+
+step_save_game .macro
+    .sint 0
+    .word OPCODE_SAVE_GAME
+    .fill 12
 .endm
 
 ; this gets copied to RAM so it can modify the script with a pointer to the
@@ -345,8 +369,8 @@ TEST_MISC
     ; test decision text box
     #step_text_box 1, 21, 30, 4, TEST_DECISION_1, TEST_DECISION_2, TEST_DECISION_3, TEST_DECISION_4
     #step_wait WAIT_RESULT_NO_CANCEL
-    #step_read_result 0
-    #step_branch_ne 0, 1, 8
+    #step_read_result SCRIPT_STORAGE_TEMP_RESULT
+    #step_branch_ne SCRIPT_STORAGE_TEMP_RESULT, 1, 8
     #step_clear_text_tiles
     ; clear_text_tiles takes one vblank to take effect. if i immediately went
     ; on to the step_text_box, the pending clear action would immediately clear
@@ -355,6 +379,33 @@ TEST_MISC
     #step_text_box 1, 21, 30, 1, TEST_MEOW, 0, 0, 0
     #step_wait WAIT_FOR_A
     #step_hide_text_box
+
+MENU_OPTION_ITEMS .text $80, "Items", 255
+MENU_OPTION_SAVE .text $80, "Save", 255
+MENU_OPTION_ID_ITEMS = 1
+MENU_OPTION_ID_SAVE = 2
+
+SCRIPT_SHOW_MENU
+    #step_set_player_locked 1
+    #step_set_variable SCRIPT_STORAGE_IN_MENU, 1
+    #step_text_box 1, 1, 10, 4, MENU_OPTION_ITEMS, MENU_OPTION_SAVE, EMPTY_STRING, EMPTY_STRING
+    #step_wait WAIT_RESULT_CANCEL_OK
+    #step_read_result SCRIPT_STORAGE_TEMP_RESULT
+    #step_branch_label OPCODE_BRANCH_NE, SCRIPT_STORAGE_TEMP_RESULT, MENU_OPTION_ID_ITEMS, SCRIPT_SHOW_MENU, _check_save
+    #step_wait 0 ; items action would go here
+_check_save
+    #step_branch_label OPCODE_BRANCH_NE, SCRIPT_STORAGE_TEMP_RESULT, MENU_OPTION_ID_SAVE, SCRIPT_SHOW_MENU, _exit_menu
+    #step_save_game
+    #step_clear_text_tiles
+    #step_wait 1
+    #step_text_box 1, 1, 10, 4, MESSAGE_SAVED, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING
+    #step_wait WAIT_FOR_A
+_exit_menu
+    #step_hide_text_box
+    #step_set_variable SCRIPT_STORAGE_IN_MENU, 0
+    #step_set_player_locked 0
+
+SCRIPT_SHOW_MENU_NUM_STEPS = (* - SCRIPT_SHOW_MENU) >> 4
 
 OBJECT_SCRIPTS .addr TEST_OBJECT_SCRIPT, TEST_HAIR_BLEACH, TEST_REACT_TO_BOOKSHELF, TEST_MISC
 OBJECT_SCRIPT_LENGTHS .word 4, 3, 25, 9
@@ -789,3 +840,6 @@ op_set_player_locked
     sta player_locked
 
     rts
+
+op_save_game
+    jmp save_game

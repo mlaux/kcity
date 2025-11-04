@@ -155,6 +155,12 @@ process_input
 
 +   bit #X_BUTTON
     beq +
+    ldx #<>SCRIPT_SHOW_MENU
+    ldy #SCRIPT_SHOW_MENU_NUM_STEPS
+    jsr set_script
+
++   bit #Y_BUTTON
+    beq +
     jsr gameplay_save_state
     jmp open_journal ; discards call stack
 
@@ -239,8 +245,13 @@ state_gameplay_vblank
     ; DMA generated text tiles if needed, or reset tilemap if turning off text box
     ; send HDMA table for text box overlay if needed
     jsr text_box_vblank
+    
+    rep #$20
+    lda script_storage + (SCRIPT_STORAGE_IN_MENU << 1)
+    beq +
+    jsr draw_play_timer
 
-    rts
++   rts
 
 gameplay_save_state
 .al

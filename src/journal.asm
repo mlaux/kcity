@@ -122,7 +122,7 @@ state_journal
     sta my_bg3vofs
 
 +   lda joypad_new
-    and #(X_BUTTON | B_BUTTON)
+    and #(Y_BUTTON | B_BUTTON)
     beq +
     jmp close_journal
 +   rts

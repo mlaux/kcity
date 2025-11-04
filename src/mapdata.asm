@@ -55,7 +55,7 @@ START_VOFS .word $120, $120, $0
 ; ((map_width - 8) << 1) - 1
 MAP_MAX_PLAYER_X .word $1ef, $1ef, $3ef
 ; (map_height << 1) - 1
-MAP_MAX_PLAYER_Y .word $1ff, $1ff, $3ff
+MAP_MAX_PLAYER_Y .word $1bf, $1bf, $3ff
 
 ALL_MAP_PALETTES .word <>BEDROOM_PALETTE, <>LIVING_ROOM_PALETTE, <>TEST_MAP_PALETTE
 ALL_TILESETS .word <>BEDROOM_TILESET, <>LIVING_ROOM_TILESET, <>TEST_MAP_TILESET

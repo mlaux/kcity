@@ -81,10 +81,10 @@ dma_queue_add
     rts
 
 dma_queue_run_vblank
-.al
-.xl
     php
     rep #$20
+.al
+.xl
     lda dma_queue_length
     beq _done
     dec a

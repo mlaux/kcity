@@ -39,3 +39,28 @@ update_play_timer
     stz play_time_hms
 +   plp
     rts
+
+play_timer_digit .macro
+    lda play_time_hms + \1
+    and #$ff
+    ; offset to charset, with $21 attributes
+    clc
+    adc #$21b0
+    sta VMDATA
+.endm
+
+draw_play_timer
+.al
+.xl
+    lda #$8a2
+    sta VMADD
+    ; not worth a loop
+    #play_timer_digit 0
+    #play_timer_digit 1
+    #static_char ':'
+    #play_timer_digit 2
+    #play_timer_digit 3
+    #static_char ':'
+    #play_timer_digit 4
+    #play_timer_digit 5
+    rts
