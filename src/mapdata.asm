@@ -41,7 +41,7 @@ LIVING_ROOM_SCRIPT_TRIGGERS .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                     .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                     .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
-TEST_MAP_NAME .text "Scroll test", 255
+TEST_MAP_NAME .text "512x512 scroll test", 255
 ; can walk anywhere
 TEST_COLLISION_MAP .binary "../gfx/testbg/walkmap.cwm"
 ; no scripts for test map. 1024 zeroes

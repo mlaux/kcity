@@ -2,7 +2,7 @@
 ; 1. load BG1 with SOLID STATE and BG2 with title scene artwork
 ; 2. set up newt which is a sprite instead of BG so we can easily animate later
 ; 3. turn on BG2 and sprites, start music, fade in entire screen
-; 4. scroll from (0, 288) to (0, 0)
+; 4. scroll from (0, 288) to (0, -1)
 ; 5. wait for music to almost end
 ; 6. turn on BG1 to show SOLID STATE and fade it in
 ; 7. occasionally palette swap "STATE" and move it with hdma
@@ -112,7 +112,7 @@ state_title
     beq _animate
 
     lda my_bg2vofs
-    bne +
+    bpl +
 
     sep #$20
     jsr spcStop
@@ -125,8 +125,8 @@ state_title
     sta effect_level
     sta my_inidisp
     stz effect_id
-    stz my_bg2hofs
-    stz my_bg2vofs
+    lda #-1
+    sta my_bg2vofs
     ; skip to full brightness
     lda #<>TITLE_SCENE_SOLID_PALETTES
     sta title_solid_palette
@@ -145,7 +145,7 @@ _animate
     bne _nothing
 
     lda my_bg2vofs
-    beq _done_scrolling
+    bmi _done_scrolling
 
     dec my_bg2vofs
     jmp move_newt
@@ -169,12 +169,11 @@ state_title_vblank
     ; if title text isn't showing yet, return
     lda my_tm
     and #BG1_ON
-    bne +
     sep #$20
+    bne +
     jmp vblank_oam_dma
 
-+   sep #$20
-    ldx #DMAMODE_CGDATA
++   ldx #DMAMODE_CGDATA
     stx DMAMODE
     lda #TITLE_STATE_CGRAM_ADDR
     sta CGADD
