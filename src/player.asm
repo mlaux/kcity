@@ -307,7 +307,10 @@ go_right
     lda player_x
     clc
     adc #SCRIPT_TRIGGER_LOOKAHEAD
-    lsr
+    cmp current_map_max_player_x
+    bcc +
+    lda current_map_max_player_x
++   lsr
     tax
     phx
     phy
@@ -351,7 +354,10 @@ go_down
     lda player_y
     clc
     adc #SCRIPT_TRIGGER_LOOKAHEAD
-    lsr
+    cmp current_map_max_player_y
+    bcc +
+    lda current_map_max_player_y
++   lsr
     tay
     phx
     phy
