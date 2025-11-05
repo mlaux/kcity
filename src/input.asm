@@ -12,12 +12,12 @@ L_BUTTON      = $20
 R_BUTTON      = $10
 
 read_input
-.al
-.xl
     ; https://snes.nesdev.org/wiki/Controller_reading
+    sep #$20
 -   lda HBVJOY
     and #1
     bne -
+    rep #$20
     lda joypad_current
     sta joypad_last
     lda JOY1L

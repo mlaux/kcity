@@ -17,9 +17,12 @@ TEXT_BOX_TILE_HEIGHTS .byte 0, 3, 4, 5, 6
 ; tile heights for 1, 2, 3, 4 lines (8x16 font)
 TEXT_BOX_TILE_HEIGHTS_8X16 .byte 0, 4, 6, 8, 10
 
+; CGADSUB values for the text box
+; $73 = enable for BG1, BG2, OBJ, backdrop, half mode
+
 ; $40 for $AA lines
 ; $40 for $BB more lines
-; $51 for $CC lines
+; $73 for $CC lines
 ; $40 for 1 line (really to end of frame)
 ; $0 for end
-TEXT_HDMA_TABLE .byte $AA, $40, $BB, $40, $CC, $51, $1, $40, 0
+TEXT_HDMA_TABLE .byte $AA, $40, $BB, $40, $CC, $73, $1, $40, 0

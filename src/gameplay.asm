@@ -34,11 +34,14 @@ state_gameplay_init
     ; for Geneva font
     jsr mono_font_init
 
-    jsr gameplay_restore_state
-
     ; don't call map_set_warp because it'll initiate a fade-out and lock
     ; the player's position, which i don't want
+    lda current_map_id
+    sta target_warp_map
     jsr map_run_warp
+    stz my_bg3hofs
+    stz my_bg3vofs
+    jsr update_scroll
     jsr disable_force_blank
     jmp start_fade_in
 
@@ -118,7 +121,6 @@ background_init
     sta title_glitch_hdma_table,x
     dex
     bpl -
-
 
     rts
 
@@ -263,31 +265,6 @@ gameplay_save_state
     sta target_player_x
     lda player_y
     sta target_player_y
-
-    ; save scroll position
-    lda my_bghofs
-    sta saved_bghofs
-    lda my_bgvofs
-    sta saved_bgvofs
-    rts
-
-gameplay_restore_state
-.al
-.xl
-    lda current_map_id
-    sta target_warp_map
-
-    ; do not explicitly need to restore player position because map_set_warp calls
-    ; player_set_initial_position, which will do it
-
-    ; restore scroll position
-    lda saved_bghofs
-    sta my_bghofs
-    lda saved_bgvofs
-    sta my_bgvofs
-
-    stz my_bg3hofs
-    stz my_bg3vofs
 
     rts
 

@@ -45,12 +45,7 @@ close_journal
     lda #$f
     sta effect_level
 
-    ; wait for mosaic to go away
--   ldx #$1
-    stx update_ppu
-    lda effect_id
-    bne -
-    stz update_ppu
+    jsr wait_for_effect
 
     ; all the way out
     jmp longjmp_main
@@ -78,6 +73,7 @@ state_journal_init
     lda #816
     sta my_bgvofs
     sta my_bg3vofs
+    stz my_bghofs
 
     ; swap backgrounds
     jsr enable_force_blank

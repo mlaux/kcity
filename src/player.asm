@@ -641,9 +641,7 @@ vblank_oam_dma
 ; centers player on screen, clamped to map boundaries
 ; parameters: none
 ; returns: none
-; assumes: AXY 16
 update_scroll
-.al
 .xl
     php
     rep #$20
@@ -659,11 +657,11 @@ update_scroll
     lsr
     sec
     sbc #128
-    bcs +
+    bpl +
     lda #0
-+   cmp #255
-    bcc +
-    lda #255
++   cmp #256
+    bmi +
+    lda #256
 +   sta my_bghofs
 
 _check_vertical
@@ -677,10 +675,13 @@ _check_vertical
     lsr
     sec
     sbc #127
-    bcs +
-    lda #0
+    ; -1 vertical scroll is displayed as 0 bc of how rendering works
+    cmp #-1
+    bpl +
+    lda #-1
+    ; 287 is really 288
 +   cmp #287
-    bcc +
+    bmi +
     lda #287
 +   sta my_bgvofs
 
