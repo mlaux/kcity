@@ -216,6 +216,9 @@ map_run_warp
     lda MAP_MAX_PLAYER_Y - 2,x
     sta current_map_max_player_y
 
+    ; lda MAP_MAX_SCROLL_Y - 2,x
+    ; sta current_map_max_scroll_y
+
     ; patch script that displays location names in memory to have
     ; the new location's name and start the script
     lda LOCATION_NAMES - 2,x

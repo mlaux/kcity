@@ -203,7 +203,15 @@ move_player
     beq +
     rts
 
-+   lda player_anim_direction
++   lda map_transition_wait
+    beq +
+    lda joypad_new
+    bit #(UP_BUTTON | DOWN_BUTTON | LEFT_BUTTON | RIGHT_BUTTON)
+    bne +
+    rts
+
++   stz map_transition_wait
+    lda player_anim_direction
     sta player_anim_previous_direction
     stz player_anim_direction
 
@@ -345,8 +353,45 @@ go_down
     sta player_y
     brl animate_player
 
+    ; --- begin 512x256 bottom-of-screen transition - might not keep
+
+    ; is this hub AND is the player walking past the transition point
++   lda current_map_scroll_flags
+    and #4
+    beq _no_split_map
+    lda player_y
+    sec
+    sbc my_bgvofs
+    sbc my_bgvofs
+    clc
+    adc #PLAYER_MOVEMENT_SPEED
+    cmp #448
+    bcc _no_split_map
+    lda my_bgvofs
+    eor #256
+    sta my_bgvofs
+    lda #416
+    clc
+    adc my_bgvofs
+    adc my_bgvofs
+    sta player_y
+    ; flip sprite to face up (away from camera)
+    lda #PLAYER_DIRECTION_UP
+    sta player_anim_direction
+    ; queue sprite data for facing up with current animation offset
+    ; (PLAYER_DIRECTION_UP - 1) << 7 + player_anim_offset
+    lda #PLAYER_DIRECTION_UP - 1
+    sln 7
+    ldx #0
+    jsr dma_queue_add
+    inc map_transition_wait
+    brl animate_player
+
+    ; --- end 512x256 code
+
     ; set up X once for both checks (convert to pixels)
-+   lda player_x
+_no_split_map
+    lda player_x
     lsr
     tax
 
@@ -598,7 +643,8 @@ _set_x
 
     ; convert player_y (bottom, half-pixels) to sprite position (top of bottom sprite, pixels)
     lda current_map_scroll_flags
-    and #2
+    ; both 'regular' vertical scroll and hub split-map scroll need this behavior
+    and #(2 | 4)
     beq _no_vscroll
     lda player_y
     lsr

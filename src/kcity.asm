@@ -242,7 +242,8 @@ current_map_scroll_flags .word ?
 ; might not need these, can depend on the collision data
 current_map_max_player_x .word ?
 current_map_max_player_y .word ?
-current_map_max_scroll_y .word ?
+; current_map_max_scroll_y .word ?
+map_transition_wait .word ?
 location_name_script .fill DISPLAY_LOCATION_NAME_LENGTH
 
 ; save slot description strings: "1 - 12:34:56" or "1 - empty"
