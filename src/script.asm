@@ -47,6 +47,7 @@ SCRIPT_STORAGE_IN_MENU = 1
 ; $f: lock/unlock player
 ; $10: clear text tiles (keep box visible)
 ; $11: save game
+; $12: call function
 
 ; can eliminate some redundancy in the implementations of these
 script_operations
@@ -65,6 +66,7 @@ script_operations
     .addr op_set_player_locked
     .addr op_clear_text_tiles
     .addr op_save_game
+    .addr op_call_function
 
 ; just wait for the specified amount of frames
 OPCODE_WAIT = 0
@@ -227,7 +229,7 @@ step_branch_label .macro
     .sint 0
     .word \1
     .word \2
-    .word \3
+    .sint \3
     .word (\4.\5 - \4) >> 4
     .byte 0, 0, 0, 0, 0, 0
 .endm
@@ -282,6 +284,17 @@ step_save_game .macro
     .fill 12
 .endm
 
+OPCODE_CALL_FUNCTION = $12
+
+; +4: function address (24-bit)
+step_call_function .macro
+    .sint 0
+    .word OPCODE_CALL_FUNCTION
+    .addr \1
+    .byte `\1
+    .fill 9
+.endm
+
 ; this gets copied to RAM so it can modify the script with a pointer to the
 ; location name that's being entered when the map is loaded
 DISPLAY_LOCATION_NAME_TEMPLATE
@@ -295,6 +308,7 @@ DISPLAY_LOCATION_NAME_LENGTH = * - DISPLAY_LOCATION_NAME_TEMPLATE
 
 EMPTY_STRING .byte $ff
 MESSAGE_SAVED .text "Saved", $ff
+MESSAGE_SAVE_CORRUPTED .text "Save data corrupted", $ff
 OBJECT_DESC .text "What could be down here?", $ff
 OBJECT_DESC2_1 .text "It's a standard 55-gallon drum.", $ff
 OBJECT_DESC2_2 .text "'AMMONIUM PERSULFATE NET WT 412 KG'", $ff
@@ -311,6 +325,11 @@ TEST_MEOW .text "Meow", $ff
 SCRIPT_MESSAGE_SAVED
     #step_text_box 1, 1, 5, 1, MESSAGE_SAVED, 0, 0, 0
     #step_wait $40
+    #step_hide_text_box
+
+SCRIPT_MESSAGE_SAVE_CORRUPTED
+    #step_text_box 1, 1, 13, 1, MESSAGE_SAVE_CORRUPTED, 0, 0, 0
+    #step_wait $80
     #step_hide_text_box
 
 TEST_OBJECT_SCRIPT
@@ -385,6 +404,15 @@ MENU_OPTION_SAVE .text $80, "Save", 255
 MENU_OPTION_ID_ITEMS = 1
 MENU_OPTION_ID_SAVE = 2
 
+SAVE_SLOT_1 .text $80, "1", 255
+SAVE_SLOT_2 .text $80, "2", 255
+SAVE_SLOT_3 .text $80, "3", 255
+SAVE_SLOT_ID_1 = 1
+SAVE_SLOT_ID_2 = 2
+SAVE_SLOT_ID_3 = 3
+
+SCRIPT_STORAGE_SAVE_SLOT = 2
+
 SCRIPT_SHOW_MENU
     #step_set_player_locked 1
     #step_set_variable SCRIPT_STORAGE_IN_MENU, 1
@@ -395,6 +423,14 @@ SCRIPT_SHOW_MENU
     #step_wait 0 ; items action would go here
 _check_save
     #step_branch_label OPCODE_BRANCH_NE, SCRIPT_STORAGE_TEMP_RESULT, MENU_OPTION_ID_SAVE, SCRIPT_SHOW_MENU, _exit_menu
+    #step_call_function build_save_slot_strings
+    #step_clear_text_tiles
+    #step_wait 1
+    #step_text_box 1, 1, 10, 4, save_slot_string1, save_slot_string2, save_slot_string3, EMPTY_STRING
+    #step_wait WAIT_RESULT_CANCEL_OK
+    #step_read_result SCRIPT_STORAGE_SAVE_SLOT
+    #step_branch_label OPCODE_BRANCH_EQ, SCRIPT_STORAGE_SAVE_SLOT, RESULT_CANCELLED, SCRIPT_SHOW_MENU, _exit_menu
+_do_save
     #step_save_game
     #step_clear_text_tiles
     #step_wait 1
@@ -843,3 +879,17 @@ op_set_player_locked
 
 op_save_game
     jmp save_game
+
+op_call_function
+.as
+.xl
+    rep #$20
+    ldy #$4
+    lda (script_element_ptr),y
+    sta $00
+    ldy #$6
+    lda (script_element_ptr),y
+    and #$ff
+    sta $02
+    sep #$20
+    jml [$0000]

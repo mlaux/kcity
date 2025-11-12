@@ -242,7 +242,14 @@ current_map_scroll_flags .word ?
 ; might not need these, can depend on the collision data
 current_map_max_player_x .word ?
 current_map_max_player_y .word ?
+current_map_max_scroll_y .word ?
 location_name_script .fill DISPLAY_LOCATION_NAME_LENGTH
+
+; save slot description strings: "1 - 12:34:56" or "1 - empty"
+SAVE_SLOT_STRING_SIZE = 16
+save_slot_string1 .fill SAVE_SLOT_STRING_SIZE
+save_slot_string2 .fill SAVE_SLOT_STRING_SIZE
+save_slot_string3 .fill SAVE_SLOT_STRING_SIZE
 
 saved_bghofs .word ?
 saved_bgvofs .word ?
@@ -283,11 +290,40 @@ digi_copyrate .fill 1
 
 * = $700000
 
-sram_map_id .word ?
-sram_player_x .word ?
-sram_player_y .word ?
-sram_game_progress .word ?
-sram_play_time_hms .fill 6
+SAVE_SLOT_SIZE = 16
+NUM_SAVE_SLOTS = 3
+
+; save slot 0
+sram_slot0_map_id .word ?
+sram_slot0_player_x .word ?
+sram_slot0_player_y .word ?
+sram_slot0_game_progress .word ?
+sram_slot0_play_time_hms .fill 6
+sram_slot0_checksum .word ?
+
+; save slot 1
+sram_slot1_map_id .word ?
+sram_slot1_player_x .word ?
+sram_slot1_player_y .word ?
+sram_slot1_game_progress .word ?
+sram_slot1_play_time_hms .fill 6
+sram_slot1_checksum .word ?
+
+; save slot 2
+sram_slot2_map_id .word ?
+sram_slot2_player_x .word ?
+sram_slot2_player_y .word ?
+sram_slot2_game_progress .word ?
+sram_slot2_play_time_hms .fill 6
+sram_slot2_checksum .word ?
+
+; aliases for current system compatibility
+sram_map_id = sram_slot0_map_id
+sram_player_x = sram_slot0_player_x
+sram_player_y = sram_slot0_player_y
+sram_game_progress = sram_slot0_game_progress
+sram_play_time_hms = sram_slot0_play_time_hms
+sram_checksum = sram_slot0_checksum
 
 .warn "sram end: ", *
 

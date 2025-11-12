@@ -18,10 +18,10 @@ mono_font_init
 
     #dma_ppu_data GENEVA_CHARS
 
-    ldx #$3c88
-    stx VMADD
+    ; ldx #$3c88
+    ; stx VMADD
 
-    #dma_ppu_data CPU_USAGE_TILES
+    ; #dma_ppu_data CPU_USAGE_TILES
 
     ldx #$3fd8 ; blank spot after 'z'
     stx VMADD
@@ -236,6 +236,13 @@ map_run_warp
 
     lda #1
     sta MDMAEN
+
+    lda #0
+    sta CGADD
+    lda #$a0
+    sta CGDATA
+    lda #$14
+    sta CGDATA
 
     jsr player_set_initial_position
     stz player_locked
