@@ -81,6 +81,7 @@ SoundTable .fill 3
 ; Work RAM variables
 ; some of these are definitely redundant but made the algorithms easier
 .virtual $800000
+RAM_BASE = *
 .dsection work_ram
 .section work_ram
 * = $800100
@@ -295,36 +296,16 @@ SAVE_SLOT_SIZE = 16
 NUM_SAVE_SLOTS = 3
 
 ; save slot 0
-sram_slot0_map_id .word ?
-sram_slot0_player_x .word ?
-sram_slot0_player_y .word ?
-sram_slot0_game_progress .word ?
-sram_slot0_play_time_hms .fill 6
-sram_slot0_checksum .word ?
+sram_map_id .word ?
+sram_player_x .word ?
+sram_player_y .word ?
+sram_game_progress .word ?
+sram_play_time_hms .fill 6
+sram_checksum .word ?
 
-; save slot 1
-sram_slot1_map_id .word ?
-sram_slot1_player_x .word ?
-sram_slot1_player_y .word ?
-sram_slot1_game_progress .word ?
-sram_slot1_play_time_hms .fill 6
-sram_slot1_checksum .word ?
-
-; save slot 2
-sram_slot2_map_id .word ?
-sram_slot2_player_x .word ?
-sram_slot2_player_y .word ?
-sram_slot2_game_progress .word ?
-sram_slot2_play_time_hms .fill 6
-sram_slot2_checksum .word ?
-
-; aliases for current system compatibility
-sram_map_id = sram_slot0_map_id
-sram_player_x = sram_slot0_player_x
-sram_player_y = sram_slot0_player_y
-sram_game_progress = sram_slot0_game_progress
-sram_play_time_hms = sram_slot0_play_time_hms
-sram_checksum = sram_slot0_checksum
+sram_offset_slot0 = 0
+sram_offset_slot1 = SAVE_SLOT_SIZE
+sram_offset_slot2 = 2 * SAVE_SLOT_SIZE
 
 .warn "sram end: ", *
 
