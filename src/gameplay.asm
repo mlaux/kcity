@@ -61,7 +61,9 @@ state_gameplay
 
     lda target_warp_map
     beq +
-    jsr start_fade_out
+    ; map_set_warp starts the fade out. i kinda think map_set_warp is just a
+    ; pointless function now
+    ; jsr start_fade_out
     jsr wait_for_effect
     ; this might go into the next frame (but it's ok because it enables force blank)
     jsr map_run_warp
@@ -228,9 +230,6 @@ _store_selection
     sta text_box_active_option
 
 _done
-    rts
-
-spc_message_received
     rts
 
 state_gameplay_vblank

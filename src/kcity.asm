@@ -246,8 +246,8 @@ current_map_max_player_y .word ?
 map_transition_wait .word ?
 location_name_script .fill DISPLAY_LOCATION_NAME_LENGTH
 
-; save slot description strings: "1 - 12:34:56" or "1 - empty"
-SAVE_SLOT_STRING_SIZE = 16
+; "1 - Location - 12:34:56"
+SAVE_SLOT_STRING_SIZE = 64
 save_slot_string1 .fill SAVE_SLOT_STRING_SIZE
 save_slot_string2 .fill SAVE_SLOT_STRING_SIZE
 save_slot_string3 .fill SAVE_SLOT_STRING_SIZE

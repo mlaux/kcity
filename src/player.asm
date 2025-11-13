@@ -82,7 +82,6 @@ set_sprite_id_16x32
 ; otherwise sets to the initial position for the map
 ; parameters: X = offset of this map's data in map data arrays (map id << 1)
 player_set_initial_position
-.al
 .xl
     php
     rep #$20
@@ -347,7 +346,7 @@ go_down
     adc #PLAYER_MOVEMENT_SPEED
     ; is y + speed < max_y
     cmp current_map_max_player_y
-    bcc +
+    bmi +
     ; no, clamp to max y
     lda current_map_max_player_y
     sta player_y
@@ -400,7 +399,7 @@ _no_split_map
     clc
     adc #SCRIPT_TRIGGER_LOOKAHEAD
     cmp current_map_max_player_y
-    bcc +
+    bmi +
     lda current_map_max_player_y
 +   lsr
     tay
@@ -433,7 +432,7 @@ go_left
     sec
     sbc #PLAYER_MOVEMENT_SPEED
     cmp #16
-    bcs +
+    bpl +
     ; no, clamp
     lda #16
     sta player_x
@@ -450,7 +449,7 @@ go_left
     sbc #SCRIPT_TRIGGER_LOOKAHEAD
     ; clamp to x=16 here
     cmp #16
-    bcs +
+    bpl +
     lda #16
 +   lsr
     tax
@@ -482,7 +481,7 @@ go_up
     sec
     sbc #PLAYER_MOVEMENT_SPEED
     cmp #$3e
-    bcs +
+    bpl +
     ; no, clamp
     lda #$3e
     sta player_y
@@ -498,7 +497,7 @@ go_up
     sec
     sbc #SCRIPT_TRIGGER_LOOKAHEAD
     cmp #$3e
-    bcs +
+    bpl +
     lda #$3e
 +   lsr
     tay

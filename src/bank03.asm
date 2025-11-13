@@ -8,5 +8,15 @@ NPC_TILESET .binary "../gfx/leif/leif.4bp"
 NEWT_TILESET .binary "../gfx/newt/newtrainbow.4bp"
 CURSOR_TILE .binary "../gfx/star.4bp"
 CPU_USAGE_TILES .binary "../gfx/cpu.4bp"
+.endsection
 
+.dsection journal_graphics
+.section journal_graphics
+JOURNAL_GRAPHICS_BANK = `*
+
+JOURNAL_TILESET .binary "../gfx/journal/notepad.4bp"
+JOURNAL_TILEMAP .binary "../gfx/journal/notepad.map"
+
+PAPER_TILESET .binary "../gfx/paper/paper.4bp"
+PAPER_TILEMAP .binary "../gfx/paper/paper.map"
 .endsection

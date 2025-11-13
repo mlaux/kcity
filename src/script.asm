@@ -426,7 +426,7 @@ _check_save
     #step_call_function build_save_slot_strings
     #step_clear_text_tiles
     #step_wait 1
-    #step_text_box 1, 1, 10, 4, save_slot_string1, save_slot_string2, save_slot_string3, EMPTY_STRING
+    #step_text_box 1, 1, 30, 4, save_slot_string1, save_slot_string2, save_slot_string3, EMPTY_STRING
     #step_wait WAIT_RESULT_CANCEL_OK
     #step_read_result SCRIPT_STORAGE_SAVE_SLOT
     #step_branch_label OPCODE_BRANCH_EQ, SCRIPT_STORAGE_SAVE_SLOT, RESULT_CANCELLED, SCRIPT_SHOW_MENU, _exit_menu
@@ -891,5 +891,4 @@ op_call_function
     lda (script_element_ptr),y
     and #$ff
     sta $02
-    sep #$20
     jml [$0000]

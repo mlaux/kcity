@@ -90,176 +90,141 @@ load_game
 build_save_slot_strings
 .al
 .xl
-    php
-    rep #$20
-
     ; build slot 1 string
-    ldx #<>save_slot_string1
-    ldy #<>sram_slot0_map_id
-    lda #'1'
+    ldx #<>sram_slot0_map_id
+    ldy #<>save_slot_string1
+    lda #'A'
     jsr build_one_slot_string
 
     ; build slot 2 string
-    ldx #<>save_slot_string2
-    ldy #<>sram_slot1_map_id
-    lda #'2'
+    ldx #<>sram_slot1_map_id
+    ldy #<>save_slot_string2
+    lda #'B'
     jsr build_one_slot_string
 
     ; build slot 3 string
-    ldx #<>save_slot_string3
-    ldy #<>sram_slot2_map_id
-    lda #'3'
-    jsr build_one_slot_string
+    ldx #<>sram_slot2_map_id
+    ldy #<>save_slot_string3
+    lda #'C'
+    jmp build_one_slot_string
 
-    plp
-    rts
+static_save_string_char .macro
+    lda #\1
+    sta $800000,y
+    iny
+.endmacro
 
 ; helper function to build one slot string
-; X = destination string address (in RAM)
-; Y = SRAM slot base address
+; X = SRAM slot base address
+; Y = destination string address (in RAM)
 ; A = slot number character ('1', '2', or '3')
 build_one_slot_string
-.al
 .xl
-    phb
+    php
     phx
-    phy
-    pha
 
     sep #$20
     pha
-    lda #$70
-    pha
-    plb
-.databank $70
-    lda #$80
-    sta $7e0000,x
-    inx
+    ; decision marker
+    #static_save_string_char $80
     pla
     ; store slot number
-    sta $7e0000,x
-    inx
+    ;sta $800000,y
+    ;iny
 
-    ; store " - "
-    lda #' '
-    sta $7e0000,x
-    inx
-    lda #'-'
-    sta $7e0000,x
-    inx
-    lda #' '
-    sta $7e0000,x
-    inx
+    ;#static_save_string_char ' '
+    ;#static_save_string_char '-'
+    ;#static_save_string_char ' '
 
     ; check if slot is valid by computing checksum
     rep #$20
-    pla
-    ply
+    plx
 
     clc
-    lda $700000,y       ; map_id
-    adc $700002,y       ; player_x
-    adc $700004,y       ; player_y
-    adc $700006,y       ; game_progress
-    adc $700008,y       ; play_time_hms + 0
-    adc $70000a,y       ; play_time_hms + 2
-    adc $70000c,y       ; play_time_hms + 4
+    lda $700000,x       ; map_id
+    adc $700002,x       ; player_x
+    adc $700004,x       ; player_y
+    adc $700006,x       ; game_progress
+    adc $700008,x       ; play_time_hms + 0
+    adc $70000a,x       ; play_time_hms + 2
+    adc $70000c,x       ; play_time_hms + 4
     eor #$5555
-    cmp $70000e,y       ; checksum
+    cmp $70000e,x       ; checksum
     beq _slot_valid
 
 _slot_empty
     sep #$20
-    lda #'e'
-    sta $7e0000,x
-    inx
-    lda #'m'
-    sta $7e0000,x
-    inx
-    lda #'p'
-    sta $7e0000,x
-    inx
-    lda #'t'
-    sta $7e0000,x
-    inx
-    lda #'y'
-    sta $7e0000,x
-    inx
-    lda #$ff
-    sta $7e0000,x
-    rep #$20
-    plx
-    plb
+    #static_save_string_char 'e'
+    #static_save_string_char 'm'
+    #static_save_string_char 'p'
+    #static_save_string_char 't'
+    #static_save_string_char 'y'
+    #static_save_string_char $ff
+    plp
     rts
 
 _slot_valid
-    ; format time as HH:MM:SS
-    ; play_time_hms is at offset 8 from slot base
-    tya
+; need to specify .al again because _slot_empty sets to .as and assembler
+; doesn't follow control flow
+.al
+    ; X = SRAM slot base address
+    ; Y = destination string pointer
+    ; hours tens
+    lda $700008,x
     clc
-    adc #8
-    tay
+    adc #'0'
+    sta $800000,y
+    iny
+
+    ; hours ones
+    lda $700009,x
+    clc
+    adc #'0'
+    sta $800000,y
+    iny
+
+    ; colon
+    #static_save_string_char ':'
+
+    ; minutes tens
+    lda $70000a,x
+    clc
+    adc #'0'
+    sta $800000,y
+    iny
+
+    ; minutes ones
+    lda $70000b,x
+    clc
+    adc #'0'
+    sta $800000,y
+    iny
+
+    #static_save_string_char ' '
+
+    ; get map_id and look up location name
+    lda $700000,x
+    and #$00ff
+    asl
+    tax
+
+    ; get pointer to location name string
+    lda LOCATION_NAMES - 2,x
+    tax
 
     sep #$20
 
-    ; hours tens
-    lda $700000,y
-    clc
-    adc #'0'
-    sta $7e0000,x
+    ; copy location name string
+-   lda $800000,x       ; read character from location name
+    cmp #$ff
+    beq +
+    sta $800000,y       ; write to destination
+    iny
     inx
-
-    ; hours ones
-    lda $700001,y
-    clc
-    adc #'0'
-    sta $7e0000,x
-    inx
-
-    ; colon
-    lda #':'
-    sta $7e0000,x
-    inx
-
-    ; minutes tens
-    lda $700002,y
-    clc
-    adc #'0'
-    sta $7e0000,x
-    inx
-
-    ; minutes ones
-    lda $700003,y
-    clc
-    adc #'0'
-    sta $7e0000,x
-    inx
-
-    ; colon
-    lda #':'
-    sta $7e0000,x
-    inx
-
-    ; seconds tens
-    lda $700004,y
-    clc
-    adc #'0'
-    sta $7e0000,x
-    inx
-
-    ; seconds ones
-    lda $700005,y
-    clc
-    adc #'0'
-    sta $7e0000,x
-    inx
+    bra -
 
     ; terminator
-    lda #$ff
-    sta $7e0000,x
++   #static_save_string_char $ff
 
-    rep #$20
-    plx
-    plb
-.databank $80
+    plp
     rts

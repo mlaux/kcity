@@ -125,7 +125,6 @@ map_set_warp
     inc player_locked
     jmp start_fade_out
 
-; i can't tell if this is janky or good
 map_run_warp
 .al
 .xl
@@ -135,17 +134,15 @@ map_run_warp
     sep #$20
     jsr enable_force_blank
 
-    lda #$80
-    sta VMAIN
-    lda #MAP_GRAPHICS_BANK
-    sta DMAADDRBANK
-
     ; if HDMA is enabled it'll interfere with normal DMA on the same channel
     stz HDMAEN
 
     rep #$20
     lda #DMAMODE_PPUDATA
     sta DMAMODE
+    lda #TILEMAP_SIZE
+    sta DMALEN
+    stz VMADD
 
     ; get x set up with offset of this map's data in each array
     lda target_warp_map
@@ -164,12 +161,11 @@ map_run_warp
 
     lda ALL_TILEMAPS - 2,x
     sta DMAADDR
-    lda #TILEMAP_SIZE
-    sta DMALEN
-
-    stz VMADD
-
+    lda ALL_MAP_BANKS - 2,x
     sep #$20
+    sta DMAADDRBANK
+    lda #$80
+    sta VMAIN
     lda #1
     sta MDMAEN
     rep #$20
@@ -229,7 +225,18 @@ map_run_warp
     jsr set_script
     plx
 
-    sep #$20
+    jsr player_set_initial_position
+    lda current_map_scroll_flags
+    ; special split 512x256px maps, if y >= 512 half pixels, set vscroll to 256
+    bit #4
+    beq +
+    lda player_y
+    cmp #512
+    bcc +
+    lda #256
+    sta my_bgvofs
+
++   sep #$20
 
     lda #PALETTE_BANK
     sta DMAADDRBANK
@@ -247,7 +254,6 @@ map_run_warp
     lda #$14
     sta CGDATA
 
-    jsr player_set_initial_position
     stz player_locked
 
     plp
