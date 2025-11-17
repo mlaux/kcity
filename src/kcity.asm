@@ -234,7 +234,7 @@ text_box_active_option .word ?
 ; address in tilemap of each option
 text_box_option_positions .fill 2 * MAX_TEXT_BOX_OPTIONS
 
-target_warp_map .word ?
+target_warp_id .word ?
 target_player_x .word ?
 target_player_y .word ?
 current_map_id .word ?

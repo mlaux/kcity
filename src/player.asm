@@ -79,8 +79,7 @@ set_sprite_id_16x32
     rts
 
 ; if target_player_x/y are set, sets the position to that
-; otherwise sets to the initial position for the map
-; parameters: X = offset of this map's data in map data arrays (map id << 1)
+; otherwise sets to the initial position for the warp
 player_set_initial_position
 .xl
     php
@@ -92,7 +91,10 @@ player_set_initial_position
     stz target_player_x
     bra _y
 
-+   lda START_X - 2,x
++   lda target_warp_id
+    asl
+    tax
+    lda WARP_TARGET_X - 2,x
     sta player_x
 
 _y
@@ -102,7 +104,10 @@ _y
     stz target_player_y
     bra _done
 
-+   lda START_Y - 2,x
++   lda target_warp_id
+    asl
+    tax
+    lda WARP_TARGET_Y - 2,x
     sta player_y
 
 _done

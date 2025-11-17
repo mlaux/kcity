@@ -121,7 +121,7 @@ _done
 map_set_warp
 .al
 .xl
-    sta target_warp_map
+    sta target_warp_id
     inc player_locked
     jmp start_fade_out
 
@@ -145,10 +145,11 @@ map_run_warp
     stz VMADD
 
     ; get x set up with offset of this map's data in each array
-    lda target_warp_map
+    lda target_warp_id
+    asl
+    tax
+    lda WARP_TARGET_MAPS - 2,x
     sta current_map_id
-    stz target_warp_map
-    and #$ff
     asl
     tax
 
@@ -255,6 +256,7 @@ map_run_warp
     sta CGDATA
 
     stz player_locked
+    stz target_warp_id
 
     plp
     rts

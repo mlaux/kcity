@@ -66,7 +66,8 @@ _fast
     sta NMITIMEN
 
     lda #1
-    sta current_map_id
+    sta target_warp_id
+    stz target_warp_id+1
 
     ldy #0
     jsr run_state_init

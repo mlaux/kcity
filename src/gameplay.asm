@@ -35,9 +35,8 @@ state_gameplay_init
     jsr mono_font_init
 
     ; don't call map_set_warp because it'll initiate a fade-out and lock
-    ; the player's position, which i don't want
-    lda current_map_id
-    sta target_warp_map
+    ; the player's position, which i don't want. warp id was already set to 1
+    ; in main.asm
     jsr map_run_warp
     stz my_bg3hofs
     stz my_bg3vofs
@@ -59,7 +58,7 @@ state_gameplay
     jsr animate_npcs
     jsr vwf_frame_loop
 
-    lda target_warp_map
+    lda target_warp_id
     beq +
     ; map_set_warp starts the fade out. i kinda think map_set_warp is just a
     ; pointless function now
