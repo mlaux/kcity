@@ -1,6 +1,5 @@
 .dsection map_graphics
 .section map_graphics
-MAP_GRAPHICS_BANK = `*
 
 BEDROOM_TILESET .binary "../gfx/bedroom/bedroom.4bp"
 BEDROOM_TILEMAP .binary "../gfx/bedroom/bedroom.map"

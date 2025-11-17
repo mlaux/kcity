@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map Trigger Editor</title>
+    <style>
+        body {
+            font-family: monospace;
+            background: #222;
+            color: #eee;
+            margin: 0;
+            padding: 20px;
+        }
+
+        #container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            margin: 0 0 20px 0;
+        }
+
+        #controls {
+            background: #333;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .control-group {
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: inline-block;
+            width: 120px;
+        }
+
+        input[type="number"], input[type="file"], select {
+            background: #444;
+            color: #eee;
+            border: 1px solid #555;
+            padding: 5px;
+            border-radius: 3px;
+        }
+
+        button {
+            background: #4a4;
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-family: monospace;
+        }
+
+        button:hover {
+            background: #5b5;
+        }
+
+        button.secondary {
+            background: #44a;
+        }
+
+        button.secondary:hover {
+            background: #55b;
+        }
+
+        #canvas-container {
+            position: relative;
+            display: inline-block;
+            background: #000;
+            border: 2px solid #555;
+        }
+
+        #canvas {
+            display: block;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        #tile-info {
+            background: #333;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        #tile-editor {
+            background: #444;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .value-display {
+            font-size: 14px;
+            margin: 5px 0;
+        }
+
+        .warning {
+            color: #fa4;
+            margin-top: 10px;
+        }
+
+        .help-text {
+            color: #aaa;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1>Map Trigger Editor</h1>
+
+        <div id="controls">
+            <div class="control-group">
+                <label>Load PNG:</label>
+                <input type="file" id="imageInput" accept="image/png">
+            </div>
+
+            <div class="control-group">
+                <label>Load Binary:</label>
+                <input type="file" id="binaryInput" accept=".bin,.dat">
+                <span class="help-text">(optional - load existing trigger data)</span>
+            </div>
+
+            <div class="control-group">
+                <label>Map Width:</label>
+                <input type="number" id="mapWidth" value="16" min="1" max="64">
+                <label style="width: 80px; margin-left: 20px;">Height:</label>
+                <input type="number" id="mapHeight" value="16" min="1" max="64">
+                <span class="help-text">(in 16x16 tiles)</span>
+            </div>
+
+            <div class="control-group">
+                <label>Zoom:</label>
+                <input type="number" id="zoom" value="2" min="1" max="8" step="0.5">
+            </div>
+
+            <div class="control-group">
+                <button onclick="clearAllTriggers()">Clear All</button>
+                <button class="secondary" onclick="exportBinary()">Export Binary</button>
+                <button class="secondary" onclick="exportAsm()">Export .asm</button>
+            </div>
+        </div>
+
+        <div id="canvas-container">
+            <canvas id="canvas"></canvas>
+        </div>
+
+        <div id="tile-info">
+            <strong>Selected Tile:</strong> <span id="selectedTile">None</span>
+
+            <div id="tile-editor" style="display: none;">
+                <div class="control-group">
+                    <label>Tile Type:</label>
+                    <select id="tileType" onchange="updateTileType()">
+                        <option value="0">Empty (0x00)</option>
+                        <option value="warp">Warp (0x80 | id)</option>
+                        <option value="script">Script (0x40 | id)</option>
+                        <option value="custom">Custom Value</option>
+                    </select>
+                </div>
+
+                <div class="control-group" id="idInput" style="display: none;">
+                    <label>ID:</label>
+                    <input type="number" id="triggerId" min="1" max="127" value="1">
+                    <span class="help-text">(1-127)</span>
+                </div>
+
+                <div class="control-group" id="customInput" style="display: none;">
+                    <label>Custom Value:</label>
+                    <input type="text" id="customValue" placeholder="0x00" maxlength="4">
+                </div>
+
+                <div class="value-display">
+                    Current Value: <strong id="currentValue">0x00</strong>
+                </div>
+
+                <button onclick="applyTileValue()">Apply</button>
+                <button class="secondary" onclick="clearTile()">Clear Tile</button>
+            </div>
+
+            <div class="warning">
+                <strong>Format Info:</strong><br>
+                • 0x80 bit = warp trigger<br>
+                • 0x40 bit = script trigger<br>
+                • Lower 6 bits = ID (1-63)<br>
+                • Example: 0x82 = warp ID 2, 0x43 = script ID 3
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        let image = null;
+        let triggerData = [];
+        let mapWidth = 16;
+        let mapHeight = 16;
+        let zoom = 2;
+        let selectedX = -1;
+        let selectedY = -1;
+
+        // Initialize trigger data
+        function initTriggerData() {
+            mapWidth = parseInt(document.getElementById('mapWidth').value);
+            mapHeight = parseInt(document.getElementById('mapHeight').value);
+            triggerData = new Array(mapWidth * mapHeight).fill(0);
+            redraw();
+        }
+
+        // Load image
+        document.getElementById('imageInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                image = new Image();
+                image.onload = () => {
+                    initTriggerData();
+                };
+                image.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Load binary data
+        document.getElementById('binaryInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const data = new Uint8Array(event.target.result);
+                const expectedSize = mapWidth * mapHeight;
+
+                if (data.length !== expectedSize) {
+                    if (confirm(`Binary file is ${data.length} bytes, but map is ${expectedSize} tiles. Adjust map size to ${Math.sqrt(data.length)}x${Math.sqrt(data.length)}?`)) {
+                        const newSize = Math.sqrt(data.length);
+                        if (Number.isInteger(newSize)) {
+                            document.getElementById('mapWidth').value = newSize;
+                            document.getElementById('mapHeight').value = newSize;
+                            mapWidth = newSize;
+                            mapHeight = newSize;
+                        }
+                    }
+                }
+
+                triggerData = Array.from(data);
+                while (triggerData.length < mapWidth * mapHeight) {
+                    triggerData.push(0);
+                }
+                redraw();
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        // Update map size
+        document.getElementById('mapWidth').addEventListener('change', initTriggerData);
+        document.getElementById('mapHeight').addEventListener('change', initTriggerData);
+
+        // Update zoom
+        document.getElementById('zoom').addEventListener('change', () => {
+            zoom = parseFloat(document.getElementById('zoom').value);
+            redraw();
+        });
+
+        // Draw canvas
+        function redraw() {
+            if (!image) {
+                canvas.width = mapWidth * 16 * zoom;
+                canvas.height = mapHeight * 16 * zoom;
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                drawGrid();
+                return;
+            }
+
+            canvas.width = image.width * zoom;
+            canvas.height = image.height * zoom;
+
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+            drawGrid();
+            drawTriggers();
+            drawSelection();
+        }
+
+        function drawGrid() {
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.lineWidth = 1;
+
+            for (let x = 0; x <= mapWidth; x++) {
+                const px = x * 16 * zoom;
+                ctx.beginPath();
+                ctx.moveTo(px, 0);
+                ctx.lineTo(px, mapHeight * 16 * zoom);
+                ctx.stroke();
+            }
+
+            for (let y = 0; y <= mapHeight; y++) {
+                const py = y * 16 * zoom;
+                ctx.beginPath();
+                ctx.moveTo(0, py);
+                ctx.lineTo(mapWidth * 16 * zoom, py);
+                ctx.stroke();
+            }
+        }
+
+        function drawTriggers() {
+            ctx.font = `${12 * zoom}px monospace`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            for (let y = 0; y < mapHeight; y++) {
+                for (let x = 0; x < mapWidth; x++) {
+                    const value = triggerData[y * mapWidth + x];
+                    if (value === 0) continue;
+
+                    const cx = (x * 16 + 8) * zoom;
+                    const cy = (y * 16 + 8) * zoom;
+
+                    // Draw background
+                    if (value & 0x80) {
+                        ctx.fillStyle = 'rgba(255, 100, 100, 0.6)';
+                    } else if (value & 0x40) {
+                        ctx.fillStyle = 'rgba(100, 100, 255, 0.6)';
+                    } else {
+                        ctx.fillStyle = 'rgba(100, 255, 100, 0.6)';
+                    }
+                    ctx.fillRect((x * 16) * zoom, (y * 16) * zoom, 16 * zoom, 16 * zoom);
+
+                    // Draw value
+                    ctx.fillStyle = '#fff';
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 2;
+                    const text = '0x' + value.toString(16).padStart(2, '0');
+                    ctx.strokeText(text, cx, cy);
+                    ctx.fillText(text, cx, cy);
+                }
+            }
+        }
+
+        function drawSelection() {
+            if (selectedX < 0 || selectedY < 0) return;
+
+            ctx.strokeStyle = '#ff0';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(selectedX * 16 * zoom, selectedY * 16 * zoom, 16 * zoom, 16 * zoom);
+        }
+
+        // Handle clicks
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = Math.floor((e.clientX - rect.left) / zoom / 16);
+            const y = Math.floor((e.clientY - rect.top) / zoom / 16);
+
+            if (x >= 0 && x < mapWidth && y >= 0 && y < mapHeight) {
+                selectedX = x;
+                selectedY = y;
+                updateTileInfo();
+                redraw();
+            }
+        });
+
+        function updateTileInfo() {
+            const idx = selectedY * mapWidth + selectedX;
+            const value = triggerData[idx];
+
+            document.getElementById('selectedTile').textContent = `(${selectedX}, ${selectedY}) = 0x${value.toString(16).padStart(2, '0')}`;
+            document.getElementById('tile-editor').style.display = 'block';
+
+            // Set UI based on current value
+            if (value === 0) {
+                document.getElementById('tileType').value = '0';
+            } else if (value & 0x80) {
+                document.getElementById('tileType').value = 'warp';
+                document.getElementById('triggerId').value = value & 0x7f;
+            } else if (value & 0x40) {
+                document.getElementById('tileType').value = 'script';
+                document.getElementById('triggerId').value = value & 0x3f;
+            } else {
+                document.getElementById('tileType').value = 'custom';
+                document.getElementById('customValue').value = '0x' + value.toString(16).padStart(2, '0');
+            }
+
+            updateTileType();
+        }
+
+        function updateTileType() {
+            const type = document.getElementById('tileType').value;
+
+            document.getElementById('idInput').style.display = (type === 'warp' || type === 'script') ? 'block' : 'none';
+            document.getElementById('customInput').style.display = (type === 'custom') ? 'block' : 'none';
+
+            updateCurrentValue();
+        }
+
+        function updateCurrentValue() {
+            if (selectedX < 0 || selectedY < 0) return;
+
+            const type = document.getElementById('tileType').value;
+            let value = 0;
+
+            if (type === '0') {
+                value = 0;
+            } else if (type === 'warp') {
+                const id = parseInt(document.getElementById('triggerId').value) || 1;
+                value = 0x80 | (id & 0x7f);
+            } else if (type === 'script') {
+                const id = parseInt(document.getElementById('triggerId').value) || 1;
+                value = 0x40 | (id & 0x3f);
+            } else if (type === 'custom') {
+                const customVal = document.getElementById('customValue').value;
+                value = parseInt(customVal, 16) || 0;
+            }
+
+            document.getElementById('currentValue').textContent = '0x' + value.toString(16).padStart(2, '0');
+        }
+
+        document.getElementById('triggerId').addEventListener('input', updateCurrentValue);
+        document.getElementById('customValue').addEventListener('input', updateCurrentValue);
+
+        function applyTileValue() {
+            if (selectedX < 0 || selectedY < 0) return;
+
+            const type = document.getElementById('tileType').value;
+            let value = 0;
+
+            if (type === '0') {
+                value = 0;
+            } else if (type === 'warp') {
+                const id = parseInt(document.getElementById('triggerId').value) || 1;
+                value = 0x80 | (id & 0x7f);
+            } else if (type === 'script') {
+                const id = parseInt(document.getElementById('triggerId').value) || 1;
+                value = 0x40 | (id & 0x3f);
+            } else if (type === 'custom') {
+                const customVal = document.getElementById('customValue').value;
+                value = parseInt(customVal, 16) || 0;
+            }
+
+            const idx = selectedY * mapWidth + selectedX;
+            triggerData[idx] = value & 0xff;
+            redraw();
+        }
+
+        function clearTile() {
+            if (selectedX < 0 || selectedY < 0) return;
+
+            const idx = selectedY * mapWidth + selectedX;
+            triggerData[idx] = 0;
+            updateTileInfo();
+            redraw();
+        }
+
+        function clearAllTriggers() {
+            if (confirm('Clear all trigger data?')) {
+                triggerData.fill(0);
+                redraw();
+            }
+        }
+
+        function exportBinary() {
+            const data = new Uint8Array(triggerData);
+            const blob = new Blob([data], { type: 'application/octet-stream' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'triggers.bin';
+            a.click();
+
+            URL.revokeObjectURL(url);
+        }
+
+        function exportAsm() {
+            let asm = '; Map trigger data\n';
+            asm += `; Size: ${mapWidth}x${mapHeight} tiles\n`;
+            asm += 'MAP_SCRIPT_TRIGGERS\n';
+
+            for (let y = 0; y < mapHeight; y++) {
+                const row = [];
+                for (let x = 0; x < mapWidth; x++) {
+                    const value = triggerData[y * mapWidth + x];
+                    if (value === 0) {
+                        row.push('0');
+                    } else {
+                        row.push('$' + value.toString(16).padStart(2, '0'));
+                    }
+                }
+                asm += '                    .byte ' + row.join(', ') + '\n';
+            }
+
+            const blob = new Blob([asm], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'triggers.asm';
+            a.click();
+
+            URL.revokeObjectURL(url);
+        }
+
+        // Initialize
+        initTriggerData();
+    </script>
+</body>
+</html>

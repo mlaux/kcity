@@ -20,3 +20,11 @@ JOURNAL_TILEMAP .binary "../gfx/journal/notepad.map"
 PAPER_TILESET .binary "../gfx/paper/paper.4bp"
 PAPER_TILEMAP .binary "../gfx/paper/paper.map"
 .endsection
+
+.dsection map_graphics
+.section map_graphics
+
+TKS_TAPESTRIES_TILESET .binary "../gfx/tk/tk.4bp"
+TKS_TAPESTRIES_TILEMAP .binary "../gfx/tk/tk.map"
+
+.endsection

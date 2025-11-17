@@ -5,7 +5,7 @@ PLAYER_ANIMATION_SPEED = 6
 ; in half pixels per frame
 PLAYER_MOVEMENT_SPEED = 3
 ; half pixels to look ahead for script triggers
-SCRIPT_TRIGGER_LOOKAHEAD = 16 << 1
+SCRIPT_TRIGGER_LOOKAHEAD = 8 << 1
 
 PLAYER_DIRECTION_NONE = 0
 PLAYER_DIRECTION_RIGHT = 1
