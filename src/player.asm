@@ -171,6 +171,9 @@ move_player
     beq +
     rts
 
+    ; for 512x256 maps: if recently transitioned to the other section, wait
+    ; for button up and then another button down before resuming movement, so
+    ; the player doesn't just immediately transition sections again
 +   lda map_transition_wait
     beq +
     lda joypad_new
@@ -556,7 +559,7 @@ _moving
     bpl +
     rts
 
-;     ; $400, $800, $c00, $1000, $1400, $1800, reset
+    ; $400, $800, $c00, $1000, $1400, $1800, reset
 +   stz sprites_anim_timer,x
     lda sprites_anim_offset,x
     clc
