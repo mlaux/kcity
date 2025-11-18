@@ -133,12 +133,13 @@ map_run_warp
     tax
     lda WARP_TARGET_MAPS - 2,X
     sta target_map_id
+    lda WARP_TARGET_X - 2,x
+    sta target_player_x
+    lda WARP_TARGET_Y - 2,x
+    sta target_player_y
     ; falls through
 
-; loads map `target_map_id` and places the player somewhere:
-;     either `target_player_x` and `target_player_y`, or
-;     if `target_warp_id` is set, WARP_TARGET_{X|Y}[target_warp_id]
-; if neither of those are set, player position is broken
+; loads map `target_map_id` and places the player at `target_player_x`/`target_player_y`
 load_map
 .al
 .xl
@@ -158,6 +159,10 @@ load_map
     sta DMALEN
     stz VMADD
 
+    lda target_player_x
+    sta player_x
+    lda target_player_y
+    sta player_y
     ; get x set up with offset of this map's data in each array
     lda target_map_id
     sta current_map_id
@@ -237,7 +242,6 @@ load_map
     jsr set_script
     plx
 
-    jsr player_set_initial_position
     lda current_map_scroll_flags
     ; special split 512x256px maps, if y >= 512 half pixels, set vscroll to 256
     bit #4
@@ -269,6 +273,8 @@ load_map
     stz player_locked
     stz target_warp_id
     stz target_map_id
+    stz target_player_x
+    stz target_player_y
 
     plp
     rts

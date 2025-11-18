@@ -78,42 +78,6 @@ set_sprite_id_16x32
     plp
     rts
 
-; if target_player_x/y are set, sets the position to that
-; otherwise sets to the initial position for the warp
-player_set_initial_position
-.xl
-    php
-    rep #$20
-
-    lda target_player_x
-    beq +
-    sta player_x
-    stz target_player_x
-    bra _y
-
-+   lda target_warp_id
-    asl
-    tax
-    lda WARP_TARGET_X - 2,x
-    sta player_x
-
-_y
-    lda target_player_y
-    beq +
-    sta player_y
-    stz target_player_y
-    bra _done
-
-+   lda target_warp_id
-    asl
-    tax
-    lda WARP_TARGET_Y - 2,x
-    sta player_y
-
-_done
-    plp
-    rts
-
 BIT_POSITIONS .byte $80, $40, $20, $10, $8, $4, $2, $1
 
 ; input: X = player X in pixels, Y = player Y in pixels
