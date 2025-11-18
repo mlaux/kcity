@@ -64,7 +64,7 @@ load_game
     rts
 
 +   lda sram_map_id
-    sta target_warp_id
+    sta target_map_id
 
     lda sram_player_x
     sta target_player_x

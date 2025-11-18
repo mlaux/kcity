@@ -37,7 +37,13 @@ state_gameplay_init
     ; don't call map_set_warp because it'll initiate a fade-out and lock
     ; the player's position, which i don't want. warp id was already set to 1
     ; in main.asm
+    lda target_warp_id
+    beq _no_warp
     jsr map_run_warp
+    bra _map_loaded
+_no_warp
+    jsr load_map
+_map_loaded
     stz my_bg3hofs
     stz my_bg3vofs
     jsr update_scroll
@@ -58,14 +64,19 @@ state_gameplay
     jsr animate_npcs
     jsr vwf_frame_loop
 
+    ; warp-or-load-map is getting kind of messy
     lda target_warp_id
     beq +
-    ; map_set_warp starts the fade out. i kinda think map_set_warp is just a
-    ; pointless function now
-    ; jsr start_fade_out
+    ; map_set_warp starts a fade out
     jsr wait_for_effect
     ; this might go into the next frame (but it's ok because it enables force blank)
     jsr map_run_warp
+    jsr start_fade_in
+    jmp disable_force_blank
++   lda target_map_id
+    beq +
+    jsr wait_for_effect
+    jsr load_map
     jsr start_fade_in
     jmp disable_force_blank
 +   rts
@@ -259,6 +270,8 @@ gameplay_save_state
     ; save player position. this is so that map_set_warp will use this
     ; position when reloading the map when coming back to gameplay, instead
     ; of the default start position for the map
+    lda current_map_id
+    sta target_map_id
     lda player_x
     sta target_player_x
     lda player_y

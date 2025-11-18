@@ -128,6 +128,20 @@ map_set_warp
 map_run_warp
 .al
 .xl
+    lda target_warp_id
+    asl
+    tax
+    lda WARP_TARGET_MAPS - 2,X
+    sta target_map_id
+    ; falls through
+
+; loads map `target_map_id` and places the player somewhere:
+;     either `target_player_x` and `target_player_y`, or
+;     if `target_warp_id` is set, WARP_TARGET_{X|Y}[target_warp_id]
+; if neither of those are set, player position is broken
+load_map
+.al
+.xl
     php
 
     ; turn the screen off
@@ -145,10 +159,7 @@ map_run_warp
     stz VMADD
 
     ; get x set up with offset of this map's data in each array
-    lda target_warp_id
-    asl
-    tax
-    lda WARP_TARGET_MAPS - 2,x
+    lda target_map_id
     sta current_map_id
     asl
     tax
@@ -257,6 +268,7 @@ map_run_warp
 
     stz player_locked
     stz target_warp_id
+    stz target_map_id
 
     plp
     rts

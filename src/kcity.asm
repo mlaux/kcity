@@ -235,6 +235,7 @@ text_box_active_option .word ?
 text_box_option_positions .fill 2 * MAX_TEXT_BOX_OPTIONS
 
 target_warp_id .word ?
+target_map_id .word ?
 target_player_x .word ?
 target_player_y .word ?
 current_map_id .word ?
