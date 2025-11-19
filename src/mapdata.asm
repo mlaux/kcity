@@ -5,54 +5,25 @@
 
 BEDROOM_NAME .text "Juno and Leif's bedroom", 255
 BEDROOM_COLLISION_MAP .binary "../gfx/bedroom/walkmap.cwm"
-BEDROOM_SCRIPT_TRIGGERS .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                        .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                        .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                        .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                        .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                        .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                        .byte 0, 0, 0, 0, 0, $44, $41, $42, 0, 0, 0, 0, 0, 0, 0, 0
-                        .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, $43, 0, 0, 0, 0, 0
-                        .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                        .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, $82, 0, 0, 0
-                        .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                        .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                        .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                        .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                        .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                        .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+BEDROOM_SCRIPT_TRIGGERS .binary "../gfx/bedroom/triggers.bin"
 
 LIVING_ROOM_NAME .text "Juno and Leif's living room", 255
 LIVING_ROOM_COLLISION_MAP .binary "../gfx/livingrm/walkmap.cwm"
-LIVING_ROOM_SCRIPT_TRIGGERS 
-                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                    .byte 0, 0, $83, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, $84, $84, $84, 0, 0, 0
-                    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+LIVING_ROOM_SCRIPT_TRIGGERS .binary "../gfx/livingrm/triggers.bin"
 
-TEST_MAP_NAME .text "Hub - Central", 255
+HUB_NAME .text "Hub - Central", 255
 ; can walk anywhere
 TEST_COLLISION_MAP .binary "../gfx/testbg/walkmap.cwm"
-; no scripts for test map. 1024 zeroes
-TEST_SCRIPT_TRIGGERS .binary "../gfx/hub/triggers.bin"
+HUB_SCRIPT_TRIGGERS .binary "../gfx/hub/triggers.bin"
 
 TKS_TAPESTRIES .text "TK's Tapestries", 255
+TKS_SCRIPT_TRIGGERS .binary "../gfx/tk/triggers.bin"
 SEASHORE_SALON .text "Seashore Salon", 255
 EMBERS_CLOTHING .text "Ember's Clothing", 255
 CITY_SERVICES .text "City Services", 255
 INDUSTRIAL_CORRIDOR .text "", 255
+
+; --- begin per-warp tables ---
 
 ; $81: start of game -> bedroom
 ; $82: bedroom -> living room
@@ -64,29 +35,152 @@ INDUSTRIAL_CORRIDOR .text "", 255
 ; $88: hub -> city services
 ; $89: hub -> ember's
 ; $8a: hub -> seashore
+; $8b: TK's -> hub
+; $8c: industrial zone -> hub
+; $8d: city services -> hub
+; $8e: ember's -> hub
+; $8f: seashore -> hub
 
-WARP_TARGET_MAPS .word 1, 2, 1, 3, 2, 4, 5, 6, 7, 8
-WARP_TARGET_X .word $60, $50, $190, $3e0, $170, 0, 0, 0, 0, 0
-WARP_TARGET_Y .word $120, $120, $110, $150, $190, 0, 0, 0, 0, 0
+WARP_TARGET_MAPS
+    ; J+L's house, <-> hub
+    .word 1, 2, 1, 3, 2
+    ; hub -> stores
+    .word 4, 5, 6, 7, 8
+    ; stores -> hub
+    .word 3, 3, 3, 3, 3
 
-START_BGMODE .word $39, $39, $39, $39, $39, $39, $39, $39
-START_HOFS .word $0, $0, $0, $0, $0, $0, $0, $0
-START_VOFS .word $120, $120, $0, $0, $0, $0, $0, $0
+WARP_TARGET_X
+    .word $60, $50, $190, $3e0, $170
+    .word 224, 0, 0, 0, 0
+    .word 0, 0, 0, 0, 0
+
+WARP_TARGET_Y
+    .word $120, $120, $110, $150, $190
+    .word 352, 0, 0, 0, 0
+    .word 0, 0, 0, 0, 0
+
+; --- begin per-map tables ---
+
+ALL_MAP_BANKS 
+    .word `BEDROOM_TILESET
+    .word `LIVING_ROOM_TILESET
+    .word `TEST_MAP_TILESET
+    .word `TKS_TAPESTRIES_TILESET
+    .word `INDUSTRIAL_CORRIDOR_TILESET
+    .word `CITY_SERVICES_TILESET
+    .word `EMBERS_CLOTHING_TILESET
+    .word `SEASHORE_SALON_TILESET
+
+ALL_MAP_PALETTES 
+    .word <>BEDROOM_PALETTE
+    .word <>LIVING_ROOM_PALETTE
+    .word <>TEST_MAP_PALETTE
+    .word <>TKS_TAPESTRIES_PALETTE
+    .word <>INDUSTRIAL_CORRIDOR_PALETTE
+    .word <>CITY_SERVICES_PALETTE
+    .word <>EMBERS_CLOTHING_PALETTE
+    .word <>SEASHORE_SALON_PALETTE
+
+ALL_TILESETS
+    .word <>BEDROOM_TILESET
+    .word <>LIVING_ROOM_TILESET
+    .word <>TEST_MAP_TILESET
+    .word <>TKS_TAPESTRIES_TILESET
+    .word <>INDUSTRIAL_CORRIDOR_TILESET
+    .word <>CITY_SERVICES_TILESET
+    .word <>EMBERS_CLOTHING_TILESET
+    .word <>SEASHORE_SALON_TILESET
+
+ALL_TILEMAPS
+    .word <>BEDROOM_TILEMAP
+    .word <>LIVING_ROOM_TILEMAP
+    .word <>TEST_MAP_TILEMAP
+    .word <>TKS_TAPESTRIES_TILEMAP
+    .word <>INDUSTRIAL_CORRIDOR_TILEMAP
+    .word <>CITY_SERVICES_TILEMAP
+    .word <>EMBERS_CLOTHING_TILEMAP
+    .word <>SEASHORE_SALON_TILEMAP
+
+ALL_TILESET_LENGTHS
+    .word size(BEDROOM_TILESET)
+    .word size(LIVING_ROOM_TILESET)
+    .word size(TEST_MAP_TILESET)
+    .word size(TKS_TAPESTRIES_TILESET)
+    .word size(INDUSTRIAL_CORRIDOR_TILESET)
+    .word size(CITY_SERVICES_TILESET)
+    .word size(EMBERS_CLOTHING_TILESET)
+    .word size(SEASHORE_SALON_TILESET)
+
+COLLISION_MAPS
+    .addr BEDROOM_COLLISION_MAP
+    .addr LIVING_ROOM_COLLISION_MAP
+    .addr TEST_COLLISION_MAP
+    .addr TEST_COLLISION_MAP
+    .addr TEST_COLLISION_MAP
+    .addr TEST_COLLISION_MAP
+    .addr TEST_COLLISION_MAP
+    .addr TEST_COLLISION_MAP
+
+COLLISION_MAP_LENGTHS
+    .word size(BEDROOM_COLLISION_MAP)
+    .word size(LIVING_ROOM_COLLISION_MAP)
+    .word size(TEST_COLLISION_MAP)
+    .word size(TEST_COLLISION_MAP)
+    .word size(TEST_COLLISION_MAP)
+    .word size(TEST_COLLISION_MAP)
+    .word size(TEST_COLLISION_MAP)
+    .word size(TEST_COLLISION_MAP)
+
+SCRIPT_TRIGGER_MAPS
+    .addr BEDROOM_SCRIPT_TRIGGERS
+    .addr LIVING_ROOM_SCRIPT_TRIGGERS
+    .addr HUB_SCRIPT_TRIGGERS
+    .addr TKS_SCRIPT_TRIGGERS
+    .addr HUB_SCRIPT_TRIGGERS
+    .addr HUB_SCRIPT_TRIGGERS
+    .addr HUB_SCRIPT_TRIGGERS
+    .addr HUB_SCRIPT_TRIGGERS
+
+LOCATION_NAMES
+    .addr BEDROOM_NAME
+    .addr LIVING_ROOM_NAME
+    .addr HUB_NAME
+    .addr TKS_TAPESTRIES
+    .addr INDUSTRIAL_CORRIDOR
+    .addr CITY_SERVICES
+    .addr EMBERS_CLOTHING
+    .addr SEASHORE_SALON
+
+START_BGMODE
+    .word $39, $39, $39, $39
+    .word $39, $39, $39, $39
+
+START_HOFS
+    .word $0, $0, $0, $0
+    .word $0, $0, $0, $0
+
+START_VOFS
+    .word $120, $120, $0, $0
+    .word $0, $0, $0, $0
+
 ; usually ((map_width - 8) << 1) - 1
-MAP_MAX_PLAYER_X .word $1ef, $1ef, $3ef, $1ef, $1ef, $1ef, $1ef, $1ef
-; usually (map_height << 1) - 1
-MAP_MAX_PLAYER_Y .word $1bf, $1df, $3ff, $1bf, $1bf, $1bf, $1bf, $1bf
+MAP_MAX_PLAYER_X
+    .word $1ef, $1ef, $3ef, $1ef
+    .word $1ef, $1ef, $1ef, $1ef
 
-ALL_MAP_BANKS .word `BEDROOM_TILESET, `LIVING_ROOM_TILESET, `TEST_MAP_TILESET, `TKS_TAPESTRIES_TILESET, `INDUSTRIAL_CORRIDOR_TILESET, `CITY_SERVICES_TILESET, `EMBERS_CLOTHING_TILESET, `SEASHORE_SALON_TILESET
-ALL_MAP_PALETTES .word <>BEDROOM_PALETTE, <>LIVING_ROOM_PALETTE, <>TEST_MAP_PALETTE, <>TKS_TAPESTRIES_PALETTE, <>INDUSTRIAL_CORRIDOR_PALETTE, <>CITY_SERVICES_PALETTE, <>EMBERS_CLOTHING_PALETTE, <>SEASHORE_SALON_PALETTE
-ALL_TILESETS .word <>BEDROOM_TILESET, <>LIVING_ROOM_TILESET, <>TEST_MAP_TILESET, <>TKS_TAPESTRIES_TILESET, <>INDUSTRIAL_CORRIDOR_TILESET, <>CITY_SERVICES_TILESET, <>EMBERS_CLOTHING_TILESET, <>SEASHORE_SALON_TILESET
-ALL_TILEMAPS .word <>BEDROOM_TILEMAP, <>LIVING_ROOM_TILEMAP, <>TEST_MAP_TILEMAP, <>TKS_TAPESTRIES_TILEMAP, <>INDUSTRIAL_CORRIDOR_TILEMAP, <>CITY_SERVICES_TILEMAP, <>EMBERS_CLOTHING_TILEMAP, <>SEASHORE_SALON_TILEMAP
-ALL_TILESET_LENGTHS .word size(BEDROOM_TILESET), size(LIVING_ROOM_TILESET), size(TEST_MAP_TILESET), size(TKS_TAPESTRIES_TILESET), size(INDUSTRIAL_CORRIDOR_TILESET), size(CITY_SERVICES_TILESET), size(EMBERS_CLOTHING_TILESET), size(SEASHORE_SALON_TILESET)
-COLLISION_MAPS .addr BEDROOM_COLLISION_MAP, LIVING_ROOM_COLLISION_MAP, TEST_COLLISION_MAP, TEST_COLLISION_MAP, TEST_COLLISION_MAP, TEST_COLLISION_MAP, TEST_COLLISION_MAP, TEST_COLLISION_MAP
-COLLISION_MAP_LENGTHS .word size(BEDROOM_COLLISION_MAP), size(LIVING_ROOM_COLLISION_MAP), size(TEST_COLLISION_MAP), size(TEST_COLLISION_MAP), size(TEST_COLLISION_MAP), size(TEST_COLLISION_MAP), size(TEST_COLLISION_MAP), size(TEST_COLLISION_MAP)
-SCRIPT_TRIGGER_MAPS .addr BEDROOM_SCRIPT_TRIGGERS, LIVING_ROOM_SCRIPT_TRIGGERS, TEST_SCRIPT_TRIGGERS, TEST_SCRIPT_TRIGGERS, TEST_SCRIPT_TRIGGERS, TEST_SCRIPT_TRIGGERS, TEST_SCRIPT_TRIGGERS, TEST_SCRIPT_TRIGGERS
-LOCATION_NAMES .addr BEDROOM_NAME, LIVING_ROOM_NAME, TEST_MAP_NAME, TKS_TAPESTRIES, INDUSTRIAL_CORRIDOR, CITY_SERVICES, EMBERS_CLOTHING, SEASHORE_SALON
-; bit 0 = horizontal scroll, bit 1 = vertical scroll, bit 2 = "hub" special vertical scroll
-MAP_SCROLL_FLAGS .word 0, 0, %101, 0, 0, 0, 0, 0
+; usually (map_height << 1) - 1
+MAP_MAX_PLAYER_Y
+    .word $1bf, $1df, $3ff, $1bf
+    .word $1bf, $1bf, $1bf, $1bf
+
+; bit 0 = horizontal scroll
+; bit 1 = vertical scroll
+; bit 2 = "hub" special split 512x256 vertical scroll
+MAP_SCROLL_FLAGS
+    .word 0, 0, %101, 0
+    .word 0, 0, 0, 0
+
 ; 0 = 256x256, 1 = 512x512
-MAP_SIZES .word 0, 0, 1, 0, 0, 0, 0, 0
+MAP_SIZES
+    .word 0, 0, 1, 0
+    .word 0, 0, 0, 0
