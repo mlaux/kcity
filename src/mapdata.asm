@@ -18,10 +18,14 @@ HUB_SCRIPT_TRIGGERS .binary "../gfx/hub/triggers.bin"
 
 TKS_TAPESTRIES .text "TK's Tapestries", 255
 TKS_SCRIPT_TRIGGERS .binary "../gfx/tk/triggers.bin"
-SEASHORE_SALON .text "Seashore Salon", 255
-EMBERS_CLOTHING .text "Ember's Clothing", 255
-CITY_SERVICES .text "City Services", 255
 INDUSTRIAL_CORRIDOR .text "", 255
+INDUSTRIAL_CORRIDOR_SCRIPT_TRIGGERS .binary "../gfx/indust1/triggers.bin"
+CITY_SERVICES .text "City Services", 255
+CITY_SERVICES_SCRIPT_TRIGGERS .binary "../gfx/services/triggers.bin"
+EMBERS_CLOTHING .text "Ember's Clothing", 255
+EMBERS_CLOTHING_SCRIPT_TRIGGERS .binary "../gfx/embers/triggers.bin"
+SEASHORE_SALON .text "Seashore Salon", 255
+SEASHORE_SALON_SCRIPT_TRIGGERS .binary "../gfx/seashore/triggers.bin"
 
 ; --- begin per-warp tables ---
 
@@ -51,13 +55,13 @@ WARP_TARGET_MAPS
 
 WARP_TARGET_X
     .word $60, $50, $190, $3e0, $170
-    .word 224, 0, 0, 0, 0
-    .word 0, 0, 0, 0, 0
+    .word 224, $e0, $100, $b0, $110
+    .word 704, 880, 144, 320, 432
 
 WARP_TARGET_Y
     .word $120, $120, $110, $150, $190
-    .word 352, 0, 0, 0, 0
-    .word 0, 0, 0, 0, 0
+    .word 352, $160, $140, $160, $160
+    .word 320, 320, 352, 352, 352
 
 ; --- begin per-map tables ---
 
@@ -136,10 +140,10 @@ SCRIPT_TRIGGER_MAPS
     .addr LIVING_ROOM_SCRIPT_TRIGGERS
     .addr HUB_SCRIPT_TRIGGERS
     .addr TKS_SCRIPT_TRIGGERS
-    .addr HUB_SCRIPT_TRIGGERS
-    .addr HUB_SCRIPT_TRIGGERS
-    .addr HUB_SCRIPT_TRIGGERS
-    .addr HUB_SCRIPT_TRIGGERS
+    .addr INDUSTRIAL_CORRIDOR_SCRIPT_TRIGGERS
+    .addr CITY_SERVICES_SCRIPT_TRIGGERS
+    .addr EMBERS_CLOTHING_SCRIPT_TRIGGERS
+    .addr SEASHORE_SALON_SCRIPT_TRIGGERS
 
 LOCATION_NAMES
     .addr BEDROOM_NAME
