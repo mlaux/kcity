@@ -140,6 +140,7 @@ map_run_warp
     ; falls through
 
 ; loads map `target_map_id` and places the player at `target_player_x`/`target_player_y`
+; with facing direction of `player_direction`
 load_map
 .al
 .xl
@@ -163,6 +164,11 @@ load_map
     sta player_x
     lda target_player_y
     sta player_y
+    lda player_direction
+    sln 7
+    ldx #0
+    jsr dma_queue_add
+
     ; get x set up with offset of this map's data in each array
     lda target_map_id
     sta current_map_id

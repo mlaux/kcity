@@ -25,11 +25,6 @@ player_init
     php
     rep #$20
 
-    ; send first frame's tile data
-    lda #0
-    ldx #0
-    jsr dma_queue_add
-
     lda #0
     jsr set_sprite_id_16x32
     lda #1
@@ -240,6 +235,7 @@ move_player
     ; skip to second animation frame (stepping forward)
 _starting_to_move
     dec a
+    sta player_direction
     sln 7
     ; same as above but add $400 to skip to first frame
     clc

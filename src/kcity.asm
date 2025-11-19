@@ -206,9 +206,15 @@ player_anim_previous_direction = sprites_anim_previous_direction
 player_anim_offset = sprites_anim_offset
 player_anim_timer = sprites_anim_timer
 
-; this is actually the x/y of the bottom half :(
+; x/y position of bottom middle in half pixels
+; SNES top left sprite X = (player_x - 16) >> 1
+; SNES top left sprite Y = (player_y - 32) >> 1
 player_x .word ?
 player_y .word ?
+; last known direction for persistence purposes. not related to animation
+; direction, which returns to 0 when player is not moving
+; PLAYER_DIRECTION_* - 1
+player_direction .word ?
 player_locked .word ?
 
 text_box_enabled .word ?
