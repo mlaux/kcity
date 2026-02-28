@@ -56,7 +56,11 @@ opening_shelf
     lda #PHASE_SHELF
     sta opening_timer
 _loop
-    jsr wait_for_vblank
+    lda frame_counter
+    and #$f
+    bne +
+    dec my_bgvofs
++   jsr wait_for_vblank
     dec opening_timer
     bne _loop
 
@@ -64,11 +68,40 @@ opening_screen
 .al
 .xl
     stz my_bghofs
-    stz my_bgvofs
+    lda #-1
+    sta my_bgvofs
     lda #PHASE_SCREEN
     sta opening_timer
 _loop
     jsr wait_for_vblank
+    sep #$20
+    lda #$28
+    sta CGADD
+    lda frame_counter
+    and #3
+    cmp #2
+    bcs +
+    ldx #$90
+-   lda OPENING_ROOM_PARTS_PALETTE,x
+    sta CGDATA
+    lda OPENING_ROOM_PARTS_PALETTE + 1,x
+    sta CGDATA
+    inx
+    inx
+    cpx #$98
+    bne -
+    bra _done
++   ldx #$50
+-   lda OPENING_ROOM_PARTS_PALETTE,x
+    sta CGDATA
+    lda OPENING_ROOM_PARTS_PALETTE + 1,x
+    sta CGDATA
+    inx
+    inx
+    cpx #$58
+    bne -
+_done
+    rep #$20
     dec opening_timer
     bne _loop
 
@@ -255,15 +288,15 @@ load_mode7_data
     lda #1
     sta MDMAEN
 
-    ldx #DMAMODE_CGDATA
-    stx DMAMODE
-    stz CGADD
-    ldx #<>MODE7_PALETTE
-    stx DMAADDR
-    ldx #MODE7_PALETTE_LENGTH
-    stx DMALEN
-    lda #1
-    sta MDMAEN
+    ; ldx #DMAMODE_CGDATA
+    ; stx DMAMODE
+    ; stz CGADD
+    ; ldx #<>MODE7_PALETTE
+    ; stx DMAADDR
+    ; ldx #MODE7_PALETTE_LENGTH
+    ; stx DMALEN
+    ; lda #1
+    ; sta MDMAEN
 
     plp
     rts

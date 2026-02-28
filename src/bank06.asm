@@ -7,10 +7,10 @@ EMBERS_CLOTHING_TILEMAP .binary "../gfx/embers/embers.map"
 SEASHORE_SALON_TILESET .binary "../gfx/seashore/seashore.4bp"
 SEASHORE_SALON_TILEMAP .binary "../gfx/seashore/seashore.map"
 
-OPENING_ROOM_PARTS_TILESET .binary "../gfx/opening/roompart.4bp"
-OPENING_ROOM_PARTS_TILEMAP .binary "../gfx/opening/roompart.map"
-OPENING_DRIP_SCENE_TILESET .binary "../gfx/opening/dripbg.4bp"
-OPENING_DRIP_SCENE_TILEMAP .binary "../gfx/opening/dripbg.map"
+.endsection
+
+.dsection opening_graphics
+.section opening_graphics
 
 MODE7_PALETTE
     .word $7fff     ; 0: white
@@ -31,7 +31,7 @@ MODE7_TILE0
 MODE7_TILE0_LENGTH = * - MODE7_TILE0
 
 MODE7_TILEMAP
-    .fill 128*32, 0
+    .fill 128*128
 MODE7_TILEMAP_LENGTH = * - MODE7_TILEMAP
 
 .endsection

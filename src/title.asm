@@ -247,6 +247,7 @@ _send
     lda #1
     sta MDMAEN
 
+    ; twinkles stars all at once... 
 ;     lda #$0d
 ;     sta CGADD
 ;     lda frame_counter
