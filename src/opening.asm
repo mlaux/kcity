@@ -29,27 +29,30 @@ opening_drip
     sta my_tm
     jsr load_drip_scene
     jsr disable_force_blank
-    lda #$f
-    sta my_inidisp
+    jsr start_fade_in
+    jsr wait_for_effect
     lda #PHASE_DRIP
     sta opening_timer
 _loop
     jsr wait_for_vblank
     dec opening_timer
     bne _loop
+    jsr start_fade_out
+    jsr wait_for_effect
 
 opening_shelf
 .al
 .xl
     jsr enable_force_blank
     jsr load_room_parts
-    jsr disable_force_blank
-    lda #$f
-    sta my_inidisp
     stz my_bghofs
     lda #$120
     sta my_bgvofs
-    jsr wait_for_vblank
+    jsr disable_force_blank
+    lda #$f
+    sta my_inidisp
+    ;jsr start_fade_in
+    ;jsr wait_for_effect
     lda #PHASE_SHELF
     sta opening_timer
 _loop
