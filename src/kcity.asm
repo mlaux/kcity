@@ -156,6 +156,15 @@ my_bg2vofs .word ?
 my_bg3hofs .word ?
 my_bg3vofs .word ?
 my_tm .word ?
+
+my_m7sel .word ?
+my_m7a .word ?
+my_m7b .word ?
+my_m7c .word ?
+my_m7d .word ?
+my_m7x .word ?
+my_m7y .word ?
+
 vertical_counter_start .word ?
 vertical_counter_end .word ?
 vertical_counter_this_frame .word ?

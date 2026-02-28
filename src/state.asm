@@ -2,14 +2,17 @@
 ; all functions will be called with AXY16 and should return with AXY16
 INITS
     .addr state_title_init
+    .addr state_opening_init
     .addr state_gameplay_init
     .addr state_journal_init
 STATES
     .addr state_title
+    .addr state_opening
     .addr state_gameplay
     .addr state_journal
 VBLANKS
     .addr state_title_vblank
+    .addr state_opening_vblank
     .addr state_gameplay_vblank
     .addr state_journal_vblank
 

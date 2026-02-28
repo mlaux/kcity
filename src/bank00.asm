@@ -14,6 +14,7 @@
 .include "script.asm"
 .include "save.asm"
 .include "time.asm"
+.include "opening.asm"
 .endsection
 
 .dsection map_data

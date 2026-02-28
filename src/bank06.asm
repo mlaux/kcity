@@ -7,4 +7,29 @@ EMBERS_CLOTHING_TILEMAP .binary "../gfx/embers/embers.map"
 SEASHORE_SALON_TILESET .binary "../gfx/seashore/seashore.4bp"
 SEASHORE_SALON_TILEMAP .binary "../gfx/seashore/seashore.map"
 
+ZEDS_TILESET .binary "../gfx/zeds/zeds.4bp"
+ZEDS_TILEMAP .binary "../gfx/zeds/zeds.map"
+
+MODE7_PALETTE
+    .word $7fff     ; 0: white
+    .word $4210     ; 1: gray
+    .fill 254*2, 0  ; 2-255: unused
+MODE7_PALETTE_LENGTH = * - MODE7_PALETTE
+
+MODE7_TILE0
+    ; concentric square (8x8, 8bpp, 1 byte per pixel)
+    .byte 1,1,1,1,1,1,1,1
+    .byte 1,0,0,0,0,0,0,1
+    .byte 1,0,0,0,0,0,0,1
+    .byte 1,0,0,0,0,0,0,1
+    .byte 1,0,0,0,0,0,0,1
+    .byte 1,0,0,0,0,0,0,1
+    .byte 1,0,0,0,0,0,0,1
+    .byte 1,1,1,1,1,1,1,1
+MODE7_TILE0_LENGTH = * - MODE7_TILE0
+
+MODE7_TILEMAP
+    .fill 128*128, 0
+MODE7_TILEMAP_LENGTH = * - MODE7_TILEMAP
+
 .endsection

@@ -497,7 +497,7 @@
                         row.push('$' + value.toString(16).padStart(2, '0'));
                     }
                 }
-                asm += '                    .byte ' + row.join(', ') + '\n';
+                asm += '    .byte ' + row.join(', ') + '\n';
             }
 
             const blob = new Blob([asm], { type: 'text/plain' });
