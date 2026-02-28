@@ -175,6 +175,7 @@ vertical_counter_vblank_this_frame .word ?
 ; todo use same memory as other stuff for these, only used on title screen
 title_animation_step .word ?
 title_animation_frame .word ?
+opening_timer = title_animation_frame
 title_appear_delay .word ?
 title_solid_palette .word ?
 title_state_palette .word ?
@@ -402,7 +403,7 @@ collision_map .fill $8000
 .include "bank06.asm"
 .endsection bank06
 .warn format("bank06 free space: $%04x", $870000 - *)
-.cerror * > $870000, "bank06 too long"
+.cerror * > $870000, format("bank06 too long by $%04x", * - $870000)
 .here
 
 ; 256k minus one byte

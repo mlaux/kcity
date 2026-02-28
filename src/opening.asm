@@ -6,16 +6,97 @@
 ; 5. transition to state_gameplay (full map) with cutscene continuing in script
 ;       interpreter. player gets control
 
-; not sure if i'm going to need these because i'm doing all of this in a blocking way
-PHASE_DRIP = 0
-PHASE_SHELF = 1
-PHASE_SCREEN = 2
-PHASE_PHOTO = 3
-PHASE_DRAWINGS = 4
-PHASE_MODE7_BED = 5
-PHASE_END = 6
+PHASE_DRIP = 240
+PHASE_SHELF = 180
+PHASE_SCREEN = 180
+PHASE_PHOTO = 180
+PHASE_DRAWINGS = 180
+PHASE_MODE7_BED = 300
 
 state_opening_init
+.al
+.xl
+    rts
+
+state_opening
+opening_drip
+.al
+.xl
+    jsr enable_force_blank
+    lda #$31
+    sta my_bgmode
+    lda #(BG1_ON | OBJ_ON)
+    sta my_tm
+    jsr load_drip_scene
+    jsr disable_force_blank
+    lda #$f
+    sta my_inidisp
+    lda #PHASE_DRIP
+    sta opening_timer
+_loop
+    jsr wait_for_vblank
+    dec opening_timer
+    bne _loop
+
+opening_shelf
+.al
+.xl
+    jsr enable_force_blank
+    jsr load_room_parts
+    jsr disable_force_blank
+    lda #$f
+    sta my_inidisp
+    stz my_bghofs
+    lda #$120
+    sta my_bgvofs
+    jsr wait_for_vblank
+    lda #PHASE_SHELF
+    sta opening_timer
+_loop
+    jsr wait_for_vblank
+    dec opening_timer
+    bne _loop
+
+opening_screen
+.al
+.xl
+    stz my_bghofs
+    stz my_bgvofs
+    lda #PHASE_SCREEN
+    sta opening_timer
+_loop
+    jsr wait_for_vblank
+    dec opening_timer
+    bne _loop
+
+opening_photo
+.al
+.xl
+    lda #$100
+    sta my_bghofs
+    lda #$120
+    sta my_bgvofs
+    lda #PHASE_PHOTO
+    sta opening_timer
+_loop
+    jsr wait_for_vblank
+    dec opening_timer
+    bne _loop
+
+opening_drawings
+.al
+.xl
+    lda #$100
+    sta my_bghofs
+    stz my_bgvofs
+    lda #PHASE_DRAWINGS
+    sta opening_timer
+_loop
+    jsr wait_for_vblank
+    dec opening_timer
+    bne _loop
+
+opening_mode7_bed
 .al
 .xl
     jsr enable_force_blank
@@ -24,22 +105,27 @@ state_opening_init
     jsr disable_force_blank
     lda #$f
     sta my_inidisp
-    rts
-
-state_opening
-.al
-.xl
+    lda #PHASE_MODE7_BED
+    sta opening_timer
+_loop
     lda frame_counter
     and #3
-    beq +
-    rts
-+   lda my_m7a
-    cmp #$200
     bne +
-    rts
-+   inc my_m7a
+    lda my_m7a
+    cmp #$200
+    beq +
+    inc my_m7a
     inc my_m7d
-    rts
++   jsr wait_for_vblank
+    dec opening_timer
+    bne _loop
+
+opening_end
+.al
+.xl
+    ldy #2
+    jsr run_state_init
+    jmp longjmp_main
 
 state_opening_vblank
 .al
@@ -75,6 +161,60 @@ state_opening_vblank
     sta M7Y
     lda my_m7y + 1
     sta M7Y
+
+    plp
+    rts
+
+load_drip_scene
+.al
+.xl
+    php
+    sep #$20
+    ldx #DMAMODE_PPUDATA
+    stx DMAMODE
+
+    lda #$80
+    sta VMAIN
+    ldx #0
+    stx VMADD
+    #dma_ppu_data OPENING_DRIP_SCENE_TILEMAP
+
+    ldx #$1000
+    stx VMADD
+    #dma_ppu_data OPENING_DRIP_SCENE_TILESET
+
+    ldx #DMAMODE_CGDATA
+    stx DMAMODE
+    lda #$0
+    sta CGADD
+    #dma_ppu_data OPENING_DRIP_SCENE_PALETTE
+
+    plp
+    rts
+
+load_room_parts
+.al
+.xl
+    php
+    sep #$20
+    ldx #DMAMODE_PPUDATA
+    stx DMAMODE
+
+    lda #$80
+    sta VMAIN
+    ldx #0
+    stx VMADD
+    #dma_ppu_data OPENING_ROOM_PARTS_TILEMAP
+
+    ldx #$1000
+    stx VMADD
+    #dma_ppu_data OPENING_ROOM_PARTS_TILESET
+
+    ldx #DMAMODE_CGDATA
+    stx DMAMODE
+    lda #$0
+    sta CGADD
+    #dma_ppu_data OPENING_ROOM_PARTS_PALETTE
 
     plp
     rts
@@ -148,4 +288,12 @@ set_mode7
     stx my_bgvofs
 
     plp
+    rts
+
+wait_for_vblank
+.al
+.xl
+    inc update_ppu
+-   lda update_ppu
+    bne -
     rts

@@ -14,7 +14,7 @@ open_journal
 .xl
     lda #6
     sta game_progress
-    ldy #2
+    ldy #3
     jsr run_state_init
     jmp longjmp_main
 
@@ -31,7 +31,7 @@ close_journal
 
     jsr wait_for_effect
 
-    ldy #1
+    ldy #2
     jsr run_state_init
 
     ; background was left turned off by loading the map

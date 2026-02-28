@@ -442,12 +442,16 @@ hide_newt
 clear_bg3_tiles
 .as
 .xl
+    ldx #DMAMODE_PPUFILL
+    stx DMAMODE
+    ldx #<>ZERO
+    stx DMAADDR
+    lda #`ZERO
+    sta DMAADDRBANK
     ldx #$2000 ; in bytes
     stx DMALEN
     ldx #$3000 ; in words
     stx VMADDL
-    ldx #DMAMODE_PPUFILL
-    stx DMAMODE
 
     lda #$80
     sta VMAIN
