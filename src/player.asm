@@ -348,6 +348,7 @@ go_down
     ; queue sprite data for facing up with current animation offset
     ; (PLAYER_DIRECTION_UP - 1) << 7 + player_anim_offset
     lda #PLAYER_DIRECTION_UP - 1
+    sta player_direction
     sln 7
     ldx #0
     jsr dma_queue_add

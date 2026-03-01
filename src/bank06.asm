@@ -7,6 +7,9 @@ EMBERS_CLOTHING_TILEMAP .binary "../gfx/embers/embers.map"
 SEASHORE_SALON_TILESET .binary "../gfx/seashore/seashore.4bp"
 SEASHORE_SALON_TILEMAP .binary "../gfx/seashore/seashore.map"
 
+CITY_SERVICES_TILESET .binary "../gfx/services/services.4bp"
+CITY_SERVICES_TILEMAP .binary "../gfx/services/services.map"
+
 .endsection
 
 .dsection opening_graphics

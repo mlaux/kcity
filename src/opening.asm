@@ -16,6 +16,17 @@ PHASE_MODE7_BED = 300
 state_opening_init
 .al
 .xl
+    sep #$20
+    ldx	#2
+	jsr	spcLoad
+    ldx #0
+    jsr spcPlay
+    jsr spcFlush
+    ; wait for music to start
+-   jsr spcReadStatus
+    bit #SPC_P
+    beq -
+    rep #$20
     rts
 
 state_opening
@@ -29,7 +40,11 @@ opening_drip
     sta my_tm
     jsr load_drip_scene
     jsr disable_force_blank
-    jsr start_fade_in
+    lda #EFFECT_FADE_IN
+    sta effect_id
+    lda #$7
+    sta effect_speed
+    stz effect_level
     jsr wait_for_effect
     lda #PHASE_DRIP
     sta opening_timer
@@ -159,6 +174,15 @@ _loop
 opening_end
 .al
 .xl
+    ; it actually processes this in reverse order, so to overwrite the default
+    ; player direction with left, i need to add this first, then run_state_init
+    ; which will queue up facing right... dumb
+    lda #PLAYER_DIRECTION_LEFT - 1
+    sta player_direction
+    sln 7
+    ldx #0
+    jsr dma_queue_add
+
     ldy #2
     jsr run_state_init
     jmp longjmp_main
