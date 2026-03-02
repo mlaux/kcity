@@ -198,7 +198,6 @@ opening_end
 state_opening_vblank
 .al
 .xl
-
     php
     sep #$20
     lda my_m7sel

@@ -77,7 +77,6 @@ go_to_opening
     jsr clear_script
     lda #1
     sta text_box_hide_requested
-    lda #1
     sta target_warp_id
     stz target_warp_id+1
     ldy #STATE_ID_OPENING

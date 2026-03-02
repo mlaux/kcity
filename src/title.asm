@@ -112,16 +112,23 @@ state_title
     beq _animate
 
     lda my_bg2vofs
-    bpl +
+    bpl _full_title
 
     sep #$20
     jsr spcStop
     rep #$20
+    jsr save_exists
+    cmp #1
+    beq _load
+    jmp go_to_opening
+
+_load
     ldy #STATE_ID_FILE_SELECT
     jsr run_state_init
     jmp longjmp_main
 
-+   lda #$f
+_full_title
+    lda #$f
     sta effect_level
     sta my_inidisp
     stz effect_id

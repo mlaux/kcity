@@ -1,3 +1,26 @@
+save_exists
+.al
+.xl
+    php
+    rep #$20
+
+    clc
+    lda sram_map_id
+    adc sram_player_x
+    adc sram_player_y
+    adc sram_game_progress
+    adc sram_play_time_hms
+    adc sram_play_time_hms + 2
+    adc sram_play_time_hms + 4
+    eor #$5555
+    cmp sram_checksum
+    beq +
+    lda #0
+    plp
+    rts
++   lda #1
+    plp
+    rts
 
 save_game
 .al
