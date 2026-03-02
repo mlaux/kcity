@@ -50,6 +50,8 @@ state_file_select_init
     jsr disable_force_blank
     lda #$f
     sta my_inidisp
+    lda #MENU_OPTION_ID_CONTINUE - 1
+    sta text_box_active_option
     ldx #<>SCRIPT_FILE_SELECT
     ldy #SCRIPT_FILE_SELECT_NUM_STEPS
     jmp set_script
