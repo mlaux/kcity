@@ -2,14 +2,14 @@ state_gameplay_init
 .al
 .xl
     sep #$20
-    jsr enable_force_blank
 
-    jsr clear_bg3_tiles
-    jsr clear_bg3_tilemap
-    jsr palette_init
-    jsr background_init
-    jsr copy_ram_scripts
-
+    ; skip music init if coming back from the journal
+    lda game_state
+    cmp #STATE_ID_JOURNAL
+    beq +
+    ; opening had faded the volume to 0
+    ldx #255
+    jsr spcSetModuleVolume
     ldx	#1
 	jsr	spcLoad
     ldx #0
@@ -18,6 +18,14 @@ state_gameplay_init
 -   jsr spcReadStatus
     bit #SPC_P
     beq -
+
++   jsr enable_force_blank
+
+    jsr clear_bg3_tiles
+    jsr clear_bg3_tilemap
+    jsr palette_init
+    jsr background_init
+    jsr copy_ram_scripts
 
     rep #$20
 
@@ -36,12 +44,13 @@ state_gameplay_init
 
     ; don't call map_set_warp because it'll initiate a fade-out and lock
     ; the player's position, which i don't want. warp id was already set to 1
-    ; in main.asm
+    ; in file_sel if "start" is chosen
     lda target_warp_id
     beq _no_warp
     jsr map_run_warp
     bra _map_loaded
 _no_warp
+    ; for returning from journal or loading game
     jsr load_map
 _map_loaded
     stz my_bg3hofs

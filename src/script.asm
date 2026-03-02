@@ -436,6 +436,28 @@ _exit_menu
 
 SCRIPT_SHOW_MENU_NUM_STEPS = (* - SCRIPT_SHOW_MENU) >> 4
 
+MENU_OPTION_START .text $80, "Start", 255
+MENU_OPTION_CONTINUE .text $80, "Continue", 255
+MENU_OPTION_ID_START = 1
+MENU_OPTION_ID_CONTINUE = 2
+
+SCRIPT_FILE_SELECT
+    #step_text_box 11, 12, 9, 2, MENU_OPTION_START, MENU_OPTION_CONTINUE, EMPTY_STRING, EMPTY_STRING
+    #step_wait WAIT_RESULT_NO_CANCEL
+    #step_read_result SCRIPT_STORAGE_TEMP_RESULT
+    #step_branch_label OPCODE_BRANCH_NE, SCRIPT_STORAGE_TEMP_RESULT, MENU_OPTION_ID_START, SCRIPT_FILE_SELECT, _load_game
+    #step_hide_text_box
+    #step_call_function go_to_opening
+    ; need unconditional
+    #step_branch_label OPCODE_BRANCH_EQ, SCRIPT_STORAGE_TEMP_RESULT, MENU_OPTION_ID_START, SCRIPT_FILE_SELECT, _end
+_load_game
+    #step_hide_text_box
+    #step_call_function go_to_gameplay_load
+_end
+    #step_wait 1
+
+SCRIPT_FILE_SELECT_NUM_STEPS = (* - SCRIPT_FILE_SELECT) >> 4
+
 OBJECT_SCRIPTS .addr TEST_OBJECT_SCRIPT, TEST_HAIR_BLEACH, TEST_REACT_TO_BOOKSHELF, TEST_MISC
 OBJECT_SCRIPT_LENGTHS .word 4, 3, 25, 9
 

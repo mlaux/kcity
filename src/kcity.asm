@@ -145,6 +145,7 @@ script_step_time_remaining .word ?
 script_step_result .word ?
 
 script_storage .fill $20
+script_storage_result = script_storage
 
 my_inidisp .word ?
 my_bgmode .word ?

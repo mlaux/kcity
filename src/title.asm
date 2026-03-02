@@ -117,7 +117,7 @@ state_title
     sep #$20
     jsr spcStop
     rep #$20
-    ldy #1
+    ldy #STATE_ID_FILE_SELECT
     jsr run_state_init
     jmp longjmp_main
 

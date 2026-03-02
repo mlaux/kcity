@@ -65,11 +65,7 @@ _fast
     lda #$81
     sta NMITIMEN
 
-    lda #1
-    sta target_warp_id
-    stz target_warp_id+1
-
-    ldy #0
+    ldy #STATE_ID_TITLE
     jsr run_state_init
 
     ; fall through to main loop

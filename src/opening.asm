@@ -150,6 +150,14 @@ _loop
 opening_mode7_bed
 .al
 .xl
+    ; mask the loading of the next music by starting to fade this one out
+    sep #$20
+    ldx #0 ; target volume
+    ldy #2 ; speed
+    jsr spcFadeModuleVolume
+    jsr spcFlush
+    rep #$20
+
     jsr enable_force_blank
     jsr load_mode7_data
     jsr set_mode7
@@ -183,7 +191,7 @@ opening_end
     ldx #0
     jsr dma_queue_add
 
-    ldy #2
+    ldy #STATE_ID_GAMEPLAY
     jsr run_state_init
     jmp longjmp_main
 
