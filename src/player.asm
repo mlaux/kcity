@@ -556,6 +556,11 @@ animate_sprite_v2
     asl
     tay     ; Y = sprite_id * 4
 
+    ; calculate max address before looping, e.g. $1c00 for 7 frames
+    lda object_num_anim_frames-2,x
+    sln 10
+    sta zp0
+
     lda sprites_anim_direction,x
     and #$ff
     bne _moving
@@ -590,11 +595,12 @@ _moving
     lda sprites_anim_offset,x
     clc
     adc #$400
-    cmp #$1c00
+    cmp zp0
     beq +
     sta sprites_anim_offset,x
     bra _go
 
+    ; skip idle frame 0, go back to $400
 +   lda #$400
     sta sprites_anim_offset,x
 
@@ -671,6 +677,83 @@ _set_y
     sbc #$10
     sta player_y_head_sprite
     rep #$20
+    rts
+
+; convert object world positions to OAM screen positions
+; assumes: AXY 16
+set_updated_object_positions
+.al
+.xl
+    lda num_active_objects
+    bne +
+    rts
+
++   stz zp3
+
+_next
+    ; X = object_index * 2 (for object arrays)
+    lda zp3
+    asl
+    tax
+
+    ; Y = OAM byte offset = (object_index + 1) * 8
+    lda zp3
+    inc a
+    asl
+    asl
+    asl
+    tay
+
+    ; convert object_x (center, half-pixels) to screen x (left edge, pixels)
+    lda current_map_scroll_flags
+    and #1
+    beq _no_hscroll
+    lda object_x,x
+    lsr
+    sec
+    sbc #8
+    sec
+    sbc my_bghofs
+    bra _set_x
+_no_hscroll
+    lda object_x,x
+    lsr
+    sec
+    sbc #8
+_set_x
+    sep #$20
+    sta oam_data_x,y
+    sta oam_data_x + 4,y
+    rep #$20
+
+    ; convert object_y (bottom, half-pixels) to screen y
+    lda current_map_scroll_flags
+    and #(2 | 4)
+    beq _no_vscroll
+    lda object_y,x
+    lsr
+    sec
+    sbc #15
+    sec
+    sbc my_bgvofs
+    bra _set_y
+_no_vscroll
+    lda object_y,x
+    lsr
+    sec
+    sbc #15
+_set_y
+    sep #$20
+    sta oam_data_y,y
+    sec
+    sbc #$10
+    sta oam_data_y + 4,y
+    rep #$20
+
+    inc zp3
+    lda zp3
+    cmp num_active_objects
+    bne _next
     rts
 
 ; send over the updated data calculated by move_player

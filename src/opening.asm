@@ -189,7 +189,7 @@ opening_end
     sta player_direction
     sln 7
     clc
-    adc object_sprite_data
+    adc #<>PLAYER_TILESET
     ldx #0
     jsr dma_queue_add
 

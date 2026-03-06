@@ -205,13 +205,13 @@ OBJECT_ENTRY_SIZE = 16
 BEDROOM_OBJECTS
     .word 2 ; count
     ; leif
-    .word $100, $180
+    .word $100, $1ff
     .word <>NPC_TILESET, `NPC_TILESET
     .word $38, 0, 0, 7
     ; cat
-    .word $100, $180
+    .word $80, $130
     .word <>CAT_TILESET, `CAT_TILESET
-    .word $38, 0, 0, 2
+    .word $3c, 0, 0, 2
 
 NO_OBJECTS
     .word 0
@@ -225,3 +225,18 @@ MAP_OBJECTS
     .addr NO_OBJECTS
     .addr NO_OBJECTS
     .addr NO_OBJECTS
+
+MAP_OBJ_PALETTES
+    .addr BEDROOM_OBJ_PALETTES
+    .addr NO_OBJECTS
+    .addr NO_OBJECTS
+    .addr NO_OBJECTS
+    .addr NO_OBJECTS
+    .addr NO_OBJECTS
+    .addr NO_OBJECTS
+    .addr NO_OBJECTS
+
+BEDROOM_OBJ_PALETTES
+    .word 2
+    .addr NPC_PALETTE
+    .addr CAT_PALETTE

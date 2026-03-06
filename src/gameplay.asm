@@ -66,6 +66,7 @@ state_gameplay
     jsr move_player
     jsr update_scroll
     jsr set_updated_player_pos
+    jsr set_updated_object_positions
     jsr run_script_v2
 
     ; run_script_v2 changes to 8 bit, change back

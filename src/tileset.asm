@@ -1,5 +1,9 @@
 TILEMAP_SIZE = $800
+; backdrop color, text box colors, cursor, etc are in palette 0. map background
+; palettes start at $10
 PALETTE_OFFSET = $10
+; juno is always $c0 (palette $c). map-defined palettes can be $d0, $e0, $f0
+OBJ_PALETTE_OFFSET = $d0
 TILEMAP_PALETTE_SIZE = $e0
 
 mono_font_init
@@ -209,6 +213,23 @@ load_map
     lda #DMAMODE_CGDATA
     sta DMAMODE
 
+    sep #$20
+    lda #PALETTE_BANK
+    sta DMAADDRBANK
+    lda #PALETTE_OFFSET
+    sta CGADD
+
+    lda #1
+    sta MDMAEN
+
+    lda #0
+    sta CGADD
+    lda #$a0
+    sta CGDATA
+    lda #$14
+    sta CGDATA
+    rep #$20
+
     lda COLLISION_MAPS - 2,x
     sta zp1
     lda COLLISION_MAP_LENGTHS - 2,x
@@ -254,25 +275,10 @@ load_map
     lda #256
     sta my_bgvofs
 
-+   jsr init_map_objects
-
-    sep #$20
-
-    lda #PALETTE_BANK
-    sta DMAADDRBANK
-    ; write the palette
-    lda #PALETTE_OFFSET
-    sta CGADD
-
-    lda #1
-    sta MDMAEN
-
-    lda #0
-    sta CGADD
-    lda #$a0
-    sta CGDATA
-    lda #$14
-    sta CGDATA
++   phx
+    jsr init_map_objects
+    plx
+    jsr init_map_obj_palettes
 
     stz player_locked
     stz target_warp_id
@@ -396,10 +402,48 @@ _next_object
     inc zp3
     lda zp3
     cmp num_active_objects
-    beq _done
+    beq +
     jmp _next_object
 
++   jsr set_updated_object_positions
+
 _done
+    rts
+
+init_map_obj_palettes
+.al
+.xl
+    lda MAP_OBJ_PALETTES - 2,x
+    sta zp2
+    lda (zp2)
+    sta zp3
+    bne +
+    ; no obj palettes to load for this map
+    rts
+
++   lda #DMAMODE_CGDATA
+    sta DMAMODE
+    sep #$20
+    lda #PALETTE_BANK
+    sta DMAADDRBANK
+    lda #$d0
+    sta CGADD
+    rep #$20
+
+    ldy #2
+-   lda (zp2),y
+    sta DMAADDR
+    lda #$20
+    sta DMALEN
+    sep #$20
+    lda #1
+    sta MDMAEN
+    rep #$20
+    iny
+    iny
+    dec zp3
+    bne -
+
     rts
 
 ; very basic RLE that only works well on 1-bit images with large areas of the
