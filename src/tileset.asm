@@ -31,15 +31,10 @@ mono_font_init
     plp
     rts
 
-; copies 16x32 sprite in tileset to video ram 
-; no idea what i'm doing but i need to implement this or i'll run out of
-; tile IDs with just a few characters on screen
-; input: a - base address of 16x32 sprite data
-;        x - dest 16x32 sprite id
+; copies 16x32 sprite frame to VRAM via DMA queue
+; input: a - full 16-bit source address within bank
+;        x - dest 16x32 sprite slot * 2
 ; AXY 16
-
-; (frame * 0x400) + (direction * 0x80) for the top half of the sprite
-; and that plus 0x200 for the bottom half
 dma_queue_add
 .al
 .xl
@@ -70,9 +65,8 @@ dma_queue_add
     sta dma_queue_entry_vmadd + 2,y
 
     pla
-    clc
-    adc #<>PLAYER_TILESET
     sta dma_queue_entry_addr,y
+    clc
     adc #$200
     sta dma_queue_entry_addr + 2,y
 
@@ -166,6 +160,8 @@ load_map
     sta player_y
     lda player_direction
     sln 7
+    clc
+    adc object_sprite_data
     ldx #0
     jsr dma_queue_add
 
@@ -258,7 +254,9 @@ load_map
     lda #256
     sta my_bgvofs
 
-+   sep #$20
++   jsr init_map_objects
+
+    sep #$20
 
     lda #PALETTE_BANK
     sta DMAADDRBANK
@@ -283,6 +281,125 @@ load_map
     stz target_player_y
 
     plp
+    rts
+
+; initialize objects for the current map from MAP_OBJECTS table
+; X = map_id * 2
+; assumes: AXY 16
+init_map_objects
+.al
+.xl
+    lda MAP_OBJECTS - 2,x
+    sta zp2
+
+    stz num_active_objects
+
+    ; hide sprite slots 1-7 (OAM bytes 8 through 63)
+    sep #$20
+    ldx #8
+    lda #$e0
+-   sta oam_data_y,x
+    inx
+    inx
+    inx
+    inx
+    cpx #64
+    bne -
+    rep #$20
+
+    lda (zp2)
+    bne +
+    jmp _done
++   sta num_active_objects
+
+    stz zp3
+
+_next_object
+    ; zp1 = zp2 + 2 + zp3 * OBJECT_ENTRY_SIZE
+    lda zp3
+    asl
+    asl
+    asl
+    asl
+    clc
+    adc zp2
+    adc #2
+    sta zp1
+
+    ; X = object_index * 2 (for 16-bit object arrays)
+    lda zp3
+    asl
+    tax
+
+    ldy #0
+    lda (zp1),y
+    sta object_x,x
+    ldy #2
+    lda (zp1),y
+    sta object_y,x
+    ldy #8
+    lda (zp1),y
+    sta object_flags,x
+    ldy #10
+    lda (zp1),y
+    sta object_interaction_script,x
+    ldy #12
+    lda (zp1),y
+    sta object_bg_script,x
+    ldy #14
+    lda (zp1),y
+    sta object_num_anim_frames,x
+
+    ; sprite data -> object_sprite_data[sprite_slot * 4]
+    ; sprite_slot = object_index + 1
+    lda zp3
+    inc a
+    asl
+    asl
+    tax
+    ldy #4
+    lda (zp1),y
+    sta object_sprite_data,x
+    ldy #6
+    lda (zp1),y
+    sta object_sprite_data + 2,x
+
+    ; set OAM flags for feet and head
+    ; OAM offset = sprite_slot * 8
+    lda zp3
+    inc a
+    asl
+    asl
+    asl
+    tax
+    ldy #8
+    lda (zp1),y
+    sep #$20
+    sta oam_data_flag,x
+    sta oam_data_flag + 4,x
+    rep #$20
+
+    ; queue initial sprite frame (facing down, idle)
+    lda zp3
+    inc a
+    asl
+    tax
+    ldy #4
+    lda (zp1),y
+    clc
+    adc #$80        ; (PLAYER_DIRECTION_DOWN - 1) << 7
+    jsr dma_queue_add
+
+    stz sprites_anim_offset,x
+    stz sprites_anim_timer,x
+
+    inc zp3
+    lda zp3
+    cmp num_active_objects
+    beq _done
+    jmp _next_object
+
+_done
     rts
 
 ; very basic RLE that only works well on 1-bit images with large areas of the

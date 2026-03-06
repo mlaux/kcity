@@ -188,6 +188,8 @@ opening_end
     lda #PLAYER_DIRECTION_LEFT - 1
     sta player_direction
     sln 7
+    clc
+    adc object_sprite_data
     ldx #0
     jsr dma_queue_add
 

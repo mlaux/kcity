@@ -13,22 +13,40 @@ PLAYER_DIRECTION_DOWN = 2
 PLAYER_DIRECTION_LEFT = 3
 PLAYER_DIRECTION_UP = 4
 
-; hardcoding for each slot for now
-SPRITE_BASE_IDS_FEET .word $2, $6
-SPRITE_BASE_IDS_HEAD .word $0, $4
-SPRITE_INITIAL_FLAGS .word $38, $0
-SPRITE_ID_TO_DATA .word $0, $2000
+; OAM tile IDs for each 16x32 sprite slot (8 slots)
+; slot N: top = 4*N, bottom = 4*N + 2
+SPRITE_BASE_IDS_TOP .word $00, $04, $08, $0c, $10, $14, $18, $1c
+SPRITE_BASE_IDS_BOTTOM .word $02, $06, $0a, $0e, $12, $16, $1a, $1e
 
 MOVEMENT_JUMP_TABLE .addr go_right, go_down, go_left, go_up
+
+PLAYER_OAM_FLAGS = $38
 
 player_init
     php
     rep #$20
 
+    ; set up OAM tile IDs for all 8 sprite slots
     lda #0
+-   pha
     jsr set_sprite_id_16x32
-    lda #1
-    jsr set_sprite_id_16x32
+    pla
+    inc a
+    cmp #NUM_SPRITE_SLOTS
+    bne -
+
+    ; set player OAM flags (priority 1, palette 4)
+    sep #$20
+    lda #PLAYER_OAM_FLAGS
+    sta oam_data_flag
+    sta oam_data_flag + 4
+    rep #$20
+
+    ; set player sprite data address (slot 0)
+    lda #<>PLAYER_TILESET
+    sta object_sprite_data
+    lda #`PLAYER_TILESET
+    sta object_sprite_data + 2
 
     inc player_locked
 
@@ -40,8 +58,9 @@ player_init
     plp
     rts
 
-; sets OAM slots [a, a+1] to sprite ids [SPRITE_BASE_IDS_FEET[a], SPRITE_BASE_IDS_HEAD[a]]
-; sets palette and visibility
+; sets OAM slots for sprite id A to use the correct tile IDs
+; hides the sprite (Y=$e0), flags default to 0
+; caller should set flags separately
 set_sprite_id_16x32
 .xl
     php
@@ -53,9 +72,9 @@ set_sprite_id_16x32
     asl
     tay ; *2 again for dest offset in oam array, *2 because two sprites stacked up
 
-    lda SPRITE_BASE_IDS_FEET,x
+    lda SPRITE_BASE_IDS_BOTTOM,x
     sta oam_data_id,y
-    lda SPRITE_INITIAL_FLAGS,x
+    lda #0
     sta oam_data_flag,y
     lda #$e0
     sta oam_data_y,y
@@ -63,9 +82,9 @@ set_sprite_id_16x32
     iny
     iny
     iny
-    lda SPRITE_BASE_IDS_HEAD,x
+    lda SPRITE_BASE_IDS_TOP,x
     sta oam_data_id,y
-    lda SPRITE_INITIAL_FLAGS,x
+    lda #0
     sta oam_data_flag,y
     lda #$e0
     sta oam_data_y,y
@@ -222,6 +241,8 @@ move_player
     ; (direction - 1) << 7 = offset in tile data for frame 0
     dec a
     sln 7
+    clc
+    adc object_sprite_data
     ldx #0
     jsr dma_queue_add
     stz player_anim_offset
@@ -239,6 +260,7 @@ _starting_to_move
     sln 7
     ; same as above but add $400 to skip to first frame
     clc
+    adc object_sprite_data
     adc #$400
     ldx #0
     jsr dma_queue_add
@@ -350,6 +372,8 @@ go_down
     lda #PLAYER_DIRECTION_UP - 1
     sta player_direction
     sln 7
+    clc
+    adc object_sprite_data
     ldx #0
     jsr dma_queue_add
     inc map_transition_wait
@@ -516,16 +540,21 @@ _go
     dec a
     sln 7
     clc
+    adc object_sprite_data
     adc player_anim_offset
     ldx #0
     jmp dma_queue_add
 
+; X = sprite slot (0-7)
+; X*2 indexes into 16-bit sprite arrays, Y = X*4 indexes into object_sprite_data
 animate_sprite_v2
 .al
 .xl
     txa
     asl
-    tax
+    tax     ; X = sprite_id * 2
+    asl
+    tay     ; Y = sprite_id * 4
 
     lda sprites_anim_direction,x
     and #$ff
@@ -545,7 +574,7 @@ _stopped
     dec a
     sln 7
     clc
-    adc SPRITE_ID_TO_DATA,x
+    adc object_sprite_data,y
     jmp dma_queue_add
 
 _moving
@@ -575,14 +604,23 @@ _go
     sln 7
     clc
     adc sprites_anim_offset,x
-    adc SPRITE_ID_TO_DATA,x
+    adc object_sprite_data,y
     jmp dma_queue_add
 
 animate_npcs
 .al
 .xl
+    lda num_active_objects
+    beq +
     ldx #1
-    jmp animate_sprite_v2
+-   phx
+    jsr animate_sprite_v2
+    plx
+    cpx num_active_objects
+    beq +
+    inx
+    bra -
++   rts
 
 set_updated_player_pos
 .al

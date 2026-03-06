@@ -189,3 +189,39 @@ MAP_SCROLL_FLAGS
 MAP_SIZES
     .word 0, 0, 1, 0
     .word 0, 0, 0, 0
+
+; --- per-map object definitions ---
+; each entry: 16 bytes
+;   +0  x (half-pixels)
+;   +2  y (half-pixels)
+;   +4  sprite data addr (16-bit within bank)
+;   +6  sprite data bank (16-bit, zero-extended)
+;   +8  OAM flags (16-bit, zero-extended)
+;   +10 interaction script index (0 = none)
+;   +12 background script index (0 = none)
+;   +14 num animation frames
+OBJECT_ENTRY_SIZE = 16
+
+BEDROOM_OBJECTS
+    .word 2 ; count
+    ; leif
+    .word $100, $180
+    .word <>NPC_TILESET, `NPC_TILESET
+    .word $38, 0, 0, 7
+    ; cat
+    .word $100, $180
+    .word <>CAT_TILESET, `CAT_TILESET
+    .word $38, 0, 0, 2
+
+NO_OBJECTS
+    .word 0
+
+MAP_OBJECTS
+    .addr BEDROOM_OBJECTS
+    .addr NO_OBJECTS
+    .addr NO_OBJECTS
+    .addr NO_OBJECTS
+    .addr NO_OBJECTS
+    .addr NO_OBJECTS
+    .addr NO_OBJECTS
+    .addr NO_OBJECTS

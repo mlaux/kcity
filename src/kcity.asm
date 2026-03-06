@@ -228,6 +228,23 @@ player_y .word ?
 player_direction .word ?
 player_locked .word ?
 
+; per-sprite ROM tile data address (32-bit: 16-bit addr, 8-bit bank, 8-bit pad)
+; 8 entries for all sprite slots (0 = player, 1-7 = objects)
+; indexed by sprite_id * 4
+NUM_SPRITE_SLOTS = 8
+object_sprite_data .fill 4 * NUM_SPRITE_SLOTS
+
+; object system - slots 1-7 (slot 0 is the player)
+; indexed by (sprite_slot - 1) * 2
+MAX_OBJECTS = 7
+num_active_objects .word ?
+object_x .fill 2 * MAX_OBJECTS
+object_y .fill 2 * MAX_OBJECTS
+object_flags .fill 2 * MAX_OBJECTS
+object_interaction_script .fill 2 * MAX_OBJECTS
+object_bg_script .fill 2 * MAX_OBJECTS
+object_num_anim_frames .fill 2 * MAX_OBJECTS
+
 text_box_enabled .word ?
 ; index of string (0-3) currently being drawn
 text_index .word ?
@@ -304,7 +321,7 @@ digi_copyrate .fill 1
 ; --- end from snesmod ---
 
 .endsection
-.cerror * > $801200, "ram too long"
+.cerror * > $801300, "ram too long"
 .warn "lowram end: ", *
 .endvirtual
 
