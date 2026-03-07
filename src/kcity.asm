@@ -147,6 +147,15 @@ script_step_result .word ?
 script_storage .fill $20
 script_storage_result = script_storage
 
+current_script_slot .word ?
+NUM_SCRIPT_SLOTS = 8
+script_slot_ptr .fill 2 * NUM_SCRIPT_SLOTS
+script_slot_element_ptr .fill 2 * NUM_SCRIPT_SLOTS
+script_slot_step .fill 2 * NUM_SCRIPT_SLOTS
+script_slot_length .fill 2 * NUM_SCRIPT_SLOTS
+script_slot_time_remaining .fill 2 * NUM_SCRIPT_SLOTS
+script_slot_result .fill 2 * NUM_SCRIPT_SLOTS
+
 my_inidisp .word ?
 my_bgmode .word ?
 my_mosaic .word ?
@@ -321,7 +330,7 @@ digi_copyrate .fill 1
 ; --- end from snesmod ---
 
 .endsection
-.cerror * > $801300, "ram too long"
+.cerror * > $801400, "ram too long"
 .warn "lowram end: ", *
 .endvirtual
 

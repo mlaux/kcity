@@ -62,8 +62,11 @@ state_file_select
     lda text_box_num_options
     beq +
     jsr process_text_box_input
-+   jsr run_script_v2
++   ldx #0
+    jsr script_slot_load
+    jsr run_script_v2
     rep #$20
+    jsr script_slot_save
     jmp vwf_frame_loop
 
 state_file_select_vblank
@@ -76,7 +79,7 @@ go_to_opening
 .al
 .xl
     rep #$20
-    jsr clear_script
+    jsr clear_all_script_slots
     lda #1
     sta text_box_hide_requested
     sta target_warp_id
@@ -87,7 +90,7 @@ go_to_opening
 
 go_to_gameplay_load
     rep #$20
-    jsr clear_script
+    jsr clear_all_script_slots
     lda #1
     sta text_box_hide_requested
     ; i can't believe this works here

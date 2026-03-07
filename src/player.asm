@@ -557,7 +557,7 @@ animate_sprite_v2
     tay     ; Y = sprite_id * 4
 
     ; calculate max address before looping, e.g. $1c00 for 7 frames
-    lda object_num_anim_frames-2,x
+    lda object_num_anim_frames - 2,x
     sln 10
     sta zp0
 
@@ -748,6 +748,9 @@ _set_y
     sec
     sbc #$10
     sta oam_data_y + 4,y
+    lda object_flags,x
+    sta oam_data_flag,y
+    sta oam_data_flag + 4,y
     rep #$20
 
     inc zp3

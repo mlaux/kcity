@@ -24,18 +24,14 @@ RESULT_CANCELLED = -1
 SCRIPT_STORAGE_TEMP_RESULT = 0
 SCRIPT_STORAGE_IN_MENU = 1
 
-; ideas:
-; - change sprite movement to use same direction system as player
-; - variable length steps using table of lengths?
-
 ; script opcodes:
 ; $0: no operation
 ; $1: show text box
 ; $2: hide text box
-; $3: set sprite flags
-; $4: set sprite position
-; $5: add/sub sprite x
-; $6: add/sub sprite y
+; $3: set object flags
+; $4: set object position
+; $5: add/sub object x
+; $6: add/sub object y
 ; $7: set sprite direction
 ; $8: set variable
 ; $9: read script_step_result into variable, reset result
@@ -53,8 +49,8 @@ SCRIPT_STORAGE_IN_MENU = 1
 script_operations
     .addr op_none
     .addr op_text_box, op_hide_text_box
-    .addr op_set_sprite_flags, op_set_sprite_position
-    .addr op_move_sprite_x, op_move_sprite_y
+    .addr op_set_object_flags, op_set_object_position
+    .addr op_move_object_x, op_move_object_y
     .addr op_set_sprite_direction
     .addr op_set_variable
     .addr op_read_result
@@ -120,58 +116,59 @@ step_clear_text_tiles .macro
     .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 .endm
 
-; sets flip/priority/palette byte in OAM
-; +4: sprite index (currently 0 to 15)
-; +5: value to set
-OPCODE_SET_SPRITE_FLAGS = 3
+; sets flip/priority/palette byte in object_flags
+; +4: object index (0-6)
+; +6: flags value
+OPCODE_SET_OBJECT_FLAGS = 3
 
-step_set_sprite_flags .macro
+step_set_object_flags .macro
     .sint 0
-    .word OPCODE_SET_SPRITE_FLAGS
-    .byte \1
-    .byte \2
-    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    .word OPCODE_SET_OBJECT_FLAGS
+    .word \1
+    .word \2
+    .fill 8
 .endm
 
-; sets x/y position of sprite
-; +4: sprite index
-; +5: x coordinate in pixels
-; +6: y coordinate in pixels
-OPCODE_SET_SPRITE_POS = 4
+; sets x/y position of object in half-pixels
+; +4: object index (0-6)
+; +6: x (half-pixels)
+; +8: y (half-pixels)
+OPCODE_SET_OBJECT_POS = 4
 
-step_set_sprite_pos .macro
+step_set_object_pos .macro
     .sint 0
-    .word OPCODE_SET_SPRITE_POS
-    .byte \1
-    .byte \2
-    .byte \3
-    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0
+    .word OPCODE_SET_OBJECT_POS
+    .word \1
+    .word \2
+    .word \3
+    .fill 6
 .endm
 
-; moves the sprite by the given signed value in a direction
-; +4: sprite index
-; +5: signed value to add to the position
-OPCODE_MOVE_SPRITE_X = 5
-step_move_sprite_x .macro
+; adds a signed delta to object position each frame (half-pixels)
+; +4: object index (0-6)
+; +6: signed delta per frame (half-pixels)
+OPCODE_MOVE_OBJECT_X = 5
+step_move_object_x .macro
     .sint \1
-    .word OPCODE_MOVE_SPRITE_X
-    .byte \2
-    .byte \3
-    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    .word OPCODE_MOVE_OBJECT_X
+    .word \2
+    .sint \3
+    .fill 8
 .endm
 
-OPCODE_MOVE_SPRITE_Y = 6
-step_move_sprite_y .macro
+OPCODE_MOVE_OBJECT_Y = 6
+step_move_object_y .macro
     .sint \1
-    .word OPCODE_MOVE_SPRITE_Y
-    .byte \2
-    .byte \3
-    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    .word OPCODE_MOVE_OBJECT_Y
+    .word \2
+    .sint \3
+    .fill 8
 .endm
 
 ; sets the direction (calculates the offset into the walk cycle)
 ; eventually will be used for other animations too?
-; +4: sprite index
+; this is a true sprite id, 0 means player, 1 means object 0, etc
+; +4: object index
 ; +5: direction
 OPCODE_SET_SPRITE_DIRECTION = 7
 step_set_sprite_direction .macro
@@ -347,28 +344,28 @@ TEST_HAIR_BLEACH
 
 TEST_REACT_TO_BOOKSHELF
     #step_set_player_locked 1
-    #step_set_sprite_pos 1, 96, 152
+    #step_set_object_pos 0, $d0, $14e
     #step_set_sprite_direction 1, PLAYER_DIRECTION_UP
-    #step_set_sprite_flags 1, $3a
-    #step_move_sprite_y 8, 1, $ff
+    #step_set_object_flags 0, $3a
+    #step_move_object_y 8, 0, -2
     #step_set_sprite_direction 1, 0
     #step_text_box 7, 18, 4, 1, BOOKSHELF_MESSAGE1, 0, 0, 0
     #step_wait $20
     #step_set_sprite_direction 1, PLAYER_DIRECTION_RIGHT
-    #step_move_sprite_x 24, 1, 1
+    #step_move_object_x 24, 0, 2
     #step_set_sprite_direction 1, 0
     #step_hide_text_box
     #step_set_sprite_direction 1, PLAYER_DIRECTION_UP
-    #step_move_sprite_y 48, 1, $ff
+    #step_move_object_y 48, 0, -2
     #step_set_sprite_direction 1, 0
     #step_text_box 1, 21, 30, 1, BOOKSHELF_MESSAGE2, 0, 0, 0
     #step_wait $80
     #step_hide_text_box
     #step_set_sprite_direction 1, PLAYER_DIRECTION_DOWN
-    #step_move_sprite_y 32, 1, 1
+    #step_move_object_y 32, 0, 2
     #step_set_sprite_direction 1, PLAYER_DIRECTION_RIGHT
-    #step_move_sprite_x 64, 1, 1
-    #step_set_sprite_flags 1, 0
+    #step_move_object_x 64, 0, 2
+    #step_set_object_flags 0, 0
     #step_set_sprite_direction 1, 0
     #step_set_player_locked 0
 
@@ -458,18 +455,20 @@ _end
 
 SCRIPT_FILE_SELECT_NUM_STEPS = (* - SCRIPT_FILE_SELECT) >> 4
 
-OBJECT_SCRIPTS .addr TEST_OBJECT_SCRIPT, TEST_HAIR_BLEACH, TEST_REACT_TO_BOOKSHELF, TEST_MISC
-OBJECT_SCRIPT_LENGTHS .word 4, 3, 25, 9
+SCRIPT_CAT
+    #step_set_sprite_direction 0, 0
+    #step_wait $20
+    #step_set_sprite_direction 2, PLAYER_DIRECTION_RIGHT
+    #step_move_object_x $20, 1, 2
+    #step_set_sprite_direction 2, 0
+    #step_wait $20
+    #step_set_sprite_direction 2, PLAYER_DIRECTION_LEFT
+    #step_move_object_x $20, 1, -2
+    #step_unconditional_branch 0
 
-load_oam_index_16x32 .macro
-    ; x = sprite_id * 8
-    ldy #$4
-    lda (script_element_ptr),y
-    asl
-    asl
-    asl
-    tax
-.endm
+OBJECT_SCRIPTS .addr TEST_OBJECT_SCRIPT, TEST_HAIR_BLEACH, TEST_REACT_TO_BOOKSHELF, TEST_MISC, SCRIPT_CAT
+OBJECT_SCRIPT_LENGTHS .word 4, 3, 25, 9, 9
+CAT_SCRIPT_INDEX = 5
 
 load_anim_index .macro
     ; x = sprite_id * 2
@@ -497,13 +496,16 @@ copy_ram_scripts
 set_script
 .al
 .xl
-    lda script_ptr
+    lda script_slot_ptr
     bne +
-    stx script_ptr
-    stx script_element_ptr
-    sty script_length
-    lda (script_element_ptr)
-    sta script_step_time_remaining
+    stx script_slot_ptr
+    stx script_slot_element_ptr
+    sty script_slot_length
+    stz script_slot_step
+    stz script_slot_result
+    stx zp0
+    lda (zp0)
+    sta script_slot_time_remaining
 +   rts
 
 clear_script
@@ -513,6 +515,100 @@ clear_script
     stz script_element_ptr
     stz script_step
     stz script_length
+    rts
+
+clear_all_script_slots
+.al
+.xl
+    ldx #(NUM_SCRIPT_SLOTS - 1) * 2
+-   stz script_slot_ptr,x
+    stz script_slot_element_ptr,x
+    stz script_slot_step,x
+    stz script_slot_length,x
+    stz script_slot_time_remaining,x
+    stz script_slot_result,x
+    dex
+    dex
+    bpl -
+    rts
+
+; X = slot index * 2
+script_slot_load
+.al
+.xl
+    lda script_slot_ptr,x
+    sta script_ptr
+    lda script_slot_element_ptr,x
+    sta script_element_ptr
+    lda script_slot_step,x
+    sta script_step
+    lda script_slot_length,x
+    sta script_length
+    lda script_slot_time_remaining,x
+    sta script_step_time_remaining
+    lda script_slot_result,x
+    sta script_step_result
+    stx current_script_slot
+    rts
+
+script_slot_save
+.al
+.xl
+    ldx current_script_slot
+    lda script_ptr
+    sta script_slot_ptr,x
+    lda script_element_ptr
+    sta script_slot_element_ptr,x
+    lda script_step
+    sta script_slot_step,x
+    lda script_length
+    sta script_slot_length,x
+    lda script_step_time_remaining
+    sta script_slot_time_remaining,x
+    lda script_step_result
+    sta script_slot_result,x
+    rts
+
+run_all_scripts
+.al
+.xl
+    ; slot 0: interaction script
+    ldx #0
+    jsr script_slot_load
+    jsr run_script_v2
+    rep #$20
+    jsr script_slot_save
+
+    ; slots 1-7: object background scripts
+    lda num_active_objects
+    beq _all_done
+
+    stz zp0
+
+_next_bg
+    lda zp0
+    asl
+    tax
+    lda object_bg_script,x
+    beq _skip_bg
+
+    ; slot = (object_index + 1) * 2
+    lda zp0
+    inc a
+    asl
+    tax
+    jsr script_slot_load
+    jsr run_script_v2
+    rep #$20
+    jsr script_slot_save
+
+_skip_bg
+    inc zp0
+    lda zp0
+    cmp num_active_objects
+    bne _next_bg
+
+_all_done
     rts
 
 set_script_step
@@ -644,87 +740,68 @@ op_clear_text_tiles
     sta text_box_clear_requested
     rts
 
-op_set_sprite_flags
+op_set_object_flags
 .as
 .xl
-    #load_oam_index_16x32
-
-    ldy #$5
+    rep #$20
+    ldy #$4
     lda (script_element_ptr),y
-    sta oam_data_flag,x
-    inx
-    inx
-    inx
-    inx
-    sta oam_data_flag,x
-
-    rts
-
-op_set_sprite_position
-.as
-.xl
-    #load_oam_index_16x32
-
-    ldy #$5
-    lda (script_element_ptr),y
-    sta oam_data_x,x
-    inx
-    inx
-    inx
-    inx
-    sta oam_data_x,x
-
-    #load_oam_index_16x32
-
+    and #$ff
+    asl
+    tax
     ldy #$6
     lda (script_element_ptr),y
-    sta oam_data_y,x
-    sec
-    sbc #$10
-    inx
-    inx
-    inx
-    inx
-    sta oam_data_y,x
-
+    and #$ff
+    sta object_flags,x
     rts
 
-op_move_sprite_x
+op_set_object_position
 .as
 .xl
-    #load_oam_index_16x32
-
-    lda oam_data_x,x
-    ldy #$5
-    clc
-    adc (script_element_ptr),y
-    sta oam_data_x,x
-    inx
-    inx
-    inx
-    inx
-    sta oam_data_x,x
-
+    rep #$20
+    ldy #$4
+    lda (script_element_ptr),y
+    and #$ff
+    asl
+    tax
+    ldy #$6
+    lda (script_element_ptr),y
+    sta object_x,x
+    ldy #$8
+    lda (script_element_ptr),y
+    sta object_y,x
     rts
 
-op_move_sprite_y
+op_move_object_x
 .as
 .xl
-    #load_oam_index_16x32
-
-    lda oam_data_y,x
-    ldy #$5
+    rep #$20
+    ldy #$4
+    lda (script_element_ptr),y
+    and #$ff
+    asl
+    tax
+    ldy #$6
+    lda (script_element_ptr),y
     clc
-    adc (script_element_ptr),y
-    sta oam_data_y,x
-    sec
-    sbc #$10
-    inx
-    inx
-    inx
-    inx
-    sta oam_data_y,x
+    adc object_x,x
+    sta object_x,x
+    rts
 
+op_move_object_y
+.as
+.xl
+    rep #$20
+    ldy #$4
+    lda (script_element_ptr),y
+    and #$ff
+    asl
+    tax
+    ldy #$6
+    lda (script_element_ptr),y
+    clc
+    adc object_y,x
+    sta object_y,x
     rts
 
 op_set_sprite_direction

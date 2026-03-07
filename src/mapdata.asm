@@ -211,7 +211,7 @@ BEDROOM_OBJECTS
     ; cat
     .word $80, $130
     .word <>CAT_TILESET, `CAT_TILESET
-    .word $3c, 0, 0, 2
+    .word $3c, 0, CAT_SCRIPT_INDEX, 3
 
 NO_OBJECTS
     .word 0

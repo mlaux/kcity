@@ -152,6 +152,8 @@ load_map
     stz HDMAEN
 
     rep #$20
+    jsr clear_all_script_slots
+
     lda #DMAMODE_PPUDATA
     sta DMAMODE
     lda #TILEMAP_SIZE
@@ -355,6 +357,31 @@ _next_object
     ldy #14
     lda (zp1),y
     sta object_num_anim_frames,x
+
+    ; initialize background script slot if this object has one
+    lda object_bg_script,x
+    beq _no_bg_script
+    asl
+    tax
+    lda OBJECT_SCRIPTS - 2,x
+    sta zp0
+    lda OBJECT_SCRIPT_LENGTHS - 2,x
+    pha
+    ; slot = (object_index + 1) * 2
+    lda zp3
+    inc a
+    asl
+    tax
+    lda zp0
+    sta script_slot_ptr,x
+    sta script_slot_element_ptr,x
+    pla
+    sta script_slot_length,x
+    stz script_slot_step,x
+    stz script_slot_result,x
+    lda (zp0)
+    sta script_slot_time_remaining,x
+_no_bg_script
 
     ; sprite data -> object_sprite_data[sprite_slot * 4]
     ; sprite_slot = object_index + 1

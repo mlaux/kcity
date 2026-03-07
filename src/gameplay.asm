@@ -67,10 +67,7 @@ state_gameplay
     jsr update_scroll
     jsr set_updated_player_pos
     jsr set_updated_object_positions
-    jsr run_script_v2
-
-    ; run_script_v2 changes to 8 bit, change back
-    rep #$20
+    jsr run_all_scripts
     jsr animate_npcs
     jsr vwf_frame_loop
 
@@ -158,7 +155,7 @@ process_input
     ; if (A pressed && !script_ptr && facing_object_script)
     bit #A_BUTTON
     beq +
-    lda script_ptr
+    lda script_slot_ptr
     bne +
     ldx facing_object_script
     beq +
@@ -204,7 +201,7 @@ _check_b
     cmp #+WAIT_RESULT_CANCEL_OK
     bne _check_a
     lda #+RESULT_CANCELLED
-    sta script_step_result
+    sta script_slot_result
     rts
 
 _check_a
@@ -213,7 +210,7 @@ _check_a
     beq _check_up_down
     lda text_box_active_option
     inc a
-    sta script_step_result
+    sta script_slot_result
     rts
 
 _check_up_down
