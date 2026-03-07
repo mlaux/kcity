@@ -196,7 +196,7 @@ _check_b
     lda joypad_new
     bit #B_BUTTON
     beq _check_a
-    lda script_step_time_remaining
+    lda script_slot_time_remaining
     ; + to accept signed constant operands
     cmp #+WAIT_RESULT_CANCEL_OK
     bne _check_a

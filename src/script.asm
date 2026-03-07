@@ -456,7 +456,7 @@ _end
 SCRIPT_FILE_SELECT_NUM_STEPS = (* - SCRIPT_FILE_SELECT) >> 4
 
 SCRIPT_CAT
-    #step_set_sprite_direction 0, 0
+    #step_set_sprite_direction 2, 0
     #step_wait $20
     #step_set_sprite_direction 2, PLAYER_DIRECTION_RIGHT
     #step_move_object_x $20, 1, 2
