@@ -54,6 +54,7 @@ state_journal_init
 .al
 .xl
     ; make sure all of this is off
+    jsr clear_script
     jsr clear_all_script_slots
     lda #1
     sta text_box_hide_requested

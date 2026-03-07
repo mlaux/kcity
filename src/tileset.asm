@@ -152,6 +152,8 @@ load_map
     stz HDMAEN
 
     rep #$20
+    lda #1
+    sta text_box_hide_requested
     jsr clear_all_script_slots
 
     lda #DMAMODE_PPUDATA
