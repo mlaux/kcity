@@ -87,6 +87,10 @@ state_title_init
     lda #$f
     sta effect_speed
     stz effect_level
+    stz title_tile_anim_frame
+    stz title_tile_anim_step
+    lda #FISH_ANIMATION_START_DELAY
+    sta title_tile_anim_delay
 
     rts
 
@@ -111,8 +115,9 @@ state_title
     and #(A_BUTTON | START_BUTTON)
     beq _animate
 
-    lda my_bg2vofs
-    bpl _full_title
+    lda my_tm
+    and #BG1_ON
+    beq _full_title
 
     sep #$20
     jsr spcStop
@@ -144,13 +149,28 @@ _full_title
     jmp hide_newt
 
 _animate
-    lda effect_id
+    lda frame_counter
+    and #$f
+    bne +
+    jsr animate_snail
+
++   lda effect_id
     bne _nothing
 
     lda frame_counter
+    pha
     and #TITLE_SCROLL_SPEED_MASK
-    bne _check_mod_2
+    bne +
+    jsr _scroll
++   pla
+    and #1
+    bne _nothing
+    jmp animate_dragonfly
 
+_nothing
+    rts
+
+_scroll
     lda my_bg2vofs
     bmi _done_scrolling
 
@@ -161,23 +181,17 @@ _done_scrolling
     lda title_appear_delay
     beq _show_title_text
     dec title_appear_delay
-    bra _nothing
-
-_check_mod_2
-    and #1
-    bne _nothing
-    jmp animate_dragonfly
+    rts
 
 _show_title_text
     lda #(BG1_ON | BG2_ON | OBJ_ON)
     sta my_tm
-
-_nothing
     rts
 
 state_title_vblank
 .al
 .xl
+    jsr animate_fish
     ; if title text isn't showing yet, return
     lda my_tm
     and #BG1_ON
@@ -336,6 +350,7 @@ load_title_background
     stx VMADD
 
     #dma_ppu_data TITLE_SCENE_TILESET_BG2
+    #dma_ppu_data CRITTERS_TILESET
 
     ldx #DMAMODE_CGDATA
     stx DMAMODE
@@ -377,13 +392,12 @@ NEWT_TILES .byte 12, 0, 2, 10, 4, 6, 8, 32, 14
 NEWT_X_COORDS .byte $0, $10, $20, $30, $10, $20, $30, $10, $20
 NEWT_Y_COORDS .byte $0, $0, $0, $0, $10, $10, $10, $20, $20
 
-FISH_OAM_INDEX = 9
-FISH_FRAMES .byte 64, 66, 68, 70, 72
+SNAIL_OAM_INDEX = 9
+SNAIL_FRAMES .byte 78, 96
+SNAIL_OAM_ATTRIBUTES = $3a
 DRAGONFLY_OAM_INDEX = 10
 DRAGONFLY_FRAMES .byte 74, 76
 DRAGONFLY_OAM_ATTRIBUTES = $3a
-SNAIL_OAM_INDEX = 11
-SNAIL_FRAMES .byte 78, 96
 
 ; TODO ~METASPRITES~ as all the cool devs say
 init_newt_sprite
@@ -393,9 +407,17 @@ init_newt_sprite
     lda #TITLE_OBJSEL
     sta OBJSEL
 
+    stz oam_data_x + (4*SNAIL_OAM_INDEX)
+    lda #144
+    sta oam_data_y + (4*SNAIL_OAM_INDEX)
+    lda #SNAIL_OAM_ATTRIBUTES
+    sta oam_data_flag + (4*SNAIL_OAM_INDEX)
+    lda SNAIL_FRAMES
+    sta oam_data_id + (4*SNAIL_OAM_INDEX)
+
     lda #$ff
     sta oam_data_x + (4*DRAGONFLY_OAM_INDEX)
-    lda #$20
+    lda #$60
     sta title_dragonfly_y_base
     sta oam_data_y + (4*DRAGONFLY_OAM_INDEX)
     lda #DRAGONFLY_OAM_ATTRIBUTES
@@ -434,12 +456,11 @@ move_newt
     sep #$20
 
     lda oam_data_x + (4*DRAGONFLY_OAM_INDEX)
-    and #$ff
     cmp #2
     bcc _no_dragonfly
 
     dec oam_data_x + (4*DRAGONFLY_OAM_INDEX)
-    dec oam_data_x + (4*DRAGONFLY_OAM_INDEX)
+    ; dec oam_data_x + (4*DRAGONFLY_OAM_INDEX)
     ldx title_dragonfly_y_lookup
     lda SINE_TABLE,x
     ; asr 3
@@ -457,7 +478,8 @@ move_newt
     inc title_dragonfly_y_lookup
     inc title_dragonfly_y_lookup
     inc title_dragonfly_y_lookup
-    inc title_dragonfly_y_base
+    ; commented so it moves up relative to scroll
+    ; dec title_dragonfly_y_base
     bra _scroll_newt
 
 _no_dragonfly
@@ -465,7 +487,8 @@ _no_dragonfly
     sta oam_data_y + (4*DRAGONFLY_OAM_INDEX)
 _scroll_newt
     ; scroll at the same speed as the background so visual placement is the same
-    ldy #NEWT_TILE_COUNT
+    ; +1 for snail
+    ldy #NEWT_TILE_COUNT + 1
     ldx #0
 -   lda oam_data_y,x
     cmp #TITLE_SPRITE_HIDDEN_Y
@@ -490,7 +513,21 @@ animate_dragonfly
     lda DRAGONFLY_FRAMES,x
     sep #$20
     sta oam_data_id + (4*DRAGONFLY_OAM_INDEX)
-    rep #20
+    rep #$20
+    rts
+
+animate_snail
+.al
+.xl
+    inc oam_data_x + (4*SNAIL_OAM_INDEX)
+    lda title_snail_frame
+    eor #1
+    sta title_snail_frame
+    tax
+    lda SNAIL_FRAMES,x
+    sep #$20
+    sta oam_data_id + (4*SNAIL_OAM_INDEX)
+    rep #$20
     rts
 
 hide_newt
@@ -501,7 +538,8 @@ hide_newt
 
     lda #TITLE_SPRITE_HIDDEN_Y
     ldx #0
-    ldy #NEWT_TILE_COUNT + 3
+    ; +2 for snail and dragonfly
+    ldy #NEWT_TILE_COUNT + 2
 -   sta oam_data_y,x
     inx
     inx
@@ -511,6 +549,45 @@ hide_newt
     bne -
 
     plp
+    rts
+
+FISH_ANIMATION_VALUES .word $1086, $1300, $1302, $1304, $1306, $1308
+FISH_ANIMATION_COUNT = 6
+FISH_ANIMATION_DELAY = 4
+FISH_ANIMATION_START_DELAY = $100
+
+animate_fish
+.al
+.xl
+    lda title_tile_anim_delay
+    beq _cycle
+    dec title_tile_anim_delay
+    bra _write
+_cycle
+    inc title_tile_anim_frame
+    lda title_tile_anim_frame
+    cmp #FISH_ANIMATION_DELAY
+    bne _write
+    stz title_tile_anim_frame
+    inc title_tile_anim_step
+    lda title_tile_anim_step
+    cmp #FISH_ANIMATION_COUNT
+    bne _write
+    stz title_tile_anim_step
+    lda #FISH_ANIMATION_START_DELAY
+    sta title_tile_anim_delay
+_write
+    sep #$20
+    lda #$80
+    sta VMAIN
+    rep #$20
+    ldx #$066a
+    stx VMADD
+    lda title_tile_anim_step
+    asl
+    tax
+    lda FISH_ANIMATION_VALUES,x
+    sta VMDATA
     rts
 
 ; clears from $3000.w to $3fff.w

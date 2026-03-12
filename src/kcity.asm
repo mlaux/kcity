@@ -175,13 +175,10 @@ my_m7d .word ?
 my_m7x .word ?
 my_m7y .word ?
 
+title_snail_frame .word ?
 title_dragonfly_frame .word ?
-title_dragonfly_x .word ?
 title_dragonfly_y_base .word ?
 title_dragonfly_y_lookup .word ?
-vertical_counter_vblank_start .word ?
-vertical_counter_vblank_end .word ?
-vertical_counter_vblank_this_frame .word ?
 
 ; todo use same memory as other stuff for these, only used on title screen
 title_animation_step .word ?
@@ -191,6 +188,9 @@ title_appear_delay .word ?
 title_solid_palette .word ?
 title_state_palette .word ?
 title_palette_fade_frame .word ?
+title_tile_anim_frame .word ?
+title_tile_anim_step .word ?
+title_tile_anim_delay .word ?
 
 game_progress .word ?
 
