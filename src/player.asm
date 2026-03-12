@@ -15,8 +15,8 @@ PLAYER_DIRECTION_UP = 4
 
 ; OAM tile IDs for each 16x32 sprite slot (8 slots)
 ; slot N: top = 4*N, bottom = 4*N + 2
-SPRITE_BASE_IDS_TOP .word $00, $04, $08, $0c, $10, $14, $18, $1c
-SPRITE_BASE_IDS_BOTTOM .word $02, $06, $0a, $0e, $12, $16, $1a, $1e
+SPRITE_BASE_IDS_TOP .word $00, $04, $08, $0c, $20, $24, $28, $2c
+SPRITE_BASE_IDS_BOTTOM .word $02, $06, $0a, $0e, $22, $26, $2a, $2e
 
 MOVEMENT_JUMP_TABLE .addr go_right, go_down, go_left, go_up
 

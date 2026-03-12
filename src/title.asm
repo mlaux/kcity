@@ -119,6 +119,7 @@ state_title
     and #BG1_ON
     beq _full_title
 
+    jsr rng_seed
     sep #$20
     jsr spcStop
     rep #$20

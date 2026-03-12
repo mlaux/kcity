@@ -13,9 +13,12 @@
 ;        to 16 byte boundary
 ; the last step only needs the bytes actually read for the step, not all 16
 
+SELF = $ff
+
 WAIT_FOR_A = -1
 WAIT_RESULT_CANCEL_OK = -2
 WAIT_RESULT_NO_CANCEL = -3
+RANDOM_WAIT = -4
 
 RESULT_CANCELLED = -1
 
@@ -71,6 +74,17 @@ step_wait .macro
     .sint \1
     .word OPCODE_WAIT
     .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+.endm
+
+; +4: AND mask for rng result
+; +6: minimum value to add
+; result = (rng_next & mask) + minimum
+step_random_wait .macro
+    .sint RANDOM_WAIT
+    .word OPCODE_WAIT
+    .word \1
+    .word \2
+    .fill 8
 .endm
 
 ; for text boxes:
@@ -456,26 +470,57 @@ _end
 SCRIPT_FILE_SELECT_NUM_STEPS = (* - SCRIPT_FILE_SELECT) >> 4
 
 SCRIPT_CAT
-    #step_set_sprite_direction 2, 0
-    #step_wait $20
-    #step_set_sprite_direction 2, PLAYER_DIRECTION_RIGHT
-    #step_move_object_x $20, 1, 2
-    #step_set_sprite_direction 2, 0
-    #step_wait $20
-    #step_set_sprite_direction 2, PLAYER_DIRECTION_LEFT
-    #step_move_object_x $20, 1, -2
+    #step_set_sprite_direction SELF, 0
+    #step_random_wait $1f, $10
+    #step_set_sprite_direction SELF, PLAYER_DIRECTION_RIGHT
+    #step_move_object_x $20, SELF, 2
+    #step_set_sprite_direction SELF, 0
+    #step_random_wait $1f, $10
+    #step_set_sprite_direction SELF, PLAYER_DIRECTION_LEFT
+    #step_move_object_x $20, SELF, -2
     #step_unconditional_branch 0
 
 OBJECT_SCRIPTS .addr TEST_OBJECT_SCRIPT, TEST_HAIR_BLEACH, TEST_REACT_TO_BOOKSHELF, TEST_MISC, SCRIPT_CAT
 OBJECT_SCRIPT_LENGTHS .word 4, 3, 25, 9, 9
 CAT_SCRIPT_INDEX = 5
 
-load_anim_index .macro
-    ; x = sprite_id * 2
+; resolves object target index from script byte +4 into X
+; SELF ($ff) → current_script_slot - 2 (= object_index * 2)
+; assumes 16-bit accumulator
+resolve_target .macro
+    .block
     ldy #$4
     lda (script_element_ptr),y
+    and #$ff
+    cmp #SELF
+    bne _not_self
+    ldx current_script_slot
+    dex
+    dex
+    bra _done
+_not_self
     asl
     tax
+_done
+    .bend
+.endm
+
+; resolves sprite target index from script byte +4 into X
+; SELF ($ff) → current_script_slot (= sprite_id * 2)
+; assumes 8-bit accumulator
+load_anim_index .macro
+    .block
+    ldy #$4
+    lda (script_element_ptr),y
+    cmp #SELF
+    bne _not_self
+    ldx current_script_slot
+    bra _done
+_not_self
+    asl
+    tax
+_done
+    .bend
 .endm
 
 copy_ram_scripts
@@ -655,6 +700,8 @@ _done_with_step
 _check_indeterminate
     cmp #-1
     beq _check_a_button
+    cmp #+RANDOM_WAIT
+    beq _handle_random_wait
 
 _check_result_condition
     lda script_step_result
@@ -665,6 +712,16 @@ _check_a_button
     lda joypad_new
     bit #A_BUTTON
     bne _go_to_next_step
+    rts
+
+_handle_random_wait
+    jsr rng_next
+    ldy #$4
+    and (script_element_ptr),y
+    clc
+    ldy #$6
+    adc (script_element_ptr),y
+    sta script_step_time_remaining
     rts
 
     ; not indeterminate
@@ -744,11 +801,7 @@ op_set_object_flags
 .as
 .xl
     rep #$20
-    ldy #$4
-    lda (script_element_ptr),y
-    and #$ff
-    asl
-    tax
+    #resolve_target
     ldy #$6
     lda (script_element_ptr),y
     and #$ff
@@ -759,11 +812,7 @@ op_set_object_position
 .as
 .xl
     rep #$20
-    ldy #$4
-    lda (script_element_ptr),y
-    and #$ff
-    asl
-    tax
+    #resolve_target
     ldy #$6
     lda (script_element_ptr),y
     sta object_x,x
@@ -776,11 +825,7 @@ op_move_object_x
 .as
 .xl
     rep #$20
-    ldy #$4
-    lda (script_element_ptr),y
-    and #$ff
-    asl
-    tax
+    #resolve_target
     ldy #$6
     lda (script_element_ptr),y
     clc
@@ -792,11 +837,7 @@ op_move_object_y
 .as
 .xl
     rep #$20
-    ldy #$4
-    lda (script_element_ptr),y
-    and #$ff
-    asl
-    tax
+    #resolve_target
     ldy #$6
     lda (script_element_ptr),y
     clc

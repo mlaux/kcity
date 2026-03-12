@@ -61,7 +61,12 @@ dma_queue_add
     sta dma_queue_entry_length + 2,y
 
     txa
-    sln 5
+    cmp #8
+    ; skip over bottom row of 16x16 tile data
+    bcc +
+    clc
+    adc #8
++   sln 5
     clc
     adc #$4000
     sta dma_queue_entry_vmadd,y

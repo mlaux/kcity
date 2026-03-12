@@ -126,6 +126,7 @@ update_ppu .word ?
 in_nmi .word ?
 frame_counter .word ?
 frame_counter_mod_60 .word ?
+rng_state .fill 4
 play_time_hms .fill 6
 
 joypad_current .word ?

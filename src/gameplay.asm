@@ -62,6 +62,7 @@ _map_loaded
 state_gameplay
 .al
 .xl
+    jsr rng_next
     jsr process_input
     jsr move_player
     jsr update_scroll

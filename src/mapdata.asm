@@ -13,6 +13,7 @@ LIVING_ROOM_SCRIPT_TRIGGERS .binary "../gfx/livingrm/triggers.bin"
 
 HUB_NAME .text "Hub - Central", 255
 ; can walk anywhere
+HUB_COLLISION_MAP .binary "../gfx/hub/walkmap.cwm"
 TEST_COLLISION_MAP .binary "../gfx/testbg/walkmap.cwm"
 HUB_SCRIPT_TRIGGERS .binary "../gfx/hub/triggers.bin"
 
@@ -119,7 +120,7 @@ ALL_TILESET_LENGTHS
 COLLISION_MAPS
     .addr BEDROOM_COLLISION_MAP
     .addr LIVING_ROOM_COLLISION_MAP
-    .addr TEST_COLLISION_MAP
+    .addr HUB_COLLISION_MAP
     .addr TEST_COLLISION_MAP
     .addr TEST_COLLISION_MAP
     .addr TEST_COLLISION_MAP
@@ -129,7 +130,7 @@ COLLISION_MAPS
 COLLISION_MAP_LENGTHS
     .word size(BEDROOM_COLLISION_MAP)
     .word size(LIVING_ROOM_COLLISION_MAP)
-    .word size(TEST_COLLISION_MAP)
+    .word size(HUB_COLLISION_MAP)
     .word size(TEST_COLLISION_MAP)
     .word size(TEST_COLLISION_MAP)
     .word size(TEST_COLLISION_MAP)
@@ -213,12 +214,35 @@ BEDROOM_OBJECTS
     .word <>CAT_TILESET, `CAT_TILESET
     .word $3c, 0, CAT_SCRIPT_INDEX, 3
 
+LIVING_ROOM_OBJECTS
+    .word 5
+    ; cat
+    .word $80, $100
+    .word <>CAT_TILESET, `CAT_TILESET
+    .word $3c, 0, CAT_SCRIPT_INDEX, 3
+    ; cat
+    .word $80, $110
+    .word <>CAT_TILESET, `CAT_TILESET
+    .word $3c, 0, CAT_SCRIPT_INDEX, 3
+    ; cat
+    .word $80, $120
+    .word <>CAT_TILESET, `CAT_TILESET
+    .word $3c, 0, CAT_SCRIPT_INDEX, 3
+    ; cat
+    .word $80, $130
+    .word <>CAT_TILESET, `CAT_TILESET
+    .word $3c, 0, CAT_SCRIPT_INDEX, 3
+    ; cat
+    .word $80, $140
+    .word <>CAT_TILESET, `CAT_TILESET
+    .word $3c, 0, CAT_SCRIPT_INDEX, 3
+
 NO_OBJECTS
     .word 0
 
 MAP_OBJECTS
     .addr BEDROOM_OBJECTS
-    .addr NO_OBJECTS
+    .addr LIVING_ROOM_OBJECTS
     .addr NO_OBJECTS
     .addr NO_OBJECTS
     .addr NO_OBJECTS

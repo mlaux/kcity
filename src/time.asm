@@ -49,6 +49,38 @@ play_timer_digit .macro
     sta VMDATA
 .endm
 
+; seed the 32-bit LFSR from frame_counter
+rng_seed
+.al
+.xl
+    lda frame_counter
+    ora #$1
+    sta rng_state
+    eor #$b971
+    sta rng_state+2
+    rts
+
+; 32-bit Galois LFSR, polynomial x^32 + x^22 + x^2 + x + 1
+; returns next value in A (low 16 bits)
+rng_next
+.al
+.xl
+    lda rng_state+2
+    lsr a
+    sta rng_state+2
+    lda rng_state
+    ror a
+    sta rng_state
+    bcc +
+    lda rng_state
+    eor #$0003
+    sta rng_state
+    lda rng_state+2
+    eor #$8020
+    sta rng_state+2
++   lda rng_state
+    rts
+
 draw_play_timer
 .al
 .xl
