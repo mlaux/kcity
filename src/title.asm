@@ -175,7 +175,7 @@ _scroll
     bmi _done_scrolling
 
     dec my_bg2vofs
-    jmp move_newt
+    jmp move_creatures
 
 _done_scrolling
     lda title_appear_delay
@@ -449,7 +449,7 @@ init_newt_sprite
     bne -
     rts
 
-move_newt
+move_creatures
 .al
 .xl
     php
