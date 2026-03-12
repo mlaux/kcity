@@ -959,23 +959,23 @@ _blanks
 ; is this even worth measuring because of how much time it adds
 draw_cpu_usage
 .xl
-    php
-    sep #$20
-    lda #$80
-    sta VMAIN
-    rep #$20
+    ; php
+    ; sep #$20
+    ; lda #$80
+    ; sta VMAIN
+    ; rep #$20
 
-    lda #$b42
-    sta VMADD
+    ; lda #$b42
+    ; sta VMADD
 
-    lda vertical_counter_this_frame
-    jsr draw_bar_graph
+    ; lda vertical_counter_this_frame
+    ; jsr draw_bar_graph
 
-    lda #$b62
-    sta VMADD
+    ; lda #$b62
+    ; sta VMADD
 
-    lda vertical_counter_vblank_this_frame
-    jsr draw_bar_graph
+    ; lda vertical_counter_vblank_this_frame
+    ; jsr draw_bar_graph
 
-    plp
+    ; plp
     rts

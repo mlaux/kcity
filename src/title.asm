@@ -149,7 +149,7 @@ _animate
 
     lda frame_counter
     and #TITLE_SCROLL_SPEED_MASK
-    bne _nothing
+    bne _check_mod_2
 
     lda my_bg2vofs
     bmi _done_scrolling
@@ -162,6 +162,11 @@ _done_scrolling
     beq _show_title_text
     dec title_appear_delay
     bra _nothing
+
+_check_mod_2
+    and #1
+    bne _nothing
+    jmp animate_dragonfly
 
 _show_title_text
     lda #(BG1_ON | BG2_ON | OBJ_ON)
@@ -354,20 +359,31 @@ load_newt_tiles
     stx VMADD
 
     #dma_ppu_data NEWT_TILESET
+    #dma_ppu_data CRITTERS_TILESET
 
     ldx #DMAMODE_CGDATA
     stx DMAMODE
     lda #$c0
     sta CGADD
     #dma_ppu_data NEWT_PALETTE
+    #dma_ppu_data CRITTERS_PALETTE
     rts
 
 NEWT_TILE_COUNT = 9
 NEWT_BASE_X = 80
 NEWT_BASE_Y = 176
+NEWT_OAM_ATTRIBUTES = $38
 NEWT_TILES .byte 12, 0, 2, 10, 4, 6, 8, 32, 14
 NEWT_X_COORDS .byte $0, $10, $20, $30, $10, $20, $30, $10, $20
 NEWT_Y_COORDS .byte $0, $0, $0, $0, $10, $10, $10, $20, $20
+
+FISH_OAM_INDEX = 9
+FISH_FRAMES .byte 64, 66, 68, 70, 72
+DRAGONFLY_OAM_INDEX = 10
+DRAGONFLY_FRAMES .byte 74, 76
+DRAGONFLY_OAM_ATTRIBUTES = $3a
+SNAIL_OAM_INDEX = 11
+SNAIL_FRAMES .byte 78, 96
 
 ; TODO ~METASPRITES~ as all the cool devs say
 init_newt_sprite
@@ -377,9 +393,15 @@ init_newt_sprite
     lda #TITLE_OBJSEL
     sta OBJSEL
 
+    lda #$ff
+    sta oam_data_x + (4*DRAGONFLY_OAM_INDEX)
     lda #$20
-    sta oam_data_y
-    sta oam_data_x
+    sta title_dragonfly_y_base
+    sta oam_data_y + (4*DRAGONFLY_OAM_INDEX)
+    lda #DRAGONFLY_OAM_ATTRIBUTES
+    sta oam_data_flag + (4*DRAGONFLY_OAM_INDEX)
+    lda DRAGONFLY_FRAMES
+    sta oam_data_id + (4*DRAGONFLY_OAM_INDEX)
 
     ldx #0
     ldy #0
@@ -394,7 +416,7 @@ init_newt_sprite
     sta oam_data_y,x
     lda NEWT_TILES,y
     sta oam_data_id,x
-    lda #$38
+    lda #NEWT_OAM_ATTRIBUTES
     sta oam_data_flag,x
     inx
     inx
@@ -411,6 +433,38 @@ move_newt
     php
     sep #$20
 
+    lda oam_data_x + (4*DRAGONFLY_OAM_INDEX)
+    and #$ff
+    cmp #2
+    bcc _no_dragonfly
+
+    dec oam_data_x + (4*DRAGONFLY_OAM_INDEX)
+    dec oam_data_x + (4*DRAGONFLY_OAM_INDEX)
+    ldx title_dragonfly_y_lookup
+    lda SINE_TABLE,x
+    ; asr 3
+    cmp #$80
+    ror
+    cmp #$80
+    ror
+    cmp #$80
+    ror
+    clc
+    adc title_dragonfly_y_base
+    sta oam_data_y + (4*DRAGONFLY_OAM_INDEX)
+    inc title_dragonfly_y_lookup
+    inc title_dragonfly_y_lookup
+    inc title_dragonfly_y_lookup
+    inc title_dragonfly_y_lookup
+    inc title_dragonfly_y_lookup
+    inc title_dragonfly_y_base
+    bra _scroll_newt
+
+_no_dragonfly
+    lda #$e0
+    sta oam_data_y + (4*DRAGONFLY_OAM_INDEX)
+_scroll_newt
+    ; scroll at the same speed as the background so visual placement is the same
     ldy #NEWT_TILE_COUNT
     ldx #0
 -   lda oam_data_y,x
@@ -426,6 +480,19 @@ move_newt
     plp
     rts
 
+animate_dragonfly
+.al
+.xl
+    lda title_dragonfly_frame
+    eor #1
+    sta title_dragonfly_frame
+    tax
+    lda DRAGONFLY_FRAMES,x
+    sep #$20
+    sta oam_data_id + (4*DRAGONFLY_OAM_INDEX)
+    rep #20
+    rts
+
 hide_newt
 .al
 .xl
@@ -434,7 +501,7 @@ hide_newt
 
     lda #TITLE_SPRITE_HIDDEN_Y
     ldx #0
-    ldy #NEWT_TILE_COUNT
+    ldy #NEWT_TILE_COUNT + 3
 -   sta oam_data_y,x
     inx
     inx

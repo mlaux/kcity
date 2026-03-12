@@ -175,9 +175,10 @@ my_m7d .word ?
 my_m7x .word ?
 my_m7y .word ?
 
-vertical_counter_start .word ?
-vertical_counter_end .word ?
-vertical_counter_this_frame .word ?
+title_dragonfly_frame .word ?
+title_dragonfly_x .word ?
+title_dragonfly_y_base .word ?
+title_dragonfly_y_lookup .word ?
 vertical_counter_vblank_start .word ?
 vertical_counter_vblank_end .word ?
 vertical_counter_vblank_this_frame .word ?
@@ -380,7 +381,7 @@ collision_map .fill $8000
 .include "bank01.asm"
 .endsection bank01
 .warn format("bank01 free space: $%04x", $820000 - *)
-.cerror * > $820000, "bank01 too long"
+.cerror * > $820000, format("bank01 too long by $%04x", * - $820000)
 .here
 
 * = $10000
