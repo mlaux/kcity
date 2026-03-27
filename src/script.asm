@@ -410,65 +410,6 @@ TEST_MISC
     #step_wait WAIT_FOR_A
     #step_hide_text_box
 
-MENU_OPTION_ITEMS .text $80, "Items", 255
-MENU_OPTION_SAVE .text $80, "Save", 255
-MENU_OPTION_ID_ITEMS = 1
-MENU_OPTION_ID_SAVE = 2
-
-SCRIPT_STORAGE_SAVE_SLOT = 2
-
-SCRIPT_SHOW_MENU
-    #step_set_player_locked 1
-    #step_set_variable SCRIPT_STORAGE_IN_MENU, 1
-    #step_text_box 1, 1, 10, 4, MENU_OPTION_ITEMS, MENU_OPTION_SAVE, EMPTY_STRING, EMPTY_STRING
-    #step_wait WAIT_RESULT_CANCEL_OK
-    #step_read_result SCRIPT_STORAGE_TEMP_RESULT
-    #step_branch_label OPCODE_BRANCH_NE, SCRIPT_STORAGE_TEMP_RESULT, MENU_OPTION_ID_ITEMS, SCRIPT_SHOW_MENU, _check_save
-    #step_wait 0 ; items action would go here
-_check_save
-    #step_branch_label OPCODE_BRANCH_NE, SCRIPT_STORAGE_TEMP_RESULT, MENU_OPTION_ID_SAVE, SCRIPT_SHOW_MENU, _exit_menu
-    #step_call_function build_save_slot_strings
-    #step_clear_text_tiles
-    #step_wait 1
-    #step_text_box 1, 1, 30, 4, save_slot_string1, save_slot_string2, save_slot_string3, EMPTY_STRING
-    #step_wait WAIT_RESULT_CANCEL_OK
-    #step_read_result SCRIPT_STORAGE_SAVE_SLOT
-    #step_branch_label OPCODE_BRANCH_EQ, SCRIPT_STORAGE_SAVE_SLOT, RESULT_CANCELLED, SCRIPT_SHOW_MENU, _exit_menu
-_do_save
-    #step_save_game
-    #step_clear_text_tiles
-    #step_wait 1
-    #step_text_box 1, 1, 10, 4, MESSAGE_SAVED, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING
-    #step_wait WAIT_FOR_A
-_exit_menu
-    #step_hide_text_box
-    #step_set_variable SCRIPT_STORAGE_IN_MENU, 0
-    #step_set_player_locked 0
-
-SCRIPT_SHOW_MENU_NUM_STEPS = (* - SCRIPT_SHOW_MENU) >> 4
-
-MENU_OPTION_START .text $80, "Start", 255
-MENU_OPTION_CONTINUE .text $80, "Continue", 255
-MENU_OPTION_ID_START = 1
-MENU_OPTION_ID_CONTINUE = 2
-
-SCRIPT_FILE_SELECT
-    #step_text_box 11, 12, 9, 2, MENU_OPTION_START, MENU_OPTION_CONTINUE, EMPTY_STRING, EMPTY_STRING
-    #step_wait WAIT_RESULT_NO_CANCEL
-    #step_read_result SCRIPT_STORAGE_TEMP_RESULT
-    #step_branch_label OPCODE_BRANCH_NE, SCRIPT_STORAGE_TEMP_RESULT, MENU_OPTION_ID_START, SCRIPT_FILE_SELECT, _load_game
-    #step_hide_text_box
-    #step_call_function go_to_opening
-    ; need unconditional
-    #step_branch_label OPCODE_BRANCH_EQ, SCRIPT_STORAGE_TEMP_RESULT, MENU_OPTION_ID_START, SCRIPT_FILE_SELECT, _end
-_load_game
-    #step_hide_text_box
-    #step_call_function go_to_gameplay_load
-_end
-    #step_wait 1
-
-SCRIPT_FILE_SELECT_NUM_STEPS = (* - SCRIPT_FILE_SELECT) >> 4
-
 SCRIPT_CAT
     #step_set_sprite_direction SELF, 0
     #step_random_wait $1f, $10

@@ -12,6 +12,7 @@ save_exists
     adc sram_play_time_hms
     adc sram_play_time_hms + 2
     adc sram_play_time_hms + 4
+    adc sram_rng_state
     eor #$5555
     cmp sram_checksum
     beq +
@@ -42,6 +43,8 @@ save_game
     sta sram_play_time_hms + 2
     lda play_time_hms + 4
     sta sram_play_time_hms + 4
+    lda rng_state
+    sta sram_rng_state
 
     clc
     lda current_map_id
@@ -51,6 +54,7 @@ save_game
     adc play_time_hms
     adc play_time_hms + 2
     adc play_time_hms + 4
+    adc rng_state
     eor #$5555
     sta sram_checksum
 
@@ -77,6 +81,7 @@ load_game
     adc sram_play_time_hms
     adc sram_play_time_hms + 2
     adc sram_play_time_hms + 4
+    adc sram_rng_state
     eor #$5555
     cmp sram_checksum
     beq +
@@ -104,6 +109,9 @@ load_game
     sta play_time_hms + 2
     lda sram_play_time_hms + 4
     sta play_time_hms + 4
+    
+    lda sram_rng_state
+    sta rng_state
 
     plp
     rts
@@ -152,6 +160,7 @@ build_one_slot_string
     adc sram_play_time_hms,x       ; play_time_hms + 0
     adc sram_play_time_hms + 2,x       ; play_time_hms + 2
     adc sram_play_time_hms + 4,x       ; play_time_hms + 4
+    adc sram_rng_state,x
     eor #$5555
     cmp sram_checksum,x       ; checksum
     beq _slot_valid

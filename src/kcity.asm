@@ -338,7 +338,7 @@ digi_copyrate .fill 1
 
 * = $700000
 
-SAVE_SLOT_SIZE = 16
+SAVE_SLOT_SIZE = 18
 NUM_SAVE_SLOTS = 3
 
 ; save slot 0
@@ -347,6 +347,7 @@ sram_player_x .word ?
 sram_player_y .word ?
 sram_game_progress .word ?
 sram_play_time_hms .fill 6
+sram_rng_state .word ?
 sram_checksum .word ?
 
 sram_offset_slot0 = 0
