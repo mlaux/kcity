@@ -418,6 +418,116 @@ TEST_MISC
     #step_wait WAIT_FOR_A
     #step_hide_text_box
 
+; --- test: conditional branch fall-through chain ---
+; sets [0] to 3, then runs through branch_eq for 1, 2, 3, 4
+; only the third one should match and show the "Matched 3" message
+; the others fall through. tests that non-taken branches don't disturb state
+TEST_FALLTHROUGH_MATCH .text "Matched 3", $ff
+TEST_FALLTHROUGH_FAIL .text "Wrong branch!", $ff
+
+TEST_BRANCH_FALLTHROUGH
+    #step_wait 1
+    #step_set_variable 0, 3
+    #step_branch_label OPCODE_BRANCH_EQ, 0, 1, TEST_BRANCH_FALLTHROUGH, _fail
+    #step_branch_label OPCODE_BRANCH_EQ, 0, 2, TEST_BRANCH_FALLTHROUGH, _fail
+    #step_branch_label OPCODE_BRANCH_EQ, 0, 3, TEST_BRANCH_FALLTHROUGH, _matched
+    #step_branch_label OPCODE_BRANCH_EQ, 0, 4, TEST_BRANCH_FALLTHROUGH, _fail
+_fail
+    #step_text_box 1, 21, 30, 1, TEST_FALLTHROUGH_FAIL, 0, 0, 0
+    #step_wait WAIT_FOR_A
+    #step_hide_text_box
+    #step_goto_label TEST_BRANCH_FALLTHROUGH, _end
+_matched
+    #step_text_box 1, 21, 30, 1, TEST_FALLTHROUGH_MATCH, 0, 0, 0
+    #step_wait WAIT_FOR_A
+    #step_hide_text_box
+_end
+    #step_wait 1
+
+TEST_BRANCH_FALLTHROUGH_NUM_STEPS = (* - TEST_BRANCH_FALLTHROUGH) >> 4
+
+; --- test: nested decision -> branch -> decision ---
+; first decision: pick a color. second decision depends on the first choice.
+; tests text box reuse and multi-level branching
+TEST_PICK_COLOR .text "Pick a color:", $ff
+TEST_COLOR_RED .text $80, "Red", $ff
+TEST_COLOR_BLUE .text $80, "Blue", $ff
+TEST_RED_SHADE .text "Which red?", $ff
+TEST_SHADE_CRIMSON .text $80, "Crimson", $ff
+TEST_SHADE_SCARLET .text $80, "Scarlet", $ff
+TEST_BLUE_SHADE .text "Which blue?", $ff
+TEST_SHADE_NAVY .text $80, "Navy", $ff
+TEST_SHADE_SKY .text $80, "Sky", $ff
+TEST_RESULT_CRIMSON .text "You picked crimson.", $ff
+TEST_RESULT_SCARLET .text "You picked scarlet.", $ff
+TEST_RESULT_NAVY .text "You picked navy.", $ff
+TEST_RESULT_SKY .text "You picked sky.", $ff
+
+TEST_NESTED_DECISION
+    #step_wait 1
+    #step_text_box 1, 21, 30, 3, TEST_PICK_COLOR, TEST_COLOR_RED, TEST_COLOR_BLUE, EMPTY_STRING
+    #step_wait WAIT_RESULT_NO_CANCEL
+    #step_read_result SCRIPT_STORAGE_TEMP_RESULT
+    ; option 1 = red, option 2 = blue
+    #step_branch_label OPCODE_BRANCH_EQ, SCRIPT_STORAGE_TEMP_RESULT, 1, TEST_NESTED_DECISION, _ask_red
+    ; fall through to blue
+    #step_clear_text_tiles
+    #step_wait 1
+    #step_text_box 1, 21, 30, 3, TEST_BLUE_SHADE, TEST_SHADE_NAVY, TEST_SHADE_SKY, EMPTY_STRING
+    #step_wait WAIT_RESULT_NO_CANCEL
+    #step_read_result SCRIPT_STORAGE_TEMP_RESULT
+    #step_branch_label OPCODE_BRANCH_EQ, SCRIPT_STORAGE_TEMP_RESULT, 1, TEST_NESTED_DECISION, _show_navy
+    ; sky
+    #step_clear_text_tiles
+    #step_wait 1
+    #step_text_box 1, 21, 30, 1, TEST_RESULT_SKY, 0, 0, 0
+    #step_goto_label TEST_NESTED_DECISION, _done
+_show_navy
+    #step_clear_text_tiles
+    #step_wait 1
+    #step_text_box 1, 21, 30, 1, TEST_RESULT_NAVY, 0, 0, 0
+    #step_goto_label TEST_NESTED_DECISION, _done
+_ask_red
+    #step_clear_text_tiles
+    #step_wait 1
+    #step_text_box 1, 21, 30, 3, TEST_RED_SHADE, TEST_SHADE_CRIMSON, TEST_SHADE_SCARLET, EMPTY_STRING
+    #step_wait WAIT_RESULT_NO_CANCEL
+    #step_read_result SCRIPT_STORAGE_TEMP_RESULT
+    #step_branch_label OPCODE_BRANCH_EQ, SCRIPT_STORAGE_TEMP_RESULT, 1, TEST_NESTED_DECISION, _show_crimson
+    ; scarlet
+    #step_clear_text_tiles
+    #step_wait 1
+    #step_text_box 1, 21, 30, 1, TEST_RESULT_SCARLET, 0, 0, 0
+    #step_goto_label TEST_NESTED_DECISION, _done
+_show_crimson
+    #step_clear_text_tiles
+    #step_wait 1
+    #step_text_box 1, 21, 30, 1, TEST_RESULT_CRIMSON, 0, 0, 0
+_done
+    #step_wait WAIT_FOR_A
+    #step_hide_text_box
+
+TEST_NESTED_DECISION_NUM_STEPS = (* - TEST_NESTED_DECISION) >> 4
+
+; --- test: counter loop ---
+; increments [0] from 0 to 5, then shows the result
+; tests inc_variable + branch_ne in a tight loop, and that the loop
+; terminates after exactly 5 iterations
+TEST_COUNTER_DONE .text "Counter reached 5", $ff
+
+TEST_COUNTER_LOOP
+    #step_set_variable 0, 0
+_loop
+    #step_inc_variable 0
+    #step_branch_label OPCODE_BRANCH_NE, 0, 5, TEST_COUNTER_LOOP, _loop
+    ; [0] == 5, show result
+    #step_wait 1
+    #step_text_box 1, 21, 30, 1, TEST_COUNTER_DONE, 0, 0, 0
+    #step_wait WAIT_FOR_A
+    #step_hide_text_box
+
+TEST_COUNTER_LOOP_NUM_STEPS = (* - TEST_COUNTER_LOOP) >> 4
+
 SCRIPT_CAT
     #step_set_sprite_direction SELF, 0
     #step_random_wait $1f, $10
@@ -429,12 +539,12 @@ SCRIPT_CAT
     #step_move_object_x $20, SELF, -2
     #step_unconditional_branch 0
 
-OBJECT_SCRIPTS .addr TEST_OBJECT_SCRIPT, TEST_HAIR_BLEACH, TEST_REACT_TO_BOOKSHELF, TEST_MISC, SCRIPT_CAT
-OBJECT_SCRIPT_LENGTHS .word 4, 3, 25, 9, 9
-CAT_SCRIPT_INDEX = 5
+OBJECT_SCRIPTS .addr TEST_OBJECT_SCRIPT, TEST_HAIR_BLEACH, TEST_REACT_TO_BOOKSHELF, TEST_NESTED_DECISION, TEST_BRANCH_FALLTHROUGH, TEST_COUNTER_LOOP, TEST_MISC, SCRIPT_CAT
+OBJECT_SCRIPT_LENGTHS .word 4, 3, 25, TEST_NESTED_DECISION_NUM_STEPS, TEST_BRANCH_FALLTHROUGH_NUM_STEPS, TEST_COUNTER_LOOP_NUM_STEPS, 9, 9
+CAT_SCRIPT_INDEX = 8
 
 ; resolves object target index from script byte +4 into X
-; SELF ($ff) → current_script_slot - 2 (= object_index * 2)
+; SELF ($ff) -> current_script_slot - 2 (= object_index * 2)
 ; assumes 16-bit accumulator
 resolve_target .macro
     .block
@@ -605,7 +715,7 @@ _skip_bg
 _all_done
     rts
 
-set_script_step
+branch_to_step
 .al
 .xl
     sta script_step
@@ -616,7 +726,14 @@ set_script_step
     clc
     adc script_ptr
     sta script_element_ptr
-    rts
+    lda (script_element_ptr)
+    sta script_step_time_remaining
+    ; get _done_with_step off of the stack
+    tsx
+    inx
+    inx
+    txs
+    jmp run_script_step
 
 run_script_v2
 .al
@@ -628,10 +745,10 @@ run_script_v2
 _check_script_end
     lda script_step
     cmp script_length
-    bne _run_step
+    bne run_script_step
     jmp clear_script
 
-_run_step
+run_script_step
     ldy #$2
     lda (script_element_ptr),y
     asl
@@ -692,7 +809,7 @@ _go_to_next_step
     sta script_element_ptr
     lda (script_element_ptr)
     sta script_step_time_remaining
-    bra _run_step
+    bra run_script_step
 
 op_none
 .as
@@ -909,9 +1026,7 @@ op_unconditional_branch
     rep #$20
     ldy #$4
     lda (script_element_ptr),y
-    ; will be incremented after this runs, so need to decrement here
-    dec a
-    jmp set_script_step
+    jmp branch_to_step
 
 op_branch_eq
 .as
@@ -927,8 +1042,7 @@ op_branch_eq
     bne +
     ldy #$8
     lda (script_element_ptr),y
-    dec a
-    jmp set_script_step
+    jmp branch_to_step
 +   rts
 
 op_branch_ne
@@ -945,8 +1059,7 @@ op_branch_ne
     beq +
     ldy #$8
     lda (script_element_ptr),y
-    dec a
-    jmp set_script_step
+    jmp branch_to_step
 +   rts
 
 op_set_player_locked
