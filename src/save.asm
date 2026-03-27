@@ -1,28 +1,65 @@
+slot_offsets .word 0, SAVE_SLOT_SIZE, 2 * SAVE_SLOT_SIZE
+
+; convert slot number (1-3) in A to byte offset in X
+slot_number_to_offset
+.al
+.xl
+    dec a
+    asl
+    tax
+    lda slot_offsets,x
+    tax
+    rts
+
+; set text_box_active_option to the index of the current save slot
+set_active_option_to_current_slot
+.al
+.xl
+    rep #$20
+    lda current_save_slot_offset
+    beq _set
+    cmp #SAVE_SLOT_SIZE
+    bne +
+    lda #1
+    bra _set
++   lda #2
+_set
+    sta text_box_active_option
+    rts
+
+; check if slot in SCRIPT_STORAGE_SAVE_SLOT is valid
+; stores 1 (valid) or 0 (empty) into SCRIPT_STORAGE_TEMP_RESULT
+check_selected_slot_valid
+.al
+.xl
+    rep #$20
+    lda script_storage + (SCRIPT_STORAGE_SAVE_SLOT * 2)
+    jsr slot_number_to_offset
+    jsr save_exists
+    sta script_storage + (SCRIPT_STORAGE_TEMP_RESULT * 2)
+    rts
+
+; X = slot byte offset (0, SAVE_SLOT_SIZE, or 2*SAVE_SLOT_SIZE)
 save_exists
 .al
 .xl
-    php
-    rep #$20
-
     clc
-    lda sram_map_id
-    adc sram_player_x
-    adc sram_player_y
-    adc sram_game_progress
-    adc sram_play_time_hms
-    adc sram_play_time_hms + 2
-    adc sram_play_time_hms + 4
-    adc sram_rng_state
+    lda sram_map_id,x
+    adc sram_player_x,x
+    adc sram_player_y,x
+    adc sram_game_progress,x
+    adc sram_play_time_hms,x
+    adc sram_play_time_hms + 2,x
+    adc sram_play_time_hms + 4,x
     eor #$5555
-    cmp sram_checksum
+    cmp sram_checksum,x
     beq +
     lda #0
-    plp
     rts
 +   lda #1
-    plp
     rts
 
+; X = slot byte offset (0, SAVE_SLOT_SIZE, or 2*SAVE_SLOT_SIZE)
 save_game
 .al
 .xl
@@ -30,21 +67,21 @@ save_game
     rep #$20
 
     lda current_map_id
-    sta sram_map_id
+    sta sram_map_id,x
     lda player_x
-    sta sram_player_x
+    sta sram_player_x,x
     lda player_y
-    sta sram_player_y
+    sta sram_player_y,x
     lda game_progress
-    sta sram_game_progress
+    sta sram_game_progress,x
     lda play_time_hms
-    sta sram_play_time_hms
+    sta sram_play_time_hms,x
     lda play_time_hms + 2
-    sta sram_play_time_hms + 2
+    sta sram_play_time_hms + 2,x
     lda play_time_hms + 4
-    sta sram_play_time_hms + 4
-    lda rng_state
-    sta sram_rng_state
+    sta sram_play_time_hms + 4,x
+
+    stx current_save_slot_offset
 
     clc
     lda current_map_id
@@ -54,9 +91,8 @@ save_game
     adc play_time_hms
     adc play_time_hms + 2
     adc play_time_hms + 4
-    adc rng_state
     eor #$5555
-    sta sram_checksum
+    sta sram_checksum,x
 
     ; only shows it when saving with select button, menu is its own script
     ; so this one does not run. menu has its own 'Saved' message
@@ -67,6 +103,7 @@ save_game
     plp
     rts
 
+; X = slot byte offset (0, SAVE_SLOT_SIZE, or 2*SAVE_SLOT_SIZE)
 load_game
 .al
 .xl
@@ -74,16 +111,15 @@ load_game
     rep #$20
 
     clc
-    lda sram_map_id
-    adc sram_player_x
-    adc sram_player_y
-    adc sram_game_progress
-    adc sram_play_time_hms
-    adc sram_play_time_hms + 2
-    adc sram_play_time_hms + 4
-    adc sram_rng_state
+    lda sram_map_id,x
+    adc sram_player_x,x
+    adc sram_player_y,x
+    adc sram_game_progress,x
+    adc sram_play_time_hms,x
+    adc sram_play_time_hms + 2,x
+    adc sram_play_time_hms + 4,x
     eor #$5555
-    cmp sram_checksum
+    cmp sram_checksum,x
     beq +
     ldx #<>SCRIPT_MESSAGE_SAVE_CORRUPTED
     ldy #3
@@ -91,27 +127,26 @@ load_game
     plp
     rts
 
-+   lda sram_map_id
++   stx current_save_slot_offset
+
+    lda sram_map_id,x
     sta target_map_id
 
-    lda sram_player_x
+    lda sram_player_x,x
     sta target_player_x
 
-    lda sram_player_y
+    lda sram_player_y,x
     sta target_player_y
 
-    lda sram_game_progress
+    lda sram_game_progress,x
     sta game_progress
 
-    lda sram_play_time_hms
+    lda sram_play_time_hms,x
     sta play_time_hms
-    lda sram_play_time_hms + 2
+    lda sram_play_time_hms + 2,x
     sta play_time_hms + 2
-    lda sram_play_time_hms + 4
+    lda sram_play_time_hms + 4,x
     sta play_time_hms + 4
-    
-    lda sram_rng_state
-    sta rng_state
 
     plp
     rts
@@ -153,16 +188,15 @@ build_one_slot_string
 
     ; check if slot is valid by computing checksum
     clc
-    lda sram_map_id,x       ; map_id
-    adc sram_player_x,x       ; player_x
-    adc sram_player_y,x       ; player_y
-    adc sram_game_progress,x       ; game_progress
-    adc sram_play_time_hms,x       ; play_time_hms + 0
-    adc sram_play_time_hms + 2,x       ; play_time_hms + 2
-    adc sram_play_time_hms + 4,x       ; play_time_hms + 4
-    adc sram_rng_state,x
+    lda sram_map_id,x
+    adc sram_player_x,x
+    adc sram_player_y,x
+    adc sram_game_progress,x
+    adc sram_play_time_hms,x
+    adc sram_play_time_hms + 2,x
+    adc sram_play_time_hms + 4,x
     eor #$5555
-    cmp sram_checksum,x       ; checksum
+    cmp sram_checksum,x
     beq _slot_valid
 
 _slot_empty

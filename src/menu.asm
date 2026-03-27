@@ -3,8 +3,6 @@ MENU_OPTION_SAVE .text $80, "Save", 255
 MENU_OPTION_ID_ITEMS = 1
 MENU_OPTION_ID_SAVE = 2
 
-SCRIPT_STORAGE_SAVE_SLOT = 2
-
 SCRIPT_SHOW_MENU
     #step_set_player_locked 1
     #step_set_variable SCRIPT_STORAGE_IN_MENU, 1
@@ -18,6 +16,7 @@ _check_save
     #step_call_function build_save_slot_strings
     #step_clear_text_tiles
     #step_wait 1
+    #step_call_function set_active_option_to_current_slot
     #step_text_box 1, 1, 30, 4, save_slot_string1, save_slot_string2, save_slot_string3, EMPTY_STRING
     #step_wait WAIT_RESULT_CANCEL_OK
     #step_read_result SCRIPT_STORAGE_SAVE_SLOT

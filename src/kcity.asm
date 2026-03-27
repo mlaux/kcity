@@ -299,6 +299,8 @@ save_slot_string1 .fill SAVE_SLOT_STRING_SIZE
 save_slot_string2 .fill SAVE_SLOT_STRING_SIZE
 save_slot_string3 .fill SAVE_SLOT_STRING_SIZE
 
+current_save_slot_offset .word ?
+
 saved_bghofs .word ?
 saved_bgvofs .word ?
 
@@ -338,7 +340,7 @@ digi_copyrate .fill 1
 
 * = $700000
 
-SAVE_SLOT_SIZE = 18
+SAVE_SLOT_SIZE = 16
 NUM_SAVE_SLOTS = 3
 
 ; save slot 0
@@ -347,7 +349,6 @@ sram_player_x .word ?
 sram_player_y .word ?
 sram_game_progress .word ?
 sram_play_time_hms .fill 6
-sram_rng_state .word ?
 sram_checksum .word ?
 
 sram_offset_slot0 = 0

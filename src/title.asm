@@ -123,9 +123,15 @@ state_title
     sep #$20
     jsr spcStop
     rep #$20
+    ldx #<>sram_offset_slot0
     jsr save_exists
-    cmp #1
-    beq _load
+    bne _load
+    ldx #<>sram_offset_slot1
+    jsr save_exists
+    bne _load
+    ldx #<>sram_offset_slot2
+    jsr save_exists
+    bne _load
     jmp go_to_opening
 
 _load

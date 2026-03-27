@@ -26,6 +26,7 @@ RESULT_CANCELLED = -1
 ; a persistent var
 SCRIPT_STORAGE_TEMP_RESULT = 0
 SCRIPT_STORAGE_IN_MENU = 1
+SCRIPT_STORAGE_SAVE_SLOT = 2
 
 ; script opcodes:
 ; $0: no operation
@@ -199,6 +200,13 @@ step_unconditional_branch .macro
     .sint 0
     .word OPCODE_UNCONDITIONAL_BRANCH
     .word \1
+    .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+.endm
+
+step_goto_label .macro
+    .sint 0
+    .word OPCODE_UNCONDITIONAL_BRANCH
+    .word (\1.\2 - \1) >> 4
     .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 .endm
 
@@ -952,6 +960,11 @@ op_set_player_locked
     rts
 
 op_save_game
+.as
+.xl
+    rep #$20
+    lda script_storage + (SCRIPT_STORAGE_SAVE_SLOT * 2)
+    jsr slot_number_to_offset
     jmp save_game
 
 op_call_function

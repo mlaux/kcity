@@ -169,10 +169,12 @@ process_input
 +   lda joypad_new
     bit #SELECT_BUTTON
     beq +
+    ldx current_save_slot_offset
     jmp save_game
 
 +   bit #START_BUTTON
     beq +
+    ldx current_save_slot_offset
     jmp load_game
 
 +   bit #X_BUTTON

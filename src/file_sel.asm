@@ -1,4 +1,3 @@
-
 MENU_OPTION_START .text $80, "Start", 255
 MENU_OPTION_CONTINUE .text $80, "Continue", 255
 MENU_OPTION_ID_START = 1
@@ -8,16 +7,30 @@ SCRIPT_FILE_SELECT
     #step_text_box 11, 12, 9, 2, MENU_OPTION_START, MENU_OPTION_CONTINUE, EMPTY_STRING, EMPTY_STRING
     #step_wait WAIT_RESULT_NO_CANCEL
     #step_read_result SCRIPT_STORAGE_TEMP_RESULT
-    #step_branch_label OPCODE_BRANCH_NE, SCRIPT_STORAGE_TEMP_RESULT, MENU_OPTION_ID_START, SCRIPT_FILE_SELECT, _load_game
-    #step_hide_text_box
+    #step_branch_label OPCODE_BRANCH_NE, SCRIPT_STORAGE_TEMP_RESULT, MENU_OPTION_ID_START, SCRIPT_FILE_SELECT, _show_slots
     #step_call_function go_to_opening
-    ; need unconditional
-    #step_branch_label OPCODE_BRANCH_EQ, SCRIPT_STORAGE_TEMP_RESULT, MENU_OPTION_ID_START, SCRIPT_FILE_SELECT, _end
-_load_game
-    #step_hide_text_box
-    #step_call_function go_to_gameplay_load
-_end
+_show_slots
+    #step_call_function build_save_slot_strings
+    #step_clear_text_tiles
     #step_wait 1
+    #step_text_box 1, 11, 30, 3, save_slot_string1, save_slot_string2, save_slot_string3, EMPTY_STRING
+_reread_result
+    #step_wait WAIT_RESULT_CANCEL_OK
+    #step_read_result SCRIPT_STORAGE_SAVE_SLOT
+    #step_branch_label OPCODE_BRANCH_NE, SCRIPT_STORAGE_SAVE_SLOT, RESULT_CANCELLED, SCRIPT_FILE_SELECT, _check_slot
+    ; cancelled, go back to start/continue
+    #step_clear_text_tiles
+    #step_wait 1
+    #step_unconditional_branch 0
+_check_slot
+    #step_call_function check_selected_slot_valid
+    #step_branch_label OPCODE_BRANCH_EQ, SCRIPT_STORAGE_TEMP_RESULT, 1, SCRIPT_FILE_SELECT, _do_load
+    ; empty slot, wait for another result (play sound effect?)
+    #step_goto_label SCRIPT_FILE_SELECT, _reread_result
+_do_load
+    #step_hide_text_box
+    #step_wait 1
+    #step_call_function go_to_gameplay_load
 
 SCRIPT_FILE_SELECT_NUM_STEPS = (* - SCRIPT_FILE_SELECT) >> 4
 
@@ -115,7 +128,8 @@ go_to_gameplay_load
     jsr clear_all_script_slots
     lda #1
     sta text_box_hide_requested
-    ; i can't believe this works here
+    lda script_storage + (SCRIPT_STORAGE_SAVE_SLOT * 2)
+    jsr slot_number_to_offset
     jsr load_game
     ldy #STATE_ID_GAMEPLAY
     jsr run_state_init
