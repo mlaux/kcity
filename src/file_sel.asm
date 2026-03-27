@@ -12,7 +12,6 @@ SCRIPT_FILE_SELECT
 _show_slots
     #step_call_function build_save_slot_strings
     #step_clear_text_tiles
-    #step_wait 1
     #step_text_box 1, 11, 30, 3, save_slot_string1, save_slot_string2, save_slot_string3, EMPTY_STRING
 _reread_result
     #step_wait WAIT_RESULT_CANCEL_OK
@@ -20,7 +19,6 @@ _reread_result
     #step_branch_label OPCODE_BRANCH_NE, SCRIPT_STORAGE_SAVE_SLOT, RESULT_CANCELLED, SCRIPT_FILE_SELECT, _check_slot
     ; cancelled, go back to start/continue
     #step_clear_text_tiles
-    #step_wait 1
     #step_unconditional_branch 0
 _check_slot
     #step_call_function check_selected_slot_valid
@@ -29,7 +27,6 @@ _check_slot
     #step_goto_label SCRIPT_FILE_SELECT, _reread_result
 _do_load
     #step_hide_text_box
-    #step_wait 1
     #step_call_function go_to_gameplay_load
 
 SCRIPT_FILE_SELECT_NUM_STEPS = (* - SCRIPT_FILE_SELECT) >> 4

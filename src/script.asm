@@ -392,29 +392,15 @@ TEST_REACT_TO_BOOKSHELF
     #step_set_player_locked 0
 
 TEST_MISC
-    ; test add opcode
-    ; [0] = 4
-    ; [1] = 8
-    ; [2] = [0] + [1]
-    ; [3] = 12
-    ; [3] = [3] + 16
-    ; #step_set_variable 0, 4
-    ; #step_set_variable 1, 8
-    ; #step_add 2, 0, 0, 1
-    ; #step_set_variable 3, 12
-    ; #step_add 3, 3, 1, 16
-
     ; test decision text box
     #step_text_box 1, 21, 30, 4, TEST_DECISION_1, TEST_DECISION_2, TEST_DECISION_3, TEST_DECISION_4
     #step_wait WAIT_RESULT_NO_CANCEL
     #step_read_result SCRIPT_STORAGE_TEMP_RESULT
     #step_branch_ne SCRIPT_STORAGE_TEMP_RESULT, 1, 8
     #step_clear_text_tiles
-    ; clear_text_tiles takes one vblank to take effect. if i immediately went
-    ; on to the step_text_box, the pending clear action would immediately clear
-    ; the new text.
-    #step_wait 1
     #step_text_box 1, 21, 30, 1, TEST_MEOW, 0, 0, 0
+    ; A press from confirming decision..........
+    #step_wait 1
     #step_wait WAIT_FOR_A
     #step_hide_text_box
 
@@ -464,7 +450,6 @@ TEST_RESULT_NAVY .text "You picked navy.", $ff
 TEST_RESULT_SKY .text "You picked sky.", $ff
 
 TEST_NESTED_DECISION
-    #step_wait 1
     #step_text_box 1, 21, 30, 3, TEST_PICK_COLOR, TEST_COLOR_RED, TEST_COLOR_BLUE, EMPTY_STRING
     #step_wait WAIT_RESULT_NO_CANCEL
     #step_read_result SCRIPT_STORAGE_TEMP_RESULT
@@ -472,38 +457,33 @@ TEST_NESTED_DECISION
     #step_branch_label OPCODE_BRANCH_EQ, SCRIPT_STORAGE_TEMP_RESULT, 1, TEST_NESTED_DECISION, _ask_red
     ; fall through to blue
     #step_clear_text_tiles
-    #step_wait 1
     #step_text_box 1, 21, 30, 3, TEST_BLUE_SHADE, TEST_SHADE_NAVY, TEST_SHADE_SKY, EMPTY_STRING
     #step_wait WAIT_RESULT_NO_CANCEL
     #step_read_result SCRIPT_STORAGE_TEMP_RESULT
     #step_branch_label OPCODE_BRANCH_EQ, SCRIPT_STORAGE_TEMP_RESULT, 1, TEST_NESTED_DECISION, _show_navy
     ; sky
     #step_clear_text_tiles
-    #step_wait 1
     #step_text_box 1, 21, 30, 1, TEST_RESULT_SKY, 0, 0, 0
     #step_goto_label TEST_NESTED_DECISION, _done
 _show_navy
     #step_clear_text_tiles
-    #step_wait 1
     #step_text_box 1, 21, 30, 1, TEST_RESULT_NAVY, 0, 0, 0
     #step_goto_label TEST_NESTED_DECISION, _done
 _ask_red
     #step_clear_text_tiles
-    #step_wait 1
     #step_text_box 1, 21, 30, 3, TEST_RED_SHADE, TEST_SHADE_CRIMSON, TEST_SHADE_SCARLET, EMPTY_STRING
     #step_wait WAIT_RESULT_NO_CANCEL
     #step_read_result SCRIPT_STORAGE_TEMP_RESULT
     #step_branch_label OPCODE_BRANCH_EQ, SCRIPT_STORAGE_TEMP_RESULT, 1, TEST_NESTED_DECISION, _show_crimson
     ; scarlet
     #step_clear_text_tiles
-    #step_wait 1
     #step_text_box 1, 21, 30, 1, TEST_RESULT_SCARLET, 0, 0, 0
     #step_goto_label TEST_NESTED_DECISION, _done
 _show_crimson
     #step_clear_text_tiles
-    #step_wait 1
     #step_text_box 1, 21, 30, 1, TEST_RESULT_CRIMSON, 0, 0, 0
 _done
+    #step_wait 1
     #step_wait WAIT_FOR_A
     #step_hide_text_box
 
@@ -854,14 +834,14 @@ op_hide_text_box
 .xl
     lda #1
     sta text_box_hide_requested
-    rts
+    jmp wait_for_vblank
 
 op_clear_text_tiles
 .as
 .xl
     lda #$1
     sta text_box_clear_requested
-    rts
+    jmp wait_for_vblank
 
 op_set_object_flags
 .as

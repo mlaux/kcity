@@ -268,6 +268,8 @@ state_gameplay_vblank
     jsr text_box_vblank
     
     rep #$20
+    lda text_box_enabled
+    beq +
     lda script_storage + (SCRIPT_STORAGE_IN_MENU << 1)
     beq +
     jsr draw_play_timer

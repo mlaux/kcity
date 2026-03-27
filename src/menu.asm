@@ -15,7 +15,6 @@ _check_save
     #step_branch_label OPCODE_BRANCH_NE, SCRIPT_STORAGE_TEMP_RESULT, MENU_OPTION_ID_SAVE, SCRIPT_SHOW_MENU, _exit_menu
     #step_call_function build_save_slot_strings
     #step_clear_text_tiles
-    #step_wait 1
     #step_call_function set_active_option_to_current_slot
     #step_text_box 1, 1, 30, 4, save_slot_string1, save_slot_string2, save_slot_string3, EMPTY_STRING
     #step_wait WAIT_RESULT_CANCEL_OK
@@ -24,8 +23,8 @@ _check_save
 _do_save
     #step_save_game
     #step_clear_text_tiles
-    #step_wait 1
     #step_text_box 1, 1, 10, 4, MESSAGE_SAVED, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING
+    #step_wait 1
     #step_wait WAIT_FOR_A
 _exit_menu
     #step_hide_text_box
