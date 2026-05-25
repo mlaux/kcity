@@ -45,6 +45,7 @@ SEASHORE_SALON_SCRIPT_TRIGGERS .binary "../gfx/seashore/triggers.bin"
 ; $8d: city services -> hub
 ; $8e: ember's -> hub
 ; $8f: seashore -> hub
+; $90: 
 
 WARP_TARGET_MAPS
     ; J+L's house, <-> hub

@@ -386,7 +386,9 @@ _next_object
     sta script_slot_length,x
     stz script_slot_step,x
     stz script_slot_result,x
-    lda (zp0)
+    lda zp0
+    sta script_element_ptr
+    jsr apply_random_timing
     sta script_slot_time_remaining,x
 _no_bg_script
 

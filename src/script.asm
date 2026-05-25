@@ -1,24 +1,28 @@
 ; script interpreter and related test scripts
 
 ; a script is an array of steps and a length
-; each step is 16 bytes long (1 timing word, 1 opcode word, and 12 data bytes)
-; +0: number of frames to wait before continuing
-;    > 0: time delay before moving on
-;      0: one-time action
-;     -1: wait for A button
-;     -2: wait for script_step_result to change to non-zero, B to continue anyway
-;     -3: wait for script_step_result to change to non-zero, no cancel
-; +2: opcode
+; each step is 16 bytes long (1 timing byte, 1 spread byte, 1 opcode word,
+; and 12 data bytes)
+; +0: timing byte: number of frames to wait before continuing
+;     $00:     one-time action
+;     $01..$fc: time delay before moving on
+;     $fd:     wait for script_step_result to change to non-zero, no cancel
+;     $fe:     wait for script_step_result to change to non-zero, B to cancel
+;     $ff:     wait for A button
+; +1: spread byte: if non-zero, the wait is randomized to a value of
+;     timing + (rng_next & spread). only valid when +0 is a real duration
+;     0 means no randomness
+; +2: opcode (only the low byte is used; +3 is reserved)
 ; +4..F: up to 12 parameter bytes depending on the type of step, then padding
 ;        to 16 byte boundary
 ; the last step only needs the bytes actually read for the step, not all 16
 
 SELF = $ff
 
-WAIT_FOR_A = -1
-WAIT_RESULT_CANCEL_OK = -2
-WAIT_RESULT_NO_CANCEL = -3
-RANDOM_WAIT = -4
+; timing byte (+0) sentinels; real durations are $00..$fc
+WAIT_RESULT_NO_CANCEL = $fd
+WAIT_RESULT_CANCEL_OK = $fe
+WAIT_FOR_A = $ff
 
 RESULT_CANCELLED = -1
 
@@ -71,21 +75,11 @@ script_operations
 ; just wait for the specified amount of frames
 OPCODE_WAIT = 0
 
-step_wait .macro
-    .sint \1
+step_wait .macro base, spread=0
+    .char \base
+    .byte \spread
     .word OPCODE_WAIT
     .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-.endm
-
-; +4: AND mask for rng result
-; +6: minimum value to add
-; result = (rng_next & mask) + minimum
-step_random_wait .macro
-    .sint RANDOM_WAIT
-    .word OPCODE_WAIT
-    .word \1
-    .word \2
-    .fill 8
 .endm
 
 ; for text boxes:
@@ -101,7 +95,7 @@ OPCODE_TEXT_BOX = 1
 
 ; TODO: named/default parameters
 step_text_box .macro
-    .sint 0
+    .byte 0, 0
     .word OPCODE_TEXT_BOX
     .byte \1
     .byte \2
@@ -117,7 +111,7 @@ step_text_box .macro
 OPCODE_HIDE_TEXT_BOX = 2
 
 step_hide_text_box .macro
-    .sint 0
+    .byte 0, 0
     .word OPCODE_HIDE_TEXT_BOX
     .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 .endm
@@ -126,7 +120,7 @@ step_hide_text_box .macro
 OPCODE_CLEAR_TEXT_TILES = $10
 
 step_clear_text_tiles .macro
-    .sint 0
+    .byte 0, 0
     .word OPCODE_CLEAR_TEXT_TILES
     .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 .endm
@@ -137,7 +131,7 @@ step_clear_text_tiles .macro
 OPCODE_SET_OBJECT_FLAGS = 3
 
 step_set_object_flags .macro
-    .sint 0
+    .byte 0, 0
     .word OPCODE_SET_OBJECT_FLAGS
     .word \1
     .word \2
@@ -151,7 +145,7 @@ step_set_object_flags .macro
 OPCODE_SET_OBJECT_POS = 4
 
 step_set_object_pos .macro
-    .sint 0
+    .byte 0, 0
     .word OPCODE_SET_OBJECT_POS
     .word \1
     .word \2
@@ -163,20 +157,22 @@ step_set_object_pos .macro
 ; +4: object index (0-6)
 ; +6: signed delta per frame (half-pixels)
 OPCODE_MOVE_OBJECT_X = 5
-step_move_object_x .macro
-    .sint \1
+step_move_object_x .macro base, obj, delta, spread=0
+    .char \base
+    .byte \spread
     .word OPCODE_MOVE_OBJECT_X
-    .word \2
-    .sint \3
+    .word \obj
+    .sint \delta
     .fill 8
 .endm
 
 OPCODE_MOVE_OBJECT_Y = 6
-step_move_object_y .macro
-    .sint \1
+step_move_object_y .macro base, obj, delta, spread=0
+    .char \base
+    .byte \spread
     .word OPCODE_MOVE_OBJECT_Y
-    .word \2
-    .sint \3
+    .word \obj
+    .sint \delta
     .fill 8
 .endm
 
@@ -187,7 +183,7 @@ step_move_object_y .macro
 ; +5: direction
 OPCODE_SET_SPRITE_DIRECTION = 7
 step_set_sprite_direction .macro
-    .sint 0
+    .byte 0, 0
     .word OPCODE_SET_SPRITE_DIRECTION
     .byte \1
     .byte \2
@@ -197,14 +193,14 @@ step_set_sprite_direction .macro
 ; +4: step to branch to
 OPCODE_UNCONDITIONAL_BRANCH = $c
 step_unconditional_branch .macro
-    .sint 0
+    .byte 0, 0
     .word OPCODE_UNCONDITIONAL_BRANCH
     .word \1
     .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 .endm
 
 step_goto_label .macro
-    .sint 0
+    .byte 0, 0
     .word OPCODE_UNCONDITIONAL_BRANCH
     .word (\1.\2 - \1) >> 4
     .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -214,7 +210,7 @@ step_goto_label .macro
 ; +6: the value
 OPCODE_SET_VARIABLE = 8
 step_set_variable .macro
-    .sint 0
+    .byte 0, 0
     .word OPCODE_SET_VARIABLE
     .word \1
     .word \2
@@ -226,7 +222,7 @@ step_set_variable .macro
 ; +8: step to branch to
 OPCODE_BRANCH_EQ = $d
 step_branch_eq .macro
-    .sint 0
+    .byte 0, 0
     .word OPCODE_BRANCH_EQ
     .word \1
     .word \2
@@ -236,7 +232,7 @@ step_branch_eq .macro
 
 OPCODE_BRANCH_NE = $e
 step_branch_ne .macro
-    .sint 0
+    .byte 0, 0
     .word OPCODE_BRANCH_NE
     .word \1
     .word \2
@@ -245,7 +241,7 @@ step_branch_ne .macro
 .endm
 
 step_branch_label .macro
-    .sint 0
+    .byte 0, 0
     .word \1
     .word \2
     .sint \3
@@ -255,7 +251,7 @@ step_branch_label .macro
 
 OPCODE_INC_VARIABLE = $a
 step_inc_variable .macro
-    .sint 0
+    .byte 0, 0
     .word OPCODE_INC_VARIABLE
     .word \1
     .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -263,7 +259,7 @@ step_inc_variable .macro
 
 OPCODE_SET_PLAYER_LOCKED = $f
 step_set_player_locked .macro
-    .sint 0
+    .byte 0, 0
     .word OPCODE_SET_PLAYER_LOCKED
     .word \1
     .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -276,7 +272,7 @@ OPCODE_ADD = $b
 ; +8: flags (currently 0 = src2 is a variable, 1 = src2 is a constant)
 ; +9: source2 (variable index or constant value)
 step_add .macro
-    .sint 0
+    .byte 0, 0
     .word OPCODE_ADD
     .word \1 ; dst
     .word \2 ; src1
@@ -289,7 +285,7 @@ OPCODE_READ_RESULT = $9
 ; script_storage[dst] = script_step_result
 ; +4: destination variable index
 step_read_result .macro
-    .sint 0
+    .byte 0, 0
     .word OPCODE_READ_RESULT
     .word \1
     .byte 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -298,7 +294,7 @@ step_read_result .macro
 OPCODE_SAVE_GAME = $11
 
 step_save_game .macro
-    .sint 0
+    .byte 0, 0
     .word OPCODE_SAVE_GAME
     .fill 12
 .endm
@@ -307,7 +303,7 @@ OPCODE_CALL_FUNCTION = $12
 
 ; +4: function address (24-bit)
 step_call_function .macro
-    .sint 0
+    .byte 0, 0
     .word OPCODE_CALL_FUNCTION
     .addr \1
     .byte `\1
@@ -510,13 +506,13 @@ TEST_COUNTER_LOOP_NUM_STEPS = (* - TEST_COUNTER_LOOP) >> 4
 
 SCRIPT_CAT
     #step_set_sprite_direction SELF, 0
-    #step_random_wait $1f, $10
+    #step_wait $10, $1f
     #step_set_sprite_direction SELF, PLAYER_DIRECTION_RIGHT
-    #step_move_object_x $20, SELF, 2
+    #step_move_object_x $20, SELF, 2, $1f
     #step_set_sprite_direction SELF, 0
-    #step_random_wait $1f, $10
+    #step_wait $10, $1f
     #step_set_sprite_direction SELF, PLAYER_DIRECTION_LEFT
-    #step_move_object_x $20, SELF, -2
+    #step_move_object_x $20, SELF, -2, $1f
     #step_unconditional_branch 0
 
 OBJECT_SCRIPTS .addr TEST_OBJECT_SCRIPT, TEST_HAIR_BLEACH, TEST_REACT_TO_BOOKSHELF, TEST_NESTED_DECISION, TEST_BRANCH_FALLTHROUGH, TEST_COUNTER_LOOP, TEST_MISC, SCRIPT_CAT
@@ -545,7 +541,7 @@ _done
 .endm
 
 ; resolves sprite target index from script byte +4 into X
-; SELF ($ff) → current_script_slot (= sprite_id * 2)
+; SELF ($ff) -> current_script_slot (= sprite_id * 2)
 ; assumes 8-bit accumulator
 load_anim_index .macro
     .block
@@ -587,8 +583,8 @@ set_script
     sty script_slot_length
     stz script_slot_step
     stz script_slot_result
-    stx zp0
-    lda (zp0)
+    stx script_element_ptr
+    jsr apply_random_timing
     sta script_slot_time_remaining
 +   rts
 
@@ -695,6 +691,36 @@ _skip_bg
 _all_done
     rts
 
+; computes a step's initial time_remaining from its timing byte (+0) and
+; spread byte (+1) - if spread is non-zero and +0 is a real duration, 
+; returns +0 + (rng_next & spread), otherwise returns +0 unchanged
+; result in A, high byte clear
+; preserves X
+apply_random_timing
+.al
+.xl
+    lda (script_element_ptr)        ; low = timing, high = spread
+    and #$ff
+    cmp #WAIT_RESULT_NO_CANCEL        ; >= $fd: sentinel, never randomized
+    bcs _no_random
+    pha                              ; save base
+    lda (script_element_ptr)
+    xba                              ; low = spread
+    and #$ff
+    beq _base_only
+    pha                              ; save spread
+    jsr rng_next
+    and 1, s                         ; rng_next & spread
+    clc
+    adc 3, s                         ; + base
+    and #$ff                         ; keep within one byte
+    sta 3, s
+    pla                              ; discard spread
+_base_only
+    pla                              ; computed time (or base if spread was 0)
+_no_random
+    rts
+
 branch_to_step
 .al
 .xl
@@ -706,7 +732,7 @@ branch_to_step
     clc
     adc script_ptr
     sta script_element_ptr
-    lda (script_element_ptr)
+    jsr apply_random_timing
     sta script_step_time_remaining
     ; get _done_with_step off of the stack
     tsx
@@ -739,15 +765,18 @@ run_script_step
 
 _done_with_step
     rep #$20
-    ; check for negative length
-    lda script_step_time_remaining
-    bpl _check_time
+    lda script_step_time_remaining   ; $0000-$00ff, high byte always clear
+    beq _go_to_next_step             ; 0: one-time action / countdown finished
+    cmp #WAIT_RESULT_NO_CANCEL        ; >= $fd: indeterminate sentinel
+    bcs _check_indeterminate
+
+    ; real duration: count down one frame
+    dec script_step_time_remaining
+    rts
 
 _check_indeterminate
-    cmp #-1
+    cmp #WAIT_FOR_A
     beq _check_a_button
-    cmp #+RANDOM_WAIT
-    beq _handle_random_wait
 
 _check_result_condition
     lda script_step_result
@@ -758,22 +787,6 @@ _check_a_button
     lda joypad_new
     bit #A_BUTTON
     bne _go_to_next_step
-    rts
-
-_handle_random_wait
-    jsr rng_next
-    ldy #$4
-    and (script_element_ptr),y
-    clc
-    ldy #$6
-    adc (script_element_ptr),y
-    sta script_step_time_remaining
-    rts
-
-    ; not indeterminate
-_check_time
-    dec script_step_time_remaining
-    bmi _go_to_next_step
     rts
 
 _go_to_next_step
@@ -787,7 +800,7 @@ _go_to_next_step
     clc
     adc #$10
     sta script_element_ptr
-    lda (script_element_ptr)
+    jsr apply_random_timing
     sta script_step_time_remaining
     bra run_script_step
 
@@ -876,7 +889,26 @@ op_move_object_x
     lda (script_element_ptr),y
     clc
     adc object_x,x
+    ; A = candidate x (half-pixels), commit only if the feet point is walkable
+    phx ; object index
+    pha ; candidate x
+    ; X = candidate pixel x, Y = current pixel y (object_x/y are center/bottom)
+    lda object_y,x
+    lsr
+    tay
+    lda 1, s
+    lsr
+    tax
+    jsr check_collision_per_pixel
+    beq +
+    pla ; candidate x
+    plx ; object index
     sta object_x,x
+    rts
+
+    ; blocked
++   pla
+    pla
     rts
 
 op_move_object_y
@@ -888,7 +920,25 @@ op_move_object_y
     lda (script_element_ptr),y
     clc
     adc object_y,x
+    ; A = candidate y (half-pixels); commit only if the feet point is walkable
+    phx ; object index
+    pha ; candidate y
+    ; X = current pixel x, Y = candidate pixel y
+    lda object_x,x
+    lsr
+    tax
+    lda 1, s
+    lsr
+    tay
+    jsr check_collision_per_pixel
+    beq +
+    pla ; candidate y
+    plx ; object index
     sta object_y,x
+    rts
+    ; blocked
++   pla
+    pla
     rts
 
 op_set_sprite_direction
@@ -955,7 +1005,7 @@ op_inc_variable
 ; +6: source1 variable index
 ; +8: flags (currently 0 = src2 is a variable, 1 = src2 is a constant)
 ; +9: source2 (variable index or constant value)
-; #step_add 1, 0, 0, 5 → script_storage[1] = script_storage[0] + 5
+; #step_add 1, 0, 0, 5 -> script_storage[1] = script_storage[0] + 5
 op_add
 .as
 .xl
