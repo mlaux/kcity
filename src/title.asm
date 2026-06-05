@@ -54,7 +54,7 @@ state_title_init
     sta my_tm
     jsr disable_force_blank
 
-    ldx	#0
+    ldx	#3
 	jsr	spcLoad
     ldx #0
     jsr spcPlay

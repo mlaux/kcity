@@ -1,14 +1,29 @@
-.dsection sound_bank
-.section sound_bank
-.binary "../music/build/kcity.smbank", $8000
-.endsection
+.dsection opening_graphics
+.section opening_graphics
 
-.dsection map_graphics
-.section map_graphics
+MODE7_PALETTE
+    .word $7fff     ; 0: white
+    .word $4210     ; 1: gray
+    .fill 254*2, 0  ; 2-255: unused
+MODE7_PALETTE_LENGTH = * - MODE7_PALETTE
 
-INDUSTRIAL_CORRIDOR_TILESET .binary "../gfx/indust1/indust1.4bp"
-INDUSTRIAL_CORRIDOR_TILEMAP .binary "../gfx/indust1/indust1.map"
+MODE7_TILE0
+    ; concentric square (8x8, 8bpp, 1 byte per pixel)
+    .byte 1,1,1,1,1,1,1,1
+    .byte 1,0,0,0,0,0,0,1
+    .byte 1,0,0,0,0,0,0,1
+    .byte 1,0,0,0,0,0,0,1
+    .byte 1,0,0,0,0,0,0,1
+    .byte 1,0,0,0,0,0,0,1
+    .byte 1,0,0,0,0,0,0,1
+    .byte 1,1,1,1,1,1,1,1
+MODE7_TILE0_LENGTH = * - MODE7_TILE0
 
-TITLE_SCENE_TILEMAP_BG1 .binary "../gfx/title/titletext.map"
-TITLE_SCENE_TILEMAP_BG2 .binary "../gfx/title/title.map"
+MODE7_TILEMAP
+    .fill 128*128
+MODE7_TILEMAP_LENGTH = * - MODE7_TILEMAP
+
+OPENING_DRIP_SCENE_TILESET .binary "../gfx/opening/dripbg.4bp"
+OPENING_DRIP_SCENE_TILEMAP .binary "../gfx/opening/dripbg.map"
+
 .endsection

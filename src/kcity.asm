@@ -394,7 +394,7 @@ collision_map .fill $8000
 .include "bank02.asm"
 .endsection bank02
 .warn format("bank02 free space: $%04x", $830000 - *)
-.cerror * > $830000, "bank02 too long"
+.cerror * > $830000, format("bank02 too long by $%04x", * - $830000)
 .here
 
 * = $18000
@@ -404,7 +404,7 @@ collision_map .fill $8000
 .include "bank03.asm"
 .endsection bank03
 .warn format("bank03 free space: $%04x", $840000 - *)
-.cerror * > $840000, "bank03 too long"
+.cerror * > $840000, format("bank03 too long by $%04x", * - $840000)
 .here
 
 * = $20000
@@ -414,7 +414,7 @@ collision_map .fill $8000
 .include "bank04.asm"
 .endsection bank04
 .warn format("bank04 free space: $%04x", $850000 - *)
-.cerror * > $850000, "bank04 too long"
+.cerror * > $850000, format("bank04 too long by $%04x", * - $850000)
 .here
 
 * = $28000
@@ -424,7 +424,7 @@ collision_map .fill $8000
 .include "bank05.asm"
 .endsection bank05
 .warn format("bank05 free space: $%04x", $860000 - *)
-.cerror * > $860000, "bank05 too long"
+.cerror * > $860000, format("bank05 too long by $%04x", * - $860000)
 .here
 
 * = $30000
@@ -447,8 +447,38 @@ collision_map .fill $8000
 .cerror * > $880000, format("bank07 too long by $%04x", * - $880000)
 .here
 
-; 256k minus one byte
-* = $03ffff
+* = $40000
+.logical $888000
+.dsection bank08
+.section bank08
+.include "bank08.asm"
+.endsection bank08
+.warn format("bank08 free space: $%04x", $890000 - *)
+.cerror * > $890000, format("bank08 too long by $%04x", * - $890000)
+.here
+
+* = $48000
+.logical $898000
+.dsection bank09
+.section bank09
+.include "bank09.asm"
+.endsection bank09
+.warn format("bank09 free space: $%04x", $8a0000 - *)
+.cerror * > $8a0000, format("bank09 too long by $%04x", * - $8a0000)
+.here
+
+* = $50000
+.logical $8a8000
+.dsection bank0a
+.section bank0a
+.include "bank0a.asm"
+.endsection bank0a
+.warn format("bank0a free space: $%04x", $8b0000 - *)
+.cerror * > $8b0000, format("bank0a too long by $%04x", * - $8b0000)
+.here
+
+; 512k minus one byte
+* = $07ffff
 .byte 0
 
 ; VRAM MAP

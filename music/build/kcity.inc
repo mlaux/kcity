@@ -9,6 +9,7 @@
 	MOD_TITLE                        = 0
 MOD_CITY                         = 1
 MOD_OPENSFX                      = 2
+MOD_MOBLOUNG                     = 3
 
 
 .endif ; __SOUNDBANK_DEFINITIONS__
