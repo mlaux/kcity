@@ -389,6 +389,11 @@ load_newt_tiles
     sta CGADD
     #dma_ppu_data NEWT_PALETTE
     #dma_ppu_data CRITTERS_PALETTE
+    ; for fish animation needs to be in a bg palette too
+    lda #$50
+    sta CGADD
+    #dma_ppu_data CRITTERS_PALETTE
+
     rts
 
 NEWT_TILE_COUNT = 9
@@ -558,7 +563,7 @@ hide_newt
     plp
     rts
 
-FISH_ANIMATION_VALUES .word $1086, $1300, $1302, $1304, $1306, $1308
+FISH_ANIMATION_VALUES .word $1086, $1700, $1702, $1704, $1706, $1708
 FISH_ANIMATION_COUNT = 6
 FISH_ANIMATION_DELAY = 4
 FISH_ANIMATION_START_DELAY = $100

@@ -362,7 +362,7 @@ TEST_HAIR_BLEACH
 
 TEST_REACT_TO_BOOKSHELF
     #step_set_player_locked 1
-    #step_set_object_pos 0, $d0, $14e
+    #step_set_object_pos 0, $b8, $14e
     #step_set_sprite_direction 1, PLAYER_DIRECTION_UP
     #step_set_object_flags 0, $3a
     #step_move_object_y 8, 0, -2
@@ -380,7 +380,7 @@ TEST_REACT_TO_BOOKSHELF
     #step_wait $80
     #step_hide_text_box
     #step_set_sprite_direction 1, PLAYER_DIRECTION_DOWN
-    #step_move_object_y 32, 0, 2
+    #step_move_object_y 24, 0, 2
     #step_set_sprite_direction 1, PLAYER_DIRECTION_RIGHT
     #step_move_object_x 64, 0, 2
     #step_set_object_flags 0, 0
